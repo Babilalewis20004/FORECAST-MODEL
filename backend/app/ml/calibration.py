@@ -1,0 +1,202 @@
+"""
+Layer 3: ensemble blending, probability calibration, and evaluation metrics.
+
+Blend:      P_blended = w_A * P_A + (1 - w_A) * P_B, with w_A fitted per market
+            on the calibration split (grid search minimising log loss),
+            falling back to DEFAULT_WEIGHTS when that split is too small.
+Calibrate:  Platt scaling (sigmoid, the default) or isotonic regression,
+            fitted on the *blended* calibration-split probabilities. Note
+            sklearn's CalibratedClassifierCV wraps a single estimator, but
+            the thing being calibrated here is a blend of two models, so
+            Platt is implemented directly -- a logistic regression on the
+            logit of the probability, the same mapping CalibratedClassifierCV's
+            method="sigmoid" fits internally.
+Metrics:    log loss, Brier score, and expected calibration error (ECE).
+
+Binary markets take/return P(event) arrays of shape (n,); the 1X2 market
+takes/returns (n, 3) arrays (home/draw/away), calibrated one-vs-rest and
+renormalised so each row still sums to 1.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+import numpy as np
+from sklearn.isotonic import IsotonicRegression
+from sklearn.linear_model import LogisticRegression
+
+EPS = 1e-12
+
+# w_A (Model A's share); Model B gets 1 - w_A.
+DEFAULT_WEIGHTS = {"match_result": 0.45, "btts": 0.45, "over_under": 0.45, "goal_range": 0.80}
+WEIGHT_GRID = np.round(np.linspace(0.0, 1.0, 21), 2)
+MIN_FIT_SAMPLES = 50
+
+
+# ---------------------------------------------------------------------------
+# Metrics
+# ---------------------------------------------------------------------------
+
+def log_loss_binary(p: np.ndarray, y: np.ndarray) -> float:
+    p = np.clip(np.asarray(p, dtype=float), EPS, 1 - EPS)
+    y = np.asarray(y, dtype=float)
+    return float(-np.mean(y * np.log(p) + (1 - y) * np.log(1 - p)))
+
+
+def log_loss_multiclass(P: np.ndarray, y: np.ndarray) -> float:
+    P = np.clip(np.asarray(P, dtype=float), EPS, 1.0)
+    y = np.asarray(y, dtype=int)
+    return float(-np.mean(np.log(P[np.arange(len(y)), y])))
+
+
+def brier_binary(p: np.ndarray, y: np.ndarray) -> float:
+    return float(np.mean((np.asarray(p, dtype=float) - np.asarray(y, dtype=float)) ** 2))
+
+
+def brier_multiclass(P: np.ndarray, y: np.ndarray) -> float:
+    """Sum over classes of squared error, averaged over rows (range 0..2)."""
+    P = np.asarray(P, dtype=float)
+    Y = np.eye(P.shape[1])[np.asarray(y, dtype=int)]
+    return float(np.mean(np.sum((P - Y) ** 2, axis=1)))
+
+
+def expected_calibration_error(p: np.ndarray, y: np.ndarray, n_bins: int = 10) -> float:
+    """Equal-width-bin ECE: sum over bins of |mean predicted - observed rate|,
+    weighted by the share of predictions in that bin."""
+    p = np.asarray(p, dtype=float)
+    y = np.asarray(y, dtype=float)
+    bins = np.minimum((p * n_bins).astype(int), n_bins - 1)
+    ece = 0.0
+    for b in range(n_bins):
+        mask = bins == b
+        if mask.any():
+            ece += mask.mean() * abs(p[mask].mean() - y[mask].mean())
+    return float(ece)
+
+
+def expected_calibration_error_multiclass(P: np.ndarray, y: np.ndarray, n_bins: int = 10) -> float:
+    """Class-wise ECE: mean of one-vs-rest ECE across classes."""
+    P = np.asarray(P, dtype=float)
+    y = np.asarray(y, dtype=int)
+    return float(np.mean([expected_calibration_error(P[:, k], y == k, n_bins) for k in range(P.shape[1])]))
+
+
+def evaluate(p: np.ndarray, y: np.ndarray) -> dict[str, float]:
+    """Brier / log loss / ECE for a binary (n,) or multiclass (n, k) prediction."""
+    if np.asarray(p).ndim == 2:
+        return {
+            "brier": brier_multiclass(p, y),
+            "log_loss": log_loss_multiclass(p, y),
+            "ece": expected_calibration_error_multiclass(p, y),
+        }
+    return {"brier": brier_binary(p, y), "log_loss": log_loss_binary(p, y), "ece": expected_calibration_error(p, y)}
+
+
+def base_rate_prediction(y_train: np.ndarray, n: int, n_classes: int | None = None) -> np.ndarray:
+    """Climatology baseline: predict the training base rate for every row."""
+    y_train = np.asarray(y_train)
+    if n_classes:
+        rates = np.bincount(y_train.astype(int), minlength=n_classes) / len(y_train)
+        return np.tile(rates, (n, 1))
+    return np.full(n, y_train.mean())
+
+
+# ---------------------------------------------------------------------------
+# Calibrators
+# ---------------------------------------------------------------------------
+
+class BinaryCalibrator:
+    def __init__(self, method: str = "sigmoid"):
+        if method not in ("sigmoid", "isotonic"):
+            raise ValueError(f"unknown calibration method: {method}")
+        self.method = method
+        self._model = None  # None = identity (e.g. single-class calibration labels)
+
+    def fit(self, p: np.ndarray, y: np.ndarray) -> "BinaryCalibrator":
+        p = np.asarray(p, dtype=float)
+        y = np.asarray(y, dtype=int)
+        if len(np.unique(y)) < 2:
+            self._model = None
+            return self
+        if self.method == "sigmoid":
+            self._model = LogisticRegression(C=100.0).fit(_logit(p).reshape(-1, 1), y)
+        else:
+            self._model = IsotonicRegression(y_min=0.0, y_max=1.0, out_of_bounds="clip").fit(p, y)
+        return self
+
+    def transform(self, p: np.ndarray) -> np.ndarray:
+        p = np.asarray(p, dtype=float)
+        if self._model is None:
+            return p
+        if self.method == "sigmoid":
+            return self._model.predict_proba(_logit(p).reshape(-1, 1))[:, 1]
+        return self._model.predict(p)
+
+
+class MulticlassCalibrator:
+    """One-vs-rest BinaryCalibrator per class, rows renormalised to sum to 1."""
+
+    def __init__(self, n_classes: int, method: str = "sigmoid"):
+        self.calibrators = [BinaryCalibrator(method) for _ in range(n_classes)]
+
+    def fit(self, P: np.ndarray, y: np.ndarray) -> "MulticlassCalibrator":
+        y = np.asarray(y, dtype=int)
+        for k, cal in enumerate(self.calibrators):
+            cal.fit(P[:, k], y == k)
+        return self
+
+    def transform(self, P: np.ndarray) -> np.ndarray:
+        Q = np.column_stack([cal.transform(P[:, k]) for k, cal in enumerate(self.calibrators)])
+        Q = np.clip(Q, EPS, None)
+        return Q / Q.sum(axis=1, keepdims=True)
+
+
+def _logit(p: np.ndarray) -> np.ndarray:
+    p = np.clip(p, 1e-6, 1 - 1e-6)
+    return np.log(p / (1 - p))
+
+
+# ---------------------------------------------------------------------------
+# Blending
+# ---------------------------------------------------------------------------
+
+def default_weight(market: str) -> float:
+    if market.startswith("over_"):
+        return DEFAULT_WEIGHTS["over_under"]
+    if market.startswith("range_"):
+        return DEFAULT_WEIGHTS["goal_range"]
+    return DEFAULT_WEIGHTS[market]
+
+
+def blend(p_a: np.ndarray, p_b: np.ndarray, w_a: float) -> np.ndarray:
+    return w_a * np.asarray(p_a, dtype=float) + (1.0 - w_a) * np.asarray(p_b, dtype=float)
+
+
+def fit_blend_weight(p_a: np.ndarray, p_b: np.ndarray, y: np.ndarray, market: str) -> float:
+    """w_A minimising log loss on the calibration split; the market's default
+    weight when there are too few samples to fit reliably."""
+    if len(y) < MIN_FIT_SAMPLES:
+        return default_weight(market)
+    loss = log_loss_multiclass if np.asarray(p_a).ndim == 2 else log_loss_binary
+    losses = [loss(blend(p_a, p_b, w), y) for w in WEIGHT_GRID]
+    return float(WEIGHT_GRID[int(np.argmin(losses))])
+
+
+@dataclass
+class MarketCalibration:
+    """Everything needed to turn one market's raw Model A (+ Model B)
+    probabilities into a final probability. w_a is None for Model-A-only
+    markets (goal ranges), which are calibrated but not blended."""
+
+    w_a: float | None
+    calibrator: BinaryCalibrator | MulticlassCalibrator
+
+    def blended(self, p_a: np.ndarray, p_b: np.ndarray | None) -> np.ndarray:
+        if self.w_a is None or p_b is None:
+            return np.asarray(p_a, dtype=float)
+        return blend(p_a, p_b, self.w_a)
+
+    def apply(self, p_a: np.ndarray, p_b: np.ndarray | None) -> tuple[np.ndarray, np.ndarray]:
+        raw = self.blended(p_a, p_b)
+        return raw, self.calibrator.transform(raw)

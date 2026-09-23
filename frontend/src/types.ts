@@ -32,6 +32,29 @@ export type OverUnderOdds = Record<string, number | null>;
 export type BttsOdds = Record<keyof Btts, number | null>;
 export type RangeOdds = Record<RangeLabel, number | null>;
 
+export interface MarketSet {
+  match_result?: MatchResult;
+  over_under?: OverUnder;
+  btts?: Btts;
+  goal_ranges?: Record<RangeLabel, number>;
+}
+
+export interface RawProbabilities {
+  model_a: MarketSet;
+  model_b?: MarketSet;
+  blended: MarketSet;
+}
+
+// Test-split Brier score for a market, per source. Lower is better;
+// "baseline" is always predicting the training base rate.
+export interface BrierScores {
+  model_a: number | null;
+  model_b: number | null;
+  blended: number | null;
+  calibrated: number | null;
+  baseline: number | null;
+}
+
 export interface Prediction {
   lambda_home: number;
   lambda_away: number;
@@ -46,6 +69,13 @@ export interface Prediction {
   match_result_odds: MatchResultOdds | null;
   over_under_odds: OverUnderOdds | null;
   btts_odds: BttsOdds | null;
+  // Ensemble provenance -- null on Model-A-only predictions made before the
+  // ensemble shipped. brier_scores is per league (keyed by market, e.g.
+  // "match_result", "btts", "over_2.5"), not per fixture.
+  raw_probabilities: RawProbabilities | null;
+  calibrated_probabilities: MarketSet | null;
+  ensemble_weights: Record<string, number | null> | null;
+  brier_scores: Record<string, BrierScores> | null;
 }
 
 export interface Fixture {

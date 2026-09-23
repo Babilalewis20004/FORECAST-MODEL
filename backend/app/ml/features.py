@@ -1,0 +1,225 @@
+"""
+Layer 1: feature pipeline for the direct GBDT classifiers (Model B).
+
+One code path serves both training and prediction: every target row (a
+historical match being trained on, or an upcoming fixture being predicted)
+looks up each side's state as of that team's last *real* match strictly
+before the target's date, via pd.merge_asof(allow_exact_matches=False).
+Because state is only ever computed from completed matches and joined
+strictly-before, a target can never see its own result or anything later
+-- and an upcoming fixture gets exactly the features a historical match on
+the same date would have had, with no separate "prediction-time" rebuild.
+
+Model A (football_goal_range_model.py) keeps its own feature set; this
+module only feeds Model B.
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pandas as pd
+
+from app.ml.football_goal_range_model import GOAL_RANGES, OU_LINES
+
+WINDOWS = (5, 10)
+MIN_PERIODS = 3  # observations needed before a rolling mean is trusted
+H2H_WINDOW = 6
+REST_DAYS_CAP = 30  # beyond this it's off-season/international-break noise
+
+ELO_BASE = 1500.0
+ELO_K = 20.0
+ELO_HOME_ADV = 60.0
+ELO_SCORE_SLOPE = 1.5  # logistic slope mapping an (xG-adjusted) goal margin to a 0..1 result
+
+# (long-format column, home-side source, away-side source)
+_STAT_SOURCES = [
+    ("goals_for", "home_goals", "away_goals"),
+    ("goals_against", "away_goals", "home_goals"),
+    ("xg_for", "home_xg", "away_xg"),
+    ("xg_against", "away_xg", "home_xg"),
+    ("shots_for", "home_shots", "away_shots"),
+    ("shots_against", "away_shots", "home_shots"),
+    ("sot_for", "home_shots_on_target", "away_shots_on_target"),
+]
+_STAT_COLS = [c for c, _, _ in _STAT_SOURCES]
+_OPTIONAL_SOURCES = ["home_xg", "away_xg", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target"]
+
+_TEAM_FEATURES = (
+    [f"{c}_r{w}" for c in _STAT_COLS for w in WINDOWS]
+    + ["conv_r10", "elo", "rest_days", "n_matches"]
+)
+FEATURE_COLUMNS: list[str] = (
+    [f"h_{f}" for f in _TEAM_FEATURES]
+    + [f"a_{f}" for f in _TEAM_FEATURES]
+    + ["elo_diff", "h2h_n", "h2h_gd", "h2h_total", "h2h_btts"]
+)
+
+
+def _to_ns(s: pd.Series) -> pd.Series:
+    return pd.to_datetime(s).astype("datetime64[ns]")
+
+
+def _prepare_matches(matches: pd.DataFrame) -> pd.DataFrame:
+    """Completed matches only, sorted by date, with every optional stat column present."""
+    df = matches[matches["home_goals"].notna() & matches["away_goals"].notna()].copy()
+    df["date"] = _to_ns(df["date"])
+    for col in _OPTIONAL_SOURCES:
+        if col not in df.columns:
+            df[col] = np.nan
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+    df["home_goals"] = df["home_goals"].astype(float)
+    df["away_goals"] = df["away_goals"].astype(float)
+    return df.sort_values("date", kind="mergesort").reset_index(drop=True)
+
+
+def _elo_after(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+    """Sequential Elo where the match signal blends the actual goal margin with
+    the xG margin when xG is available (so a lucky 1-0 on 0.4 vs 2.1 xG moves
+    ratings less than a deserved one). Returns each side's rating *after* the
+    match; the pre-match rating for a later target comes from the merge_asof."""
+    ratings: dict[str, float] = {}
+    h_after = np.empty(len(df))
+    a_after = np.empty(len(df))
+    cols = zip(df["home_team"], df["away_team"], df["home_goals"], df["away_goals"], df["home_xg"], df["away_xg"])
+    for i, (h, a, hg, ag, hx, ax) in enumerate(cols):
+        rh = ratings.get(h, ELO_BASE)
+        ra = ratings.get(a, ELO_BASE)
+        margin = hg - ag
+        if not (np.isnan(hx) or np.isnan(ax)):
+            margin = 0.5 * margin + 0.5 * (hx - ax)
+        score_h = 1.0 / (1.0 + np.exp(-ELO_SCORE_SLOPE * margin))
+        exp_h = 1.0 / (1.0 + 10 ** ((ra - rh - ELO_HOME_ADV) / 400))
+        delta = ELO_K * (np.log(abs(margin) + 1) + 1) * (score_h - exp_h)
+        ratings[h] = rh + delta
+        ratings[a] = ra - delta
+        h_after[i] = ratings[h]
+        a_after[i] = ratings[a]
+    return h_after, a_after
+
+
+def _team_state(df: pd.DataFrame) -> pd.DataFrame:
+    """One row per (team, completed match): the team's rolling form *including*
+    that match -- i.e. its state going into its next game."""
+    h_after, a_after = _elo_after(df)
+
+    home = pd.DataFrame({"team": df["home_team"], "date": df["date"], "elo": h_after})
+    away = pd.DataFrame({"team": df["away_team"], "date": df["date"], "elo": a_after})
+    for col, h_src, a_src in _STAT_SOURCES:
+        home[col] = df[h_src].to_numpy()
+        away[col] = df[a_src].to_numpy()
+
+    long = pd.concat([home, away], ignore_index=True).sort_values(["team", "date"], kind="mergesort")
+    long["_goals_w_shots"] = long["goals_for"].where(long["shots_for"].notna())
+    g = long.groupby("team", sort=False)
+
+    out = long[["team", "date", "elo"]].copy()
+    for col in _STAT_COLS:
+        for w in WINDOWS:
+            out[f"{col}_r{w}"] = g[col].transform(lambda s, w=w: s.rolling(w, min_periods=MIN_PERIODS).mean())
+
+    goals_sum = g["_goals_w_shots"].transform(lambda s: s.rolling(10, min_periods=MIN_PERIODS).sum())
+    shots_sum = g["shots_for"].transform(lambda s: s.rolling(10, min_periods=MIN_PERIODS).sum())
+    out["conv_r10"] = goals_sum / shots_sum.replace(0, np.nan)
+    out["n_matches"] = g.cumcount() + 1
+    out["last_match_date"] = out["date"]
+    return out.sort_values("date", kind="mergesort").reset_index(drop=True)
+
+
+def _h2h_state(df: pd.DataFrame) -> pd.DataFrame:
+    """One row per completed match per unordered team pair: the pair's last
+    H2H_WINDOW meetings *including* this one. gd is from the perspective of
+    the alphabetically-first team (pair_a) so it's venue-independent."""
+    pair_a = np.where(df["home_team"] <= df["away_team"], df["home_team"], df["away_team"])
+    pair_b = np.where(df["home_team"] <= df["away_team"], df["away_team"], df["home_team"])
+    gd = df["home_goals"] - df["away_goals"]
+    h2h = pd.DataFrame({
+        "pair": pd.Series(pair_a) + "|" + pd.Series(pair_b),
+        "pair_a": pair_a,
+        "date": df["date"].to_numpy(),
+        "gd_a": np.where(df["home_team"].to_numpy() == pair_a, gd, -gd),
+        "total": (df["home_goals"] + df["away_goals"]).to_numpy(),
+        "btts": ((df["home_goals"] > 0) & (df["away_goals"] > 0)).astype(float).to_numpy(),
+    }).sort_values(["pair", "date"], kind="mergesort")
+
+    g = h2h.groupby("pair", sort=False)
+    out = h2h[["pair", "pair_a", "date"]].copy()
+    for col in ("gd_a", "total", "btts"):
+        out[f"h2h_{col}"] = g[col].transform(lambda s: s.rolling(H2H_WINDOW, min_periods=1).mean())
+    out["h2h_n"] = g.cumcount() + 1
+    return out.sort_values("date", kind="mergesort").reset_index(drop=True)
+
+
+def build_feature_frame(matches: pd.DataFrame, targets: pd.DataFrame) -> pd.DataFrame:
+    """
+    Features for arbitrary target rows (date, home_team, away_team), computed
+    only from matches strictly before each target's date. Works identically
+    for historical matches (training) and unplayed fixtures (prediction).
+    Returns `targets` (original order, extra columns kept) plus FEATURE_COLUMNS.
+    """
+    history = _prepare_matches(matches)
+    state = _team_state(history)
+    h2h = _h2h_state(history)
+
+    t = targets.reset_index(drop=True).copy()
+    t["date"] = _to_ns(t["date"])
+    t["_tid"] = np.arange(len(t))
+    left = t[["_tid", "date", "home_team", "away_team"]].sort_values("date", kind="mergesort")
+
+    state_cols = [c for c in state.columns if c not in ("team", "date")]
+    for side, team_col in (("h", "home_team"), ("a", "away_team")):
+        merged = pd.merge_asof(
+            left[["_tid", "date", team_col]].rename(columns={team_col: "team"}),
+            state,
+            on="date",
+            by="team",
+            allow_exact_matches=False,
+            direction="backward",
+        ).set_index("_tid")
+        side_feats = merged[state_cols].copy()
+        side_feats["rest_days"] = (merged["date"] - merged["last_match_date"]).dt.days.clip(upper=REST_DAYS_CAP)
+        side_feats["n_matches"] = side_feats["n_matches"].fillna(0)
+        side_feats["elo"] = side_feats["elo"].fillna(ELO_BASE)
+        side_feats = side_feats.drop(columns=["last_match_date"]).add_prefix(f"{side}_")
+        t = t.join(side_feats, on="_tid")
+
+    pair_a = np.where(left["home_team"] <= left["away_team"], left["home_team"], left["away_team"])
+    pair_b = np.where(left["home_team"] <= left["away_team"], left["away_team"], left["home_team"])
+    h2h_left = left[["_tid", "date", "home_team"]].assign(pair=pd.Series(pair_a, index=left.index) + "|" + pd.Series(pair_b, index=left.index))
+    h2h_merged = pd.merge_asof(
+        h2h_left, h2h, on="date", by="pair", allow_exact_matches=False, direction="backward"
+    ).set_index("_tid")
+    sign = np.where(h2h_merged["home_team"] == h2h_merged["pair_a"], 1.0, -1.0)
+    h2h_feats = pd.DataFrame(
+        {
+            "h2h_n": h2h_merged["h2h_n"].fillna(0),
+            "h2h_gd": h2h_merged["h2h_gd_a"] * sign,  # from the target's home side
+            "h2h_total": h2h_merged["h2h_total"],
+            "h2h_btts": h2h_merged["h2h_btts"],
+        },
+        index=h2h_merged.index,
+    )
+    t = t.join(h2h_feats, on="_tid")
+    t["elo_diff"] = t["h_elo"] - t["a_elo"]
+    # Stable dtype regardless of whether any target lacked history (a column
+    # with no NaNs would otherwise come out int64 in one call, float64 in another).
+    t[FEATURE_COLUMNS] = t[FEATURE_COLUMNS].astype("float64")
+
+    return t.drop(columns=["_tid"])[list(targets.columns) + FEATURE_COLUMNS]
+
+
+def build_training_frame(matches: pd.DataFrame) -> pd.DataFrame:
+    """Every completed match with its pre-match features plus outcome labels
+    for each market Model B (and the ensemble evaluation) needs."""
+    history = _prepare_matches(matches)
+    targets = history[["date", "home_team", "away_team", "home_goals", "away_goals"]]
+    frame = build_feature_frame(history, targets)
+
+    hg, ag = frame["home_goals"], frame["away_goals"]
+    total = hg + ag
+    frame["y_result"] = np.select([hg > ag, hg == ag], [0, 1], default=2).astype(int)
+    frame["y_btts"] = ((hg > 0) & (ag > 0)).astype(int)
+    for line in OU_LINES:
+        frame[f"y_over_{line}"] = (total > line).astype(int)
+    for label, (lo, hi) in GOAL_RANGES.items():
+        frame[f"y_range_{label}"] = ((total >= lo) & (total <= hi)).astype(int)
+    return frame

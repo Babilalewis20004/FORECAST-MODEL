@@ -72,6 +72,12 @@ class Prediction(Base):
     match_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     over_under: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     btts: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # Ensemble provenance. When present, the market columns above hold the
+    # final *calibrated* probabilities, and raw_probabilities holds the
+    # pre-calibration Model A / Model B / blended values they came from.
+    # Null for predictions made before the ensemble shipped (Model A only).
+    raw_probabilities: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    ensemble_weights: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
 
 class ModelRun(Base):
@@ -82,3 +88,6 @@ class ModelRun(Base):
     trained_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     n_matches: Mapped[int] = mapped_column(Integer, nullable=False)
     model_path: Mapped[str] = mapped_column(String, nullable=False)
+    # Test-split evaluation from ensemble.train_ensemble (Brier / log loss /
+    # ECE per market). Per league, not per prediction, so it lives here.
+    metrics: Mapped[dict | None] = mapped_column(JSONB, nullable=True)

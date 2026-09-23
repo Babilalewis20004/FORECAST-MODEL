@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import fixtures, leagues, refresh
+from app.routers import fixtures, leagues, predict, refresh
 from app.services.model_service import load_cached_models
 
 
@@ -25,6 +25,7 @@ app.add_middleware(
 
 app.include_router(leagues.router)
 app.include_router(fixtures.router)
+app.include_router(predict.router)
 app.include_router(refresh.router)
 
 

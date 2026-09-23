@@ -40,10 +40,30 @@ class PredictionOut(BaseModel):
     match_result_odds: dict[str, float | None] | None = None
     over_under_odds: dict[str, float | None] | None = None
     btts_odds: dict[str, float | None] | None = None
+    # Ensemble provenance -- all null for predictions made before the
+    # ensemble shipped (Model A only, uncalibrated) until the next retrain.
+    #   raw_probabilities: {"model_a": {...}, "model_b": {...}, "blended": {...}}
+    #   calibrated_probabilities: the final numbers (same as the market fields
+    #     above), grouped the same way as raw_probabilities
+    #   ensemble_weights: per-market w_A (Model A's share; null = Model A only)
+    #   brier_scores: per-market test-split Brier for this fixture's *league*
+    #     (it measures the model on a holdout set, not this one fixture)
+    raw_probabilities: dict | None = None
+    calibrated_probabilities: dict | None = None
+    ensemble_weights: dict[str, float | None] | None = None
+    brier_scores: dict[str, dict[str, float | None]] | None = None
 
     @staticmethod
-    def from_orm_row(row) -> "PredictionOut":
+    def from_orm_row(row, league_metrics: dict | None = None) -> "PredictionOut":
         range_probabilities = {label: getattr(row, field) for label, field in LABEL_TO_FIELD.items()}
+        calibrated = None
+        if row.raw_probabilities:
+            calibrated = {
+                "match_result": row.match_result,
+                "over_under": row.over_under,
+                "btts": row.btts,
+                "goal_ranges": range_probabilities,
+            }
         return PredictionOut(
             lambda_home=row.lambda_home,
             lambda_away=row.lambda_away,
@@ -56,7 +76,19 @@ class PredictionOut(BaseModel):
             match_result_odds=probabilities_to_odds(row.match_result) if row.match_result else None,
             over_under_odds=probabilities_to_odds(row.over_under) if row.over_under else None,
             btts_odds=probabilities_to_odds(row.btts) if row.btts else None,
+            raw_probabilities=row.raw_probabilities,
+            calibrated_probabilities=calibrated,
+            ensemble_weights=row.ensemble_weights,
+            brier_scores=brier_scores_from_metrics(league_metrics) if row.raw_probabilities else None,
         )
+
+
+def brier_scores_from_metrics(metrics: dict | None) -> dict[str, dict[str, float | None]] | None:
+    """Per-market test-split Brier (calibrated model vs. base-rate baseline, plus
+    each base model) from a model_runs.metrics blob."""
+    if not metrics or "markets" not in metrics:
+        return None
+    return {market: m["brier"] for market, m in metrics["markets"].items()}
 
 
 class FixtureOut(BaseModel):

@@ -48,6 +48,7 @@ copy .env.example .env                 # then edit .env:
 python scripts\init_db.py              # creates tables (safe to re-run)
 python scripts\import_csv_to_postgres.py   # one-off: seeds Postgres from the root CSVs
 python scripts\migrate_add_markets.py  # adds the 1X2/O-U/BTTS columns (safe to re-run)
+python scripts\migrate_add_ensemble.py # adds ensemble/calibration columns (safe to re-run)
 
 uvicorn app.main:app --reload --port 8000
 ```
@@ -131,6 +132,61 @@ is available for every prediction (goal-range probabilities have always
 been stored); the other three odds fields inherit the same `null`-until-
 retrained rule as their probabilities.
 
+### Ensemble and calibration
+
+Model A (the simulation above) is one of two models. The final probabilities
+served for 1X2, BTTS and Over/Under are a blend of both, then calibrated:
+
+| Layer | Module | What it does |
+|---|---|---|
+| 1. Features | [`features.py`](backend/app/ml/features.py) | Rolling 5/10-match goals, xG, shots and shots on target (for and against), shot conversion, xG-adjusted Elo, rest days, head-to-head record. Training and serving share one code path, so a fixture can't see its own or later results |
+| 2a. Model A | [`football_goal_range_model.py`](backend/app/ml/football_goal_range_model.py) | Negative-Binomial copula simulation (unchanged) |
+| 2b. Model B | [`gbdt_models.py`](backend/app/ml/gbdt_models.py) | XGBoost classifiers trained directly on outcomes: `multi:softprob` for 1X2, `binary:logistic` for BTTS and each Over line |
+| 3. Blend + calibrate | [`calibration.py`](backend/app/ml/calibration.py), [`ensemble.py`](backend/app/ml/ensemble.py) | `P = w_A·P_A + (1-w_A)·P_B` per market, then Platt (sigmoid) calibration. Isotonic is also implemented. Log loss, Brier score and ECE metrics |
+
+Each league's history is split by date: the oldest 70% trains both models,
+the next 15% fits each market's blend weight `w_A` (grid search on log loss,
+falling back to 0.45 when there's too little data) and its calibrator, and
+the newest 15% is only used to report metrics. Both base models are then
+refit on 100% of history for serving, reusing the fitted weights and
+calibrators. Goal ranges come from Model A only; they're calibrated but not
+blended, since Model B has no range classifiers.
+
+Two things to know when reading the output:
+
+- **Markets are no longer guaranteed to agree.** Each market is blended and
+  calibrated on its own, so e.g. the final P(Over 2.5) need not exactly
+  match the goal-range numbers. That's the price of per-market calibration.
+- **The card's "skill vs base rate" tag is per league, not per fixture.**
+  It's `1 − Brier(calibrated) / Brier(always predicting the base rate)` on
+  that league's test split. It can be negative, and for lower-league goal
+  markets it often sits near zero: those markets are close to unpredictable
+  from pre-match data. Hover the tag for the full Brier breakdown and blend
+  weights.
+
+The market columns in `predictions` hold the final calibrated numbers (so
+odds and the UI use them unchanged). `raw_probabilities` keeps the Model A,
+Model B and blended values they came from, `ensemble_weights` the per-market
+`w_A`, and `model_runs.metrics` the league's test-split Brier, log loss and
+ECE for every source. `GET /api/predict/{fixture_id}` returns all of it.
+Predictions made before this shipped have these fields `null` and show
+"Uncalibrated · Model A only" until their league is retrained. A retrain now
+takes about 3 minutes per league (about 20 minutes for all six).
+
+### Tests
+
+```powershell
+cd backend
+pip install -r requirements-dev.txt
+python -m pytest
+```
+
+Covers feature leakage (rewriting later results can't change earlier
+features), train/serve feature parity, rest-day and head-to-head
+correctness, metric formulas against scikit-learn, calibrator and
+blend-weight behaviour, and end-to-end ensemble training on synthetic data.
+No database needed.
+
 ### Manual refresh
 
 | Action | Endpoint |
@@ -141,10 +197,9 @@ retrained rule as their probabilities.
 | Retrain only (uses whatever's already in Postgres) | `POST /api/refresh/retrain` |
 
 All of these run as a background job (single-flight — only one at a time);
-poll `GET /api/refresh/status/{job_id}` for progress. A full refresh across
-all 6 leagues takes roughly 8-10 minutes (mostly Monte Carlo simulation
-over every upcoming fixture, not training itself); a single league is
-1-2 minutes. Stats backfill costs one API request per match and is
+poll `GET /api/refresh/status/{job_id}` for progress. A full retrain across
+all 6 leagues takes roughly 20 minutes; a single league is about 3 minutes
+(ensemble training plus Monte Carlo simulation over every upcoming fixture). Stats backfill costs one API request per match and is
 budget-limited on the free plan (100/day), so it's kept separate from a
 routine refresh — run it on its own and re-run daily until it reports
 nothing left to fetch.

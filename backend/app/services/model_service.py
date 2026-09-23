@@ -11,6 +11,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
 from app.db import SessionLocal
+from app.ml.ensemble import LeagueEnsemble, flat_from_prediction, nest, train_ensemble
 from app.ml.football_goal_range_model import (
     GOALS_ONLY_LEAGUES,
     XG_RICH_LEAGUES,
@@ -27,6 +28,7 @@ MODEL_STORE.mkdir(parents=True, exist_ok=True)
 ALL_LEAGUES = sorted(XG_RICH_LEAGUES | GOALS_ONLY_LEAGUES)
 
 _model_cache: dict[str, LeagueGoalModel] = {}
+_ensemble_cache: dict[str, LeagueEnsemble] = {}
 
 
 class ModelNotTrainedError(RuntimeError):
@@ -45,17 +47,31 @@ def _model_path(league: str) -> Path:
     return MODEL_STORE / f"{league_slug(league)}.joblib"
 
 
+def _ensemble_path(league: str) -> Path:
+    # Separate file from Model A's so joblib files from before the ensemble
+    # shipped still load as plain LeagueGoalModels.
+    return MODEL_STORE / f"{league_slug(league)}_ensemble.joblib"
+
+
 def load_cached_models() -> None:
-    """Called once at startup: populate the in-memory cache from whatever
+    """Called once at startup: populate the in-memory caches from whatever
     .joblib files already exist on disk, so the server never forces a
     retrain just because the process restarted."""
     for league in ALL_LEAGUES:
-        path = _model_path(league)
-        if path.exists():
-            try:
-                _model_cache[league] = joblib.load(path)
-            except Exception:  # noqa: BLE001 -- a corrupt/stale file just means "not cached"
-                continue
+        for path, cache in ((_model_path(league), _model_cache), (_ensemble_path(league), _ensemble_cache)):
+            if path.exists():
+                try:
+                    cache[league] = joblib.load(path)
+                except Exception:  # noqa: BLE001 -- a corrupt/stale file just means "not cached"
+                    continue
+
+
+def get_ensemble(league: str) -> LeagueEnsemble | None:
+    """None if the league hasn't been trained since the ensemble shipped --
+    callers then fall back to Model A only."""
+    if league not in _ensemble_cache and _ensemble_path(league).exists():
+        _ensemble_cache[league] = joblib.load(_ensemble_path(league))
+    return _ensemble_cache.get(league)
 
 
 def get_model(league: str) -> LeagueGoalModel:
@@ -106,11 +122,14 @@ def train_league(db: Session, league: str) -> dict:
         raise ValueError(f"No matches in DB for league '{league}' -- run a scrape first.")
 
     tier = league_tier(league)
-    model = LeagueGoalModel(league=league, tier=tier)
-    model.fit(history, test_size=0.0)  # full history, no holdout -- this is for real predictions
+    # Model A (refit on full history) + Model B + per-market blend weights and
+    # calibrators, with test-split metrics -- see app/ml/ensemble.py.
+    model, ensemble = train_ensemble(history, league, tier)
 
     joblib.dump(model, _model_path(league))
+    joblib.dump(ensemble, _ensemble_path(league))
     _model_cache[league] = model
+    _ensemble_cache[league] = ensemble
 
     trained_at = datetime.now(timezone.utc)
     stmt = pg_insert(ModelRun).values(
@@ -119,6 +138,7 @@ def train_league(db: Session, league: str) -> dict:
         trained_at=trained_at,
         n_matches=len(history),
         model_path=str(_model_path(league)),
+        metrics=ensemble.metrics,
     )
     stmt = stmt.on_conflict_do_update(
         index_elements=[ModelRun.league],
@@ -127,6 +147,7 @@ def train_league(db: Session, league: str) -> dict:
             "trained_at": stmt.excluded.trained_at,
             "n_matches": stmt.excluded.n_matches,
             "model_path": stmt.excluded.model_path,
+            "metrics": stmt.excluded.metrics,
         },
     )
     db.execute(stmt)
@@ -137,6 +158,7 @@ def train_league(db: Session, league: str) -> dict:
 
 def generate_predictions(db: Session, league: str) -> dict:
     model = get_model(league)
+    ensemble = get_ensemble(league)
     history = _matches_df(db, league)
     upcoming = db.execute(select(UpcomingFixture).where(UpcomingFixture.league == league)).scalars().all()
 
@@ -146,12 +168,19 @@ def generate_predictions(db: Session, league: str) -> dict:
     # per-fixture rebuild was previously the dominant cost of a retrain:
     # several minutes for a single mid-size league).
     team_state = compute_team_state(history, league_tier(league))
+    fixtures = [fx for fx in upcoming if fx.home_team in team_state and fx.away_team in team_state]
+    n_failed = len(upcoming) - len(fixtures)
 
-    n_ok = n_failed = 0
-    for fx in upcoming:
-        if fx.home_team not in team_state or fx.away_team not in team_state:
-            n_failed += 1
-            continue
+    # Model B scores every fixture in one batch.
+    b_probs = None
+    if ensemble is not None and fixtures:
+        targets = pd.DataFrame(
+            [{"date": fx.date, "home_team": fx.home_team, "away_team": fx.away_team} for fx in fixtures]
+        )
+        b_probs = ensemble.predict_model_b(history, targets)
+
+    n_ok = 0
+    for i, fx in enumerate(fixtures):
         try:
             result = predict_fixture_fast(model, team_state, fx.home_team, fx.away_team)
         except (ValueError, IndexError):
@@ -159,15 +188,26 @@ def generate_predictions(db: Session, league: str) -> dict:
             continue
         n_ok += 1
 
+        a_flat = flat_from_prediction(result)
+        if ensemble is not None:
+            combined = ensemble.combine(a_flat, {m: v[i] for m, v in b_probs.items()})
+            final, raw, weights = nest(combined["calibrated"]), combined["raw"], combined["weights"]
+        else:
+            final, raw, weights = nest(a_flat), None, None
+
+        # The market columns hold the final (calibrated when available)
+        # probabilities, so odds and the existing UI pick them up unchanged.
         values = {
             "fixture_id": fx.fixture_id,
             "league": league,
             "lambda_home": result["lambda_home"],
             "lambda_away": result["lambda_away"],
-            **{LABEL_TO_FIELD[label]: p for label, p in result["range_probabilities"].items()},
-            "match_result": result["match_result"],
-            "over_under": result["over_under"],
-            "btts": result["btts"],
+            **{LABEL_TO_FIELD[label]: p for label, p in final["goal_ranges"].items()},
+            "match_result": final["match_result"],
+            "over_under": final["over_under"],
+            "btts": final["btts"],
+            "raw_probabilities": raw,
+            "ensemble_weights": weights,
         }
         stmt = pg_insert(Prediction).values(**values)
         update_cols = {k: getattr(stmt.excluded, k) for k in values if k != "fixture_id"}

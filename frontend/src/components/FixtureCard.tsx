@@ -1,4 +1,5 @@
 import type { Fixture } from "../types";
+import { CalibrationTag } from "./CalibrationTag";
 import { GoalRangeChart } from "./GoalRangeChart";
 import { MarketsPanel } from "./MarketsPanel";
 import "./FixtureCard.css";
@@ -35,6 +36,7 @@ export function FixtureCard({ fixture }: { fixture: Fixture }) {
               awayTeam={fixture.away_team}
             />
           )}
+          <CalibrationTag prediction={prediction} />
         </>
       ) : (
         <p className="fixture-card__no-prediction">No prediction yet — trigger a retrain.</p>
