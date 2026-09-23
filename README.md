@@ -1,25 +1,252 @@
 # Predict Model
 
-Football prediction app: trains a per-league Poisson/XGBoost +
-Negative-Binomial model on historical results and serves, per upcoming
-fixture, probabilities (and their fair decimal-odds equivalent) for:
+Football prediction app for six leagues (Premier League, La Liga, EFL
+Championship, League One, League Two, Scottish Premiership). For every
+upcoming fixture it serves calibrated probabilities, and their fair
+decimal odds, for:
 
-- **Goal ranges** (1-3, 2-4, 3-6, etc.)
 - **Match Result / 1X2** (Home Win / Draw / Away Win)
 - **Over/Under Goals** (1.5, 2.5, 3.5)
 - **Both Teams To Score (BTTS)** (Yes / No)
+- **Goal ranges** (1-3, 1-4, 2-3, 2-4, 2-5, 2-6, 3-5, 3-6)
 
-All four markets come from the same simulated joint score distribution for
-a fixture — nothing is trained per market, so they're internally consistent
-with each other (see [How data flows](#how-data-flows)).
+Two models produce every prediction: a Negative-Binomial score simulation
+(Model A) and direct XGBoost classifiers (Model B). They are blended per
+market with weights fitted on held-out data, then calibrated. Each league
+reports its own held-out accuracy, so you can see where the model beats
+simply predicting the base rate and where it doesn't
+([latest results](#latest-evaluation)).
 
-- [`backend/app/ml/football_goal_range_model.py`](backend/app/ml/football_goal_range_model.py) — the model itself (feature engineering, training, Monte Carlo simulation, all four markets)
-- [`backend/app/`](backend/app/) — FastAPI service: Postgres-backed API, model caching/persistence, manual scrape/retrain background jobs
-- [`frontend/`](frontend/) — React + Vite UI: upcoming fixtures with goal-range, 1X2, Over/Under and BTTS predictions, league filter, refresh trigger
-- [`legacy/`](legacy/) — the original standalone CLI scripts (`api_football_scraper.py`, `predict_upcoming.py`), superseded by the backend's service layer; kept for reference, not run directly anymore
+Local, single-user app: no auth, no scheduler. You refresh data with a
+button in the UI (or a `POST /api/refresh/*` call).
 
-Local/single-user app — no auth, no scheduler. Data refresh is a manual
-button in the UI (or a `POST /api/refresh/*` call) rather than a cron job.
+| Path | What's there |
+|---|---|
+| [`backend/app/ml/`](backend/app/ml/) | The four ML modules: features, Model A, Model B, blending and calibration |
+| [`backend/app/`](backend/app/) | FastAPI service: Postgres models, routers, scrape/retrain background jobs |
+| [`backend/scripts/`](backend/scripts/) | DB setup, CSV seed import, idempotent migrations |
+| [`backend/tests/`](backend/tests/) | pytest suite (no database needed) |
+| [`frontend/`](frontend/) | React + Vite UI |
+| [`legacy/`](legacy/) | Original CLI scripts, superseded by the backend; kept for reference only |
+
+## System Architecture Blueprint
+
+The diagrams render on GitHub, which adds pan, zoom and full-screen
+controls. If VS Code's preview shows raw code, install the *Markdown Preview
+Mermaid Support* extension. The sections below each diagram expand for
+details and links to the code.
+
+```mermaid
+flowchart LR
+    APIF["API-Football API<br/>fixtures + match stats"]
+
+    subgraph ING["Ingestion"]
+        SCR["scrape_service.py<br/>fixtures, optional<br/>stats backfill"]
+        CACHE[("raw JSON cache")]
+    end
+
+    subgraph DBIN["Postgres · inputs"]
+        M[("matches")]
+        U[("upcoming_fixtures")]
+    end
+
+    subgraph ML["ML pipeline · app/ml/"]
+        F["Layer 1<br/>Features"]
+        A["Layer 2a · Model A<br/>NB copula simulation"]
+        B["Layer 2b · Model B<br/>XGBoost classifiers"]
+        BL["Layer 3 · Blend<br/>w_A·P_A + (1 − w_A)·P_B"]
+        CAL["Layer 3 · Calibrate<br/>Platt / isotonic"]
+    end
+
+    subgraph DBOUT["Postgres · outputs"]
+        P[("predictions<br/>calibrated + raw<br/>+ weights")]
+        R[("model_runs<br/>test-split metrics")]
+    end
+
+    subgraph API["Layer 4 · FastAPI"]
+        FX["/api/fixtures/*"]
+        PR["/api/predict/{fixture_id}"]
+    end
+
+    subgraph UI["Layer 4 · React + Vite"]
+        CARD["FixtureCard<br/>1X2 · O/U · BTTS<br/>goal ranges · odds"]
+        TAG["CalibrationTag<br/>skill vs base rate"]
+    end
+
+    subgraph TRIG["Manual refresh"]
+        RP["RefreshPanel (UI)"]
+        RF["/api/refresh/*<br/>background jobs"]
+    end
+
+    APIF --> SCR
+    SCR <--> CACHE
+    SCR --> M
+    SCR --> U
+    M --> F
+    M --> A
+    U --> F
+    U --> A
+    F --> B
+    A --> BL
+    B --> BL
+    BL --> CAL
+    CAL --> P
+    CAL --> R
+    P --> FX
+    P --> PR
+    R --> FX
+    R --> PR
+    FX --> CARD
+    PR --> CARD
+    CARD --> TAG
+    RP --> RF
+    RF -. "scrape" .-> SCR
+    RF -. "retrain" .-> F
+```
+
+Dashed arrows are the manual triggers from the UI. Trained models are also
+saved to `backend/app/ml/model_store/*.joblib` and reloaded at startup
+(omitted from the diagram for clarity).
+
+<details>
+<summary><b>Ingestion</b>: API-Football → Postgres</summary>
+
+[`scrape_service.py`](backend/app/services/scrape_service.py) pulls match
+history and upcoming fixtures for all six leagues, upserting on
+`(league, date, home_team, away_team)` so re-runs never duplicate rows. The
+optional stats backfill (shots, shots on target, corners, cards, xG) costs
+one API request per match, and the free plan allows 100 per day. It's
+resumable, and every raw response is cached under `downloaded_files/`, so
+re-scraping already-fetched data costs no API budget.
+</details>
+
+<details>
+<summary><b>Layer 1: Features</b> (<code>features.py</code>)</summary>
+
+[`features.py`](backend/app/ml/features.py) builds Model B's inputs for
+each side:
+
+- rolling 5- and 10-match goals, xG, shots and shots on target, for and against
+- shot conversion over the last 10 matches
+- xG-adjusted Elo: the match signal blends the actual goal margin with the
+  xG margin when xG exists
+- rest days, capped at 30
+- head-to-head record from the last 6 meetings (goal difference from the
+  home side's view, average total goals, BTTS rate)
+
+Training and prediction share **one code path**. Each target row looks up
+each team's state as of its last completed match *strictly before* the
+target date (`pd.merge_asof(allow_exact_matches=False)`). A fixture can't
+see its own or later results, and an upcoming fixture gets exactly the
+features a historical match on that date would have had. Tests enforce both
+properties.
+</details>
+
+<details>
+<summary><b>Layer 2a: Model A</b>, the Negative-Binomial copula simulation</summary>
+
+[`football_goal_range_model.py`](backend/app/ml/football_goal_range_model.py)
+works in three steps:
+
+1. Two Poisson-objective XGBoost regressors predict expected goals
+   (`lambda_home`, `lambda_away`).
+2. A Negative-Binomial dispersion fitted from residuals accounts for
+   football's over-dispersion.
+3. 20,000 correlated home/away score draws are simulated via a Gaussian
+   copula (ρ = −0.1, a Dixon-Coles-style low-score adjustment).
+
+Every market is an aggregation over that one sample set:
+
+| Market | Derivation |
+|---|---|
+| Goal range (e.g. "2-4") | `P(lo <= home+away <= hi)` |
+| 1X2 | `P(home>away)` / `P(home==away)` / `P(home<away)` |
+| Over *N* | `P(home+away > N)` |
+| BTTS | `P(home>0 AND away>0)` |
+
+Model A uses its own feature set (rolling goals, shots and xG, plus Elo).
+Leagues with rich data (Premier League, La Liga, Championship) use a
+10-match window; the others use 6.
+</details>
+
+<details>
+<summary><b>Layer 2b: Model B</b>, direct GBDT classifiers</summary>
+
+[`gbdt_models.py`](backend/app/ml/gbdt_models.py) trains XGBoost
+classifiers directly on outcomes:
+- `multi:softprob` for 1X2
+- `binary:logistic` for BTTS and each Over line
+
+The trees are deliberately low-capacity (depth 3, learning rate 0.03,
+`min_child_weight` 5), because each league has only 1–2k matches. There are
+no goal-range classifiers, so goal ranges stay Model A only.
+</details>
+
+<details>
+<summary><b>Layer 3: Blend, calibrate, evaluate</b> (<code>calibration.py</code>, <code>ensemble.py</code>)</summary>
+
+For each market, [`ensemble.py`](backend/app/ml/ensemble.py) runs:
+
+1. **Blend:** `P = w_A·P_A + (1 − w_A)·P_B`, with `w_A` chosen by grid search
+   (steps of 0.05) to minimise log loss on the calibration split. The spec
+   defaults (0.45 for 1X2/BTTS/O-U, 0.80 for goal ranges) apply when that
+   split has fewer than 50 matches.
+2. **Calibrate:** Platt scaling (a logistic regression on the logit, the
+   same mapping as `CalibratedClassifierCV(method="sigmoid")`) by default.
+   Isotonic is implemented too. 1X2 is calibrated one-vs-rest, then
+   renormalised.
+3. **Evaluate:** Brier score, log loss and ECE for Model A, Model B, the
+   raw blend, the calibrated blend, and a base-rate baseline.
+
+**Market consistency.** Each market is blended and calibrated on its own,
+so the final P(Over 2.5) need not exactly match the goal-range numbers.
+That's the trade-off accepted for per-market calibration.
+</details>
+
+<details>
+<summary><b>Layer 4: API and UI</b></summary>
+
+The `predictions` table's market columns hold the final calibrated numbers.
+`raw_probabilities` keeps the Model A, Model B and blended values, and
+`ensemble_weights` the per-market `w_A`. Each league's test-split metrics
+live in `model_runs.metrics`.
+
+| Endpoint | Returns |
+|---|---|
+| `GET /api/fixtures/upcoming` | Upcoming fixtures (`status=NS`) with their current predictions; filter by `league`, `start`, `end` |
+| `GET /api/predict/{fixture_id}` | One fixture's calibrated prediction, raw probabilities, blend weights and its league's Brier scores |
+| `GET /api/fixtures/{fixture_id}?full_distribution=true` | Adds a live 0..8+ total-goals distribution from Model A |
+| `GET /api/leagues` | Leagues with last-trained time |
+| `POST /api/refresh/{full,scrape,retrain}` | Background jobs, one at a time; poll `GET /api/refresh/status/{job_id}` |
+
+Decimal odds (`*_odds`, fair odds of `1/p` with no bookmaker margin) are
+computed at response time from the stored probabilities, not persisted.
+Each card's **CalibrationTag** shows the league's Brier skill (see
+below). Hover it for the full breakdown and blend weights. Predictions made
+before the ensemble shipped show "Uncalibrated · Model A only" until their
+league is retrained.
+</details>
+
+### Training pipeline, per league
+
+```mermaid
+flowchart LR
+    H["League history<br/>sorted by date"] --> S{"Chronological split"}
+    S -->|"oldest 70%"| TR["Train split<br/>fit Model A + Model B"]
+    S -->|"next 15%"| CS["Calibration split<br/>fit w_A per market<br/>fit calibrators"]
+    S -->|"newest 15%"| TS["Test split<br/>Brier · log loss · ECE<br/>never used for fitting"]
+    TR --> CS
+    CS --> TS
+    TS --> RF["Refit Model A + B on 100%<br/>reuse w_A + calibrators"]
+    RF --> SV["Serve: predictions<br/>+ model_runs.metrics"]
+```
+
+The weights and calibrators are fitted on a different split from the one
+the metrics are reported on, so the displayed scores aren't graded on data
+the model was tuned against. The final refit uses all history, because the
+most recent matches matter most in football. The trade-off is that the
+calibrators were fitted against slightly weaker models than the ones
+served.
 
 ## Quickstart
 
@@ -29,9 +256,8 @@ Prerequisites: Python 3.10+, Node 18+, Docker Desktop running.
 docker compose up -d   # Postgres, from the project root
 ```
 
-Then follow **Backend setup** and **Frontend setup** below (separate
-terminals — both need to stay running). Once both are up, open
-http://localhost:5173.
+Then follow **Backend setup** and **Frontend setup** in separate terminals
+(both need to stay running), and open http://localhost:5173.
 
 ### Backend setup
 
@@ -53,14 +279,13 @@ python scripts\migrate_add_ensemble.py # adds ensemble/calibration columns (safe
 uvicorn app.main:app --reload --port 8000
 ```
 
-Verify it's up: http://localhost:8000/api/health should return `{"status":
-"ok"}`, and http://localhost:8000/docs gives the interactive (Swagger)
-API reference for every endpoint below.
+Check it's running: http://localhost:8000/api/health should return
+`{"status": "ok"}`, and http://localhost:8000/docs has the interactive
+(Swagger) API reference.
 
 > **Port note:** `docker-compose.yml` maps Postgres to host port **5433**,
-> not 5432 — the default `.env.example` already points at 5433. If you
-> don't have another Postgres running locally, feel free to change both
-> the compose file's port mapping and `DATABASE_URL` back to 5432.
+> not 5432, and `.env.example` already points there. If you don't have
+> another Postgres running locally, you can change both back to 5432.
 
 ### Frontend setup
 
@@ -70,110 +295,53 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173 — `vite.config.ts` proxies `/api` to
-`localhost:8000`, so no CORS setup or `.env` is needed for local dev as
-long as the backend is running on port 8000.
+`vite.config.ts` proxies `/api` to `localhost:8000`, so local development
+needs no CORS setup or `.env`.
 
 ### First run
 
-The seed import gives you a populated fixtures list immediately (imported
-straight from the root CSVs, including their existing predictions). To
-refresh against live data, click **Refresh data** in the UI (or `POST
-/api/refresh/full`) — see [Manual refresh](#manual-refresh) below for what
-that does and roughly how long it takes.
+The seed import gives you a populated fixtures list straight away, but those
+predictions are Model A only and uncalibrated. Click **Refresh data** in the
+UI (or `POST /api/refresh/retrain`) to train the full ensemble. That takes
+about 3 minutes per league, about 20 minutes for all six.
 
-## How data flows
+## Latest evaluation
 
-`api_football_scraper` (now `backend/app/services/scrape_service.py`) pulls
-match history + upcoming fixtures from the API-Football API for all 6
-leagues (Premier League, La Liga, EFL Championship, League One, League Two,
-Scottish Premiership) and upserts them into Postgres, keyed on
-`(league, date, home_team, away_team)`. `model_service.py` trains one
-`LeagueGoalModel` per league on that history, persists it to
-`backend/app/ml/model_store/*.joblib`, and writes predictions for every
-upcoming fixture back to the `predictions` table. The API layer just reads
-from Postgres and the in-memory/disk model cache — it never retrains on a
-GET request.
+Brier skill score on each league's test split, from the retrain on
+2026-09-23: `1 − Brier(calibrated) / Brier(always predicting the league's
+base rate)`. Positive means the model beat the base rate on matches it
+never saw during fitting. `w` is Model A's share of the blend.
 
-For each fixture, the model predicts expected goals (`lambda_home`,
-`lambda_away`) via two Poisson-objective XGBoost regressors, then Monte
-Carlo simulates 20,000 *jointly* correlated home/away score draws from
-Negative Binomial distributions parameterised by those lambdas
-(`simulate_joint_score_distribution` in
-[football_goal_range_model.py](backend/app/ml/football_goal_range_model.py)).
-Every market is then just a different aggregation over that one sample set:
+| League | Test matches | 1X2 | BTTS | Over 1.5 | Over 2.5 | Over 3.5 |
+|---|---|---|---|---|---|---|
+| EFL Championship | 354 | +0.5% (w 0.85) | +2.7% (w 0.25) | +1.6% (w 0.15) | +1.7% (w 0.10) | +0.0% (w 0.55) |
+| La Liga | 292 | +3.8% (w 0.45) | +0.1% (w 0.55) | +0.7% (w 0.50) | +2.3% (w 0.60) | +1.0% (w 0.50) |
+| League One | 349 | +4.1% (w 0.70) | +1.1% (w 0.65) | +0.9% (w 0.85) | +0.3% (w 0.75) | +1.5% (w 1.00) |
+| League Two | 349 | +0.6% (w 0.85) | −0.1% (w 0.65) | +0.3% (w 0.80) | −0.9% (w 0.70) | +0.2% (w 0.30) |
+| Premier League | 298 | +2.3% (w 0.85) | +0.3% (w 0.50) | −0.2% (w 0.35) | +1.8% (w 0.85) | +1.9% (w 0.50) |
+| Scottish Premiership | 147 | +8.0% (w 0.65) | +0.0% (w 0.70) | +0.0% (w 0.60) | −0.8% (w 0.70) | +0.8% (w 0.75) |
 
-| Market | Derivation |
-|---|---|
-| Goal range (e.g. "2-4") | `P(lo <= home+away <= hi)` |
-| Match Result / 1X2 | `P(home>away)` / `P(home==away)` / `P(home<away)` |
-| Over/Under *N* | `P(home+away > N)` |
-| BTTS | `P(home>0 AND away>0)` |
+How to read it:
 
-Because they share one simulation, the markets agree with each other (e.g.
-a fixture with a high home-win probability will also skew its BTTS/O-U
-numbers accordingly) rather than being four independently-calibrated
-models that can quietly contradict one another.
+- **1X2 is where the model adds value.** It beats the base rate in every
+  league.
+- **Goal markets are close to unpredictable** from pre-match data, landing
+  between −1% and +2%. That's normal for football, not a bug.
+- **Small samples make the extremes noisy.** Scottish Premiership's +8% comes
+  from only 147 test matches, and some fitted weights swing to the extremes
+  (Championship Over 2.5 gives Model A only 0.10). See
+  [Recommended next steps](#recommended-next-steps-more-stable-numbers).
+- **Calibration helps the binary markets but hurts 1X2.** Comparing test
+  Brier before and after calibration: Over/Under improves in all 6 leagues
+  and BTTS in 5 of 6, but 1X2 gets worse in 4 of 6 (League One 0.619 →
+  0.631, La Liga, League Two, Scottish Premiership). The blend alone was
+  already well calibrated for 1X2. Fixing this is step 1 below.
 
-`PredictionOut.match_result` / `.over_under` / `.btts` are `null` for any
-prediction generated before this feature shipped, until that fixture's
-league is next retrained — the frontend's `FixtureCard` falls back to
-showing just the goal-range chart in that case.
+These numbers change with every retrain. To get the current ones, call
+`GET /api/predict/{fixture_id}` (`brier_scores`), or run
+`SELECT league, metrics->'markets' FROM model_runs;`.
 
-Every market above also gets a decimal-odds counterpart (`range_odds`,
-`match_result_odds`, `over_under_odds`, `btts_odds`) — fair, no-margin
-odds (`1/probability`, via `decimal_odds()`/`probabilities_to_odds()` in
-[football_goal_range_model.py](backend/app/ml/football_goal_range_model.py)),
-same keys as their probability counterparts, `null` where a probability
-is exactly 0. These are **computed at API-response time from the stored
-probabilities, not persisted** — there's nothing to migrate, since odds
-carry no information a probability doesn't already have. `range_odds`
-is available for every prediction (goal-range probabilities have always
-been stored); the other three odds fields inherit the same `null`-until-
-retrained rule as their probabilities.
-
-### Ensemble and calibration
-
-Model A (the simulation above) is one of two models. The final probabilities
-served for 1X2, BTTS and Over/Under are a blend of both, then calibrated:
-
-| Layer | Module | What it does |
-|---|---|---|
-| 1. Features | [`features.py`](backend/app/ml/features.py) | Rolling 5/10-match goals, xG, shots and shots on target (for and against), shot conversion, xG-adjusted Elo, rest days, head-to-head record. Training and serving share one code path, so a fixture can't see its own or later results |
-| 2a. Model A | [`football_goal_range_model.py`](backend/app/ml/football_goal_range_model.py) | Negative-Binomial copula simulation (unchanged) |
-| 2b. Model B | [`gbdt_models.py`](backend/app/ml/gbdt_models.py) | XGBoost classifiers trained directly on outcomes: `multi:softprob` for 1X2, `binary:logistic` for BTTS and each Over line |
-| 3. Blend + calibrate | [`calibration.py`](backend/app/ml/calibration.py), [`ensemble.py`](backend/app/ml/ensemble.py) | `P = w_A·P_A + (1-w_A)·P_B` per market, then Platt (sigmoid) calibration. Isotonic is also implemented. Log loss, Brier score and ECE metrics |
-
-Each league's history is split by date: the oldest 70% trains both models,
-the next 15% fits each market's blend weight `w_A` (grid search on log loss,
-falling back to 0.45 when there's too little data) and its calibrator, and
-the newest 15% is only used to report metrics. Both base models are then
-refit on 100% of history for serving, reusing the fitted weights and
-calibrators. Goal ranges come from Model A only; they're calibrated but not
-blended, since Model B has no range classifiers.
-
-Two things to know when reading the output:
-
-- **Markets are no longer guaranteed to agree.** Each market is blended and
-  calibrated on its own, so e.g. the final P(Over 2.5) need not exactly
-  match the goal-range numbers. That's the price of per-market calibration.
-- **The card's "skill vs base rate" tag is per league, not per fixture.**
-  It's `1 − Brier(calibrated) / Brier(always predicting the base rate)` on
-  that league's test split. It can be negative, and for lower-league goal
-  markets it often sits near zero: those markets are close to unpredictable
-  from pre-match data. Hover the tag for the full Brier breakdown and blend
-  weights.
-
-The market columns in `predictions` hold the final calibrated numbers (so
-odds and the UI use them unchanged). `raw_probabilities` keeps the Model A,
-Model B and blended values they came from, `ensemble_weights` the per-market
-`w_A`, and `model_runs.metrics` the league's test-split Brier, log loss and
-ECE for every source. `GET /api/predict/{fixture_id}` returns all of it.
-Predictions made before this shipped have these fields `null` and show
-"Uncalibrated · Model A only" until their league is retrained. A retrain now
-takes about 3 minutes per league (about 20 minutes for all six).
-
-### Tests
+## Tests
 
 ```powershell
 cd backend
@@ -181,42 +349,93 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-Covers feature leakage (rewriting later results can't change earlier
-features), train/serve feature parity, rest-day and head-to-head
-correctness, metric formulas against scikit-learn, calibrator and
-blend-weight behaviour, and end-to-end ensemble training on synthetic data.
-No database needed.
+16 tests, no database needed. They cover:
+- **Leakage:** rewriting later results can't change earlier features.
+- **Train/serve parity:** features built for an upcoming fixture match the
+  training features for the same match.
+- **Feature correctness:** rest days, head-to-head from the home side's view,
+  Elo direction.
+- **Metrics:** log loss, Brier score and ECE checked against scikit-learn.
+- **Calibration and blending:** calibrators fix miscalibration out of sample,
+  and blend weights favour the informative model.
+- **End to end:** ensemble training on synthetic data.
 
-### Manual refresh
+## Manual refresh
 
 | Action | Endpoint |
 |---|---|
 | Scrape fixtures + retrain (the UI's main button) | `POST /api/refresh/full` |
 | Scrape fixtures only | `POST /api/refresh/scrape` `{"include_stats": false}` |
 | Scrape + backfill shots/corners/cards/xG | `POST /api/refresh/scrape` `{"include_stats": true}` |
-| Retrain only (uses whatever's already in Postgres) | `POST /api/refresh/retrain` |
+| Retrain only (uses whatever's already in Postgres) | `POST /api/refresh/retrain` `{"leagues": [...]}` (omit for all) |
 
-All of these run as a background job (single-flight — only one at a time);
-poll `GET /api/refresh/status/{job_id}` for progress. A full retrain across
-all 6 leagues takes roughly 20 minutes; a single league is about 3 minutes
-(ensemble training plus Monte Carlo simulation over every upcoming fixture). Stats backfill costs one API request per match and is
-budget-limited on the free plan (100/day), so it's kept separate from a
-routine refresh — run it on its own and re-run daily until it reports
-nothing left to fetch.
+Jobs run one at a time in the background. Run the stats backfill on its own
+and repeat it daily until nothing is left to fetch, because of the 100
+requests/day free-plan limit.
+
+## Recommended next steps: more stable numbers
+
+Each league trains on only 1–2k matches, so the calibration split has
+roughly 150–350 matches, and the test split about the same. That is enough
+to fit the models, but it leaves the blend weights, calibrators and
+reported skill noticeably noisy. In rough order of expected impact:
+
+1. **Fix 1X2 calibration (quick win).** One-vs-rest Platt scaling plus
+   renormalisation fits six parameters on ~150–350 matches, and on the
+   test split it makes 1X2 *worse* in 4 of 6 leagues (see
+   [Latest evaluation](#latest-evaluation)). Replace it with
+   single-parameter multinomial temperature scaling. Also keep a
+   calibrator only if it improves log loss on the calibration split, and
+   otherwise use identity (the raw blend). *Where:* `MulticlassCalibrator`
+   in [`calibration.py`](backend/app/ml/calibration.py), and the
+   calibrator fit in `train_ensemble` in
+   [`ensemble.py`](backend/app/ml/ensemble.py).
+2. **Pool training across leagues.** Train one Model B, and fit one set of
+   calibrators, on all six leagues (about 11.8k matches), with league and
+   tier as categorical features. That's about 6× the data behind every
+   fitted parameter, and the classifiers can still learn league-specific
+   effects. Keep Model A per league, since its goal rates are genuinely
+   league-specific. *Where:* `train_ensemble` in
+   [`ensemble.py`](backend/app/ml/ensemble.py) becomes a cross-league
+   function, and `retrain_leagues` in
+   [`model_service.py`](backend/app/services/model_service.py) calls it once
+   instead of once per league.
+3. **Shrink per-league blend weights toward a pooled weight.** Use
+   `w_league = (n·ŵ_league + k·ŵ_pooled) / (n + k)` with `k ≈ 300`, so a
+   league with little data (Scottish Premiership) leans on the pooled
+   estimate instead of swinging to 0.10 or 1.00 on ~350 matches. *Where:*
+   `fit_blend_weight` in [`calibration.py`](backend/app/ml/calibration.py).
+4. **Show uncertainty on the skill numbers.** Bootstrap the test matches
+   (about 1,000 resamples) and store an interval next to each Brier skill,
+   so the tag reads e.g. "+8.0% ± 5%". Then a small-sample league looks
+   uncertain rather than impressive. *Where:* `evaluate` in `calibration.py`,
+   `CalibrationTag.tsx`.
+5. **Walk-forward evaluation instead of one split.** Evaluate on several
+   consecutive windows (e.g. 4 × 10%), report the mean and spread, and fit
+   calibrators on the pooled out-of-fold predictions. That gives more
+   calibration data and an honest picture of how skill varies over time.
+6. **Finish the xG backfill for the lower leagues.** League One, League Two
+   and Scottish Premiership have only 15–20% xG coverage, versus 70–75% for
+   the top three. The stats backfill fills it in 100 matches a day.
+
+**How to tell it worked:** run the walk-forward evaluation (step 5) before
+and after each change. It should show a smaller spread in the skill
+numbers, and more stable blend weights between retrains. Also watch that
+mean Brier skill doesn't drop.
 
 ## Notes
 
-- `tier="rich"` (Premier League/La Liga/EFL Championship) uses xG + shots
-  features when present; other leagues fall back to goals + Elo only.
-- The model file's `if __name__ == "__main__"` block still runs standalone
-  (`python -m app.ml.football_goal_range_model` from `backend/`) — trains on
-  synthetic data if no `matches.csv` is found, or the real seed CSV
-  otherwise. Useful for quick experimentation without the API/DB running.
-- `downloaded_files/api_football_cache/` caches every raw API response on
-  disk (shared with the archived CLI scripts' original cache) — a
-  re-scrape of already-fetched league-seasons costs no API budget.
-- No Alembic in this project — a schema change to an *existing* table
-  (like adding the 1X2/O-U/BTTS columns) needs its own small idempotent
-  script (`backend/scripts/migrate_add_markets.py` is the pattern to
-  follow for the next one), since `init_db.py`'s `create_all()` only
-  creates tables that don't exist yet, never new columns on one that does.
+- Running
+  [`football_goal_range_model.py`](backend/app/ml/football_goal_range_model.py)
+  directly (`python -m app.ml.football_goal_range_model` from `backend/`)
+  trains Model A on the root `matches.csv` seed data and prints a holdout
+  calibration check per league. Useful for experimenting without the API or
+  database running.
+- There's no Alembic. Adding a column to an existing table needs a small
+  idempotent script (`backend/scripts/migrate_add_*.py` shows the pattern).
+  `init_db.py`'s `create_all()` only creates missing tables, never new
+  columns on existing ones.
+- Model files live in `backend/app/ml/model_store/` (gitignored). Model A is
+  saved as `{league}.joblib`, and the ensemble (Model B, weights,
+  calibrators, metrics) as `{league}_ensemble.joblib`. Both reload at
+  startup, so a restart never forces a retrain.
