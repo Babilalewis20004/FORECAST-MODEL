@@ -6,10 +6,11 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.orm_models import Match, ModelRun, Prediction, UpcomingFixture
 from app.schemas import FixtureDetailOut, FixtureOut, MatchOut, PredictionOut
-from app.services.model_service import ModelNotTrainedError, predict_single
+from app.services.model_service import ModelNotTrainedError, model_group, predict_single
 
 
 def league_metrics(db: Session) -> dict[str, dict | None]:
+    """Test-split metrics keyed by model group -- look up with model_group(league)."""
     return {r.league: r.metrics for r in db.query(ModelRun).all()}
 
 router = APIRouter(prefix="/api", tags=["fixtures"])
@@ -60,7 +61,7 @@ def list_upcoming(
                 home_team=f.home_team,
                 away_team=f.away_team,
                 status=f.status,
-                prediction=PredictionOut.from_orm_row(pred, metrics.get(f.league)) if pred else None,
+                prediction=PredictionOut.from_orm_row(pred, metrics.get(model_group(f.league))) if pred else None,
             )
         )
     return out
@@ -89,7 +90,7 @@ def get_fixture(fixture_id: int, full_distribution: bool = False, db: Session = 
         home_team=fx.home_team,
         away_team=fx.away_team,
         status=fx.status,
-        prediction=PredictionOut.from_orm_row(pred, league_metrics(db).get(fx.league)) if pred else None,
+        prediction=PredictionOut.from_orm_row(pred, league_metrics(db).get(model_group(fx.league))) if pred else None,
         goal_distribution=goal_distribution,
     )
 

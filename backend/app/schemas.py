@@ -18,6 +18,7 @@ FIELD_TO_LABEL = {field: label for label, field in LABEL_TO_FIELD.items()}
 class LeagueOut(BaseModel):
     league: str
     tier: str
+    model_group: str
     last_trained_at: datetime | None = None
     n_matches: int | None = None
 

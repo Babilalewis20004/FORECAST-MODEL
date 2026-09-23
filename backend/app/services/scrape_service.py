@@ -28,10 +28,36 @@ LEAGUES: dict[str, int] = {
     "League One": 41,
     "League Two": 42,
     "Scottish Premiership": 179,
+    "UEFA Nations League": 5,
+    "International Friendlies": 10,
+    "CONCACAF Nations League": 536,
+    "Gulf Cup of Nations": 25,
+    "UEFA U21 Championship": 38,
+    "UEFA U21 Championship - Qualification": 850,
+    "Africa Cup of Nations - Qualification": 36,
+    "World Cup": 1,
+    "Africa Cup of Nations": 6,
+    "Copa America": 9,
 }
 
 SEASONS = [2022, 2023, 2024, 2025, 2026]
+# International competitions don't run on a yearly club calendar: API-Football
+# only has seasons for the editions that exist (e.g. AFCON 2027 qualifying is
+# season 2027). Listing them avoids wasted requests on missing years.
+LEAGUE_SEASONS: dict[str, list[int]] = {
+    "UEFA Nations League": [2022, 2024, 2026],
+    "CONCACAF Nations League": [2022, 2023, 2024, 2025],
+    "Gulf Cup of Nations": [2023, 2024, 2026],
+    "UEFA U21 Championship": [2023, 2025],
+    "UEFA U21 Championship - Qualification": [2023, 2025, 2027],
+    "Africa Cup of Nations - Qualification": [2023, 2025, 2027],
+    "World Cup": [2026],
+    "Africa Cup of Nations": [2025],  # the 2025 edition, played Dec 2025 - Jan 2026
+    "Copa America": [2024],  # latest edition; the next is 2028
+}
 FINISHED_STATUSES = {"FT", "AET", "PEN"}
+# Statuses that will never change again (cancelled, abandoned, awarded).
+SETTLED_STATUSES = FINISHED_STATUSES | {"CANC", "ABD", "AWD", "WO"}
 STAT_MAP = {
     "Total Shots": "shots",
     "Shots on Goal": "shots_on_target",
@@ -88,13 +114,31 @@ def _get(session: requests.Session, budget: Budget, path: str, cache_file: Path 
     return data
 
 
+def _season_complete(cache_file: Path) -> bool:
+    """A cached season is final only once none of its fixtures can still
+    change -- otherwise upcoming fixtures and new results would never be
+    picked up after the first scrape."""
+    if not cache_file.exists():
+        return False
+    data = json.loads(cache_file.read_text(encoding="utf-8"))
+    return all(item["fixture"]["status"]["short"] in SETTLED_STATUSES for item in data["response"])
+
+
 def _fetch_league_season(session: requests.Session, budget: Budget, league_name: str, league_id: int, season: int) -> list[dict]:
     cache_file = CACHE_DIR / f"fixtures_{league_id}_{season}.json"
+    if not _season_complete(cache_file):
+        cache_file.unlink(missing_ok=True)
     data = _get(session, budget, "fixtures", cache_file, league=league_id, season=season)
 
     rows = []
     for item in data["response"]:
         fx, teams, goals = item["fixture"], item["teams"], item["goals"]
+        # Every market settles on 90 minutes, but "goals" includes extra time
+        # -- knockout ties (Nations League finals, Gulf Cup, U21) use the
+        # regular-time score instead.
+        fulltime = (item.get("score") or {}).get("fulltime") or {}
+        if fx["status"]["short"] in ("AET", "PEN") and fulltime.get("home") is not None:
+            goals = fulltime
         rows.append(
             {
                 "fixture_id": fx["id"],
@@ -170,7 +214,7 @@ def scrape_fixtures(leagues: list[str] | None, job=None) -> dict:
     try:
         for league_name, league_id in targets.items():
             n_finished = n_upcoming = 0
-            for season in SEASONS:
+            for season in LEAGUE_SEASONS.get(league_name, SEASONS):
                 if job is not None:
                     job.detail = f"fetching {league_name} {season}-{season + 1}..."
                 try:

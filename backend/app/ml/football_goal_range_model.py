@@ -62,6 +62,29 @@ from scipy.stats import nbinom, norm
 XG_RICH_LEAGUES = {"Premier League", "La Liga", "EFL Championship"}
 GOALS_ONLY_LEAGUES = {"League One", "League Two", "Scottish Premiership"}
 
+# National-team competitions. Each is far too small to train on alone (the
+# Gulf Cup is ~30 matches over five years), and a national team's form carries
+# across friendlies, Nations League and qualifiers -- so they are pooled into
+# one INTERNATIONAL_GROUP model (goals-only tier: no xG coverage) whose team
+# state spans every competition. Fixtures keep their competition name.
+INTERNATIONAL_GROUP = "International"
+INTERNATIONAL_COMPETITIONS = {
+    "UEFA Nations League",
+    "International Friendlies",
+    "CONCACAF Nations League",
+    "Gulf Cup of Nations",
+    "UEFA U21 Championship",
+    # Not a target market on its own, but without it U21 sides only have
+    # the handful of finals matches played every two years as history.
+    "UEFA U21 Championship - Qualification",
+    "Africa Cup of Nations - Qualification",
+    # Finished tournaments with no upcoming fixtures, kept as history: they
+    # are the most recent competitive matches for most national teams.
+    "World Cup",
+    "Africa Cup of Nations",
+    "Copa America",
+}
+
 ROLLING_WINDOW_RICH = 10       # PL/La Liga/Championship: longer window OK
 ROLLING_WINDOW_LOWER = 6       # lower leagues: shorter window (more squad churn)
 

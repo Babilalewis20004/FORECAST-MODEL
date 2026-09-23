@@ -6,6 +6,9 @@ export const OU_LINES = [1.5, 2.5, 3.5] as const;
 export interface League {
   league: string;
   tier: "rich" | "lower";
+  // The trained model serving this competition: the league itself for
+  // domestic leagues, "International" for every national-team competition.
+  model_group: string;
   last_trained_at: string | null;
   n_matches: number | null;
 }

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.orm_models import ModelRun, Prediction, UpcomingFixture
 from app.schemas import FixtureOut, PredictionOut
+from app.services.model_service import model_group
 
 router = APIRouter(prefix="/api/predict", tags=["predict"])
 
@@ -21,7 +22,7 @@ def get_prediction(fixture_id: int, db: Session = Depends(get_db)) -> FixtureOut
     if pred is None:
         raise HTTPException(status_code=404, detail="No prediction for this fixture yet -- trigger a retrain")
 
-    run = db.query(ModelRun).filter(ModelRun.league == fx.league).one_or_none()
+    run = db.query(ModelRun).filter(ModelRun.league == model_group(fx.league)).one_or_none()
     return FixtureOut(
         fixture_id=fx.fixture_id,
         date=fx.date,

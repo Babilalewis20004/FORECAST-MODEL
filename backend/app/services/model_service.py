@@ -14,6 +14,8 @@ from app.db import SessionLocal
 from app.ml.ensemble import LeagueEnsemble, flat_from_prediction, nest, train_ensemble
 from app.ml.football_goal_range_model import (
     GOALS_ONLY_LEAGUES,
+    INTERNATIONAL_COMPETITIONS,
+    INTERNATIONAL_GROUP,
     XG_RICH_LEAGUES,
     LeagueGoalModel,
     compute_team_state,
@@ -25,7 +27,11 @@ from app.schemas import LABEL_TO_FIELD
 MODEL_STORE = Path(__file__).resolve().parents[1] / "ml" / "model_store"
 MODEL_STORE.mkdir(parents=True, exist_ok=True)
 
-ALL_LEAGUES = sorted(XG_RICH_LEAGUES | GOALS_ONLY_LEAGUES)
+# Competitions fixtures are listed/filtered by, vs. the model groups actually
+# trained: each domestic league is its own group, and every international
+# competition shares INTERNATIONAL_GROUP (see football_goal_range_model).
+ALL_LEAGUES = sorted(XG_RICH_LEAGUES | GOALS_ONLY_LEAGUES) + sorted(INTERNATIONAL_COMPETITIONS)
+ALL_MODEL_GROUPS = sorted(XG_RICH_LEAGUES | GOALS_ONLY_LEAGUES) + [INTERNATIONAL_GROUP]
 
 _model_cache: dict[str, LeagueGoalModel] = {}
 _ensemble_cache: dict[str, LeagueEnsemble] = {}
@@ -43,6 +49,15 @@ def league_tier(league: str) -> str:
     return "rich" if league in XG_RICH_LEAGUES else "lower"
 
 
+def model_group(league: str) -> str:
+    """The trained model (and model_runs row) that serves a competition."""
+    return INTERNATIONAL_GROUP if league in INTERNATIONAL_COMPETITIONS else league
+
+
+def group_competitions(group: str) -> list[str]:
+    return sorted(INTERNATIONAL_COMPETITIONS) if group == INTERNATIONAL_GROUP else [group]
+
+
 def _model_path(league: str) -> Path:
     return MODEL_STORE / f"{league_slug(league)}.joblib"
 
@@ -57,7 +72,7 @@ def load_cached_models() -> None:
     """Called once at startup: populate the in-memory caches from whatever
     .joblib files already exist on disk, so the server never forces a
     retrain just because the process restarted."""
-    for league in ALL_LEAGUES:
+    for league in ALL_MODEL_GROUPS:
         for path, cache in ((_model_path(league), _model_cache), (_ensemble_path(league), _ensemble_cache)):
             if path.exists():
                 try:
@@ -85,8 +100,10 @@ def get_model(league: str) -> LeagueGoalModel:
     raise ModelNotTrainedError(f"No trained model for '{league}' yet -- trigger a retrain first.")
 
 
-def _matches_df(db: Session, league: str) -> pd.DataFrame:
-    rows = db.execute(select(Match).where(Match.league == league)).scalars().all()
+def _matches_df(db: Session, group: str) -> pd.DataFrame:
+    """All finished matches of a model group, pooled across its competitions
+    so a team's rolling form and Elo span every competition it plays in."""
+    rows = db.execute(select(Match).where(Match.league.in_(group_competitions(group)))).scalars().all()
     if not rows:
         return pd.DataFrame()
     df = pd.DataFrame(
@@ -160,7 +177,11 @@ def generate_predictions(db: Session, league: str) -> dict:
     model = get_model(league)
     ensemble = get_ensemble(league)
     history = _matches_df(db, league)
-    upcoming = db.execute(select(UpcomingFixture).where(UpcomingFixture.league == league)).scalars().all()
+    upcoming = (
+        db.execute(select(UpcomingFixture).where(UpcomingFixture.league.in_(group_competitions(league))))
+        .scalars()
+        .all()
+    )
 
     # Team rolling-stat/Elo state depends only on real match history, which
     # is identical for every fixture in this league -- compute it once
@@ -199,7 +220,7 @@ def generate_predictions(db: Session, league: str) -> dict:
         # probabilities, so odds and the existing UI pick them up unchanged.
         values = {
             "fixture_id": fx.fixture_id,
-            "league": league,
+            "league": fx.league,
             "lambda_home": result["lambda_home"],
             "lambda_away": result["lambda_away"],
             **{LABEL_TO_FIELD[label]: p for label, p in final["goal_ranges"].items()},
@@ -222,7 +243,9 @@ def generate_predictions(db: Session, league: str) -> dict:
 def retrain_leagues(leagues: list[str] | None) -> dict:
     """Entry point for the background job -- opens its own DB session since
     it runs outside the request lifecycle (see job_manager)."""
-    targets = leagues or ALL_LEAGUES
+    # Competitions map to their model group; asking for two international
+    # competitions retrains the shared International model once.
+    targets = list(dict.fromkeys(model_group(lg) for lg in leagues)) if leagues else ALL_MODEL_GROUPS
     db = SessionLocal()
     results = []
     try:
@@ -241,7 +264,8 @@ def predict_single(db: Session, fixture_id: int) -> dict | None:
     fx = db.execute(select(UpcomingFixture).where(UpcomingFixture.fixture_id == fixture_id)).scalar_one_or_none()
     if fx is None:
         return None
-    model = get_model(fx.league)
-    history = _matches_df(db, fx.league)
-    team_state = compute_team_state(history, league_tier(fx.league))
+    group = model_group(fx.league)
+    model = get_model(group)
+    history = _matches_df(db, group)
+    team_state = compute_team_state(history, league_tier(group))
     return predict_fixture_fast(model, team_state, fx.home_team, fx.away_team)

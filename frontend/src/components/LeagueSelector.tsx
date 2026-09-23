@@ -20,12 +20,21 @@ export function LeagueSelector({ leagues, value, onChange }: Props) {
         fontSize: 14,
       }}
     >
-      <option value="">All leagues</option>
-      {leagues.map((l) => (
-        <option key={l.league} value={l.league}>
-          {l.league} {l.last_trained_at ? "" : "(untrained)"}
-        </option>
-      ))}
+      <option value="">All competitions</option>
+      {[
+        { label: "Leagues", items: leagues.filter((l) => l.model_group === l.league) },
+        { label: "International", items: leagues.filter((l) => l.model_group !== l.league) },
+      ]
+        .filter((g) => g.items.length > 0)
+        .map((g) => (
+          <optgroup key={g.label} label={g.label}>
+            {g.items.map((l) => (
+              <option key={l.league} value={l.league}>
+                {l.league} {l.last_trained_at ? "" : "(untrained)"}
+              </option>
+            ))}
+          </optgroup>
+        ))}
     </select>
   );
 }
