@@ -1,0 +1,2193 @@
+fixture_id,date,league,home_team,away_team,status
+1545025,2026-05-23,EFL Championship,Hull City,Southampton,CANC
+1564325,2026-09-26,League One,Milton Keynes Dons,Bromley,PST
+1563774,2026-09-26,League Two,Rotherham,Crewe,NS
+1563769,2026-09-26,League Two,Crawley Town,Barnet,NS
+1564319,2026-09-26,League One,Bradford,Barnsley,PST
+1563767,2026-09-26,League Two,Bristol Rovers,Exeter City,NS
+1563770,2026-09-26,League Two,Fleetwood Town,Rochdale,NS
+1563773,2026-09-26,League Two,Port Vale,Northampton,NS
+1563775,2026-09-26,League Two,Shrewsbury,Colchester,NS
+1563776,2026-09-26,League Two,Swindon Town,Accrington ST,NS
+1563771,2026-09-26,League Two,Newport County,Grimsby,NS
+1564329,2026-09-26,League One,Stockport County,Peterborough,NS
+1564320,2026-09-26,League One,Cambridge United,AFC Wimbledon,NS
+1564330,2026-09-26,League One,Wycombe,Reading,NS
+1564327,2026-09-26,League One,Plymouth,Burton Albion,NS
+1563768,2026-09-26,League Two,Cheltenham,Chesterfield,NS
+1563777,2026-09-26,League Two,Tranmere,Walsall,NS
+1564328,2026-09-26,League One,Stevenage,Sheffield Wednesday,PST
+1563778,2026-09-26,League Two,York,Gillingham,NS
+1563772,2026-09-26,League Two,Oldham,Salford City,NS
+1564326,2026-09-26,League One,Notts County,Blackpool,PST
+1564324,2026-09-26,League One,Mansfield Town,Leyton Orient,PST
+1563790,2026-10-03,League Two,Walsall,Crawley Town,NS
+1563788,2026-10-03,League Two,Rochdale,Swindon Town,NS
+1563785,2026-10-03,League Two,Gillingham,Newport County,NS
+1563779,2026-10-03,League Two,Accrington ST,Cheltenham,NS
+1563786,2026-10-03,League Two,Grimsby,Shrewsbury,NS
+1563783,2026-10-03,League Two,Crewe,Bristol Rovers,NS
+1564341,2026-10-03,League One,Sheffield Wednesday,Cambridge United,PST
+1564332,2026-10-03,League One,Barnsley,Milton Keynes Dons,PST
+1564331,2026-10-03,League One,AFC Wimbledon,Stevenage,PST
+1564339,2026-10-03,League One,Peterborough,Notts County,PST
+1564333,2026-10-03,League One,Blackpool,Leicester,PST
+1564337,2026-10-03,League One,Luton,Doncaster,PST
+1564334,2026-10-03,League One,Bromley,Wycombe,PST
+1564340,2026-10-03,League One,Reading,Bradford,NS
+1564342,2026-10-03,League One,Wigan,Mansfield Town,NS
+1563789,2026-10-03,League Two,Salford City,Fleetwood Town,NS
+1563780,2026-10-03,League Two,Barnet,York,NS
+1564335,2026-10-03,League One,Burton Albion,Huddersfield,NS
+1564336,2026-10-03,League One,Leyton Orient,Plymouth,NS
+1563787,2026-10-03,League Two,Northampton,Oldham,NS
+1563784,2026-10-03,League Two,Exeter City,Rotherham,NS
+1563782,2026-10-03,League Two,Colchester,Port Vale,NS
+1563781,2026-10-03,League Two,Chesterfield,Tranmere,NS
+1570408,2026-10-09,La Liga,Malaga,Espanyol,NS
+1563190,2026-10-09,EFL Championship,West Ham,QPR,NS
+1563183,2026-10-10,EFL Championship,Middlesbrough,Wolves,NS
+1570403,2026-10-10,La Liga,Alaves,Atletico Madrid,NS
+1570404,2026-10-10,La Liga,Barcelona,Getafe,NS
+1570411,2026-10-10,La Liga,Real Madrid,Villarreal,NS
+1563802,2026-10-10,League Two,York,Northampton,NS
+1563801,2026-10-10,League Two,Tranmere,Rochdale,NS
+1563792,2026-10-10,League Two,Cheltenham,Salford City,NS
+1563795,2026-10-10,League Two,Newport County,Colchester,NS
+1563793,2026-10-10,League Two,Crawley Town,Chesterfield,NS
+1563799,2026-10-10,League Two,Shrewsbury,Exeter City,NS
+1563797,2026-10-10,League Two,Port Vale,Grimsby,NS
+1563794,2026-10-10,League Two,Fleetwood Town,Walsall,NS
+1563791,2026-10-10,League Two,Bristol Rovers,Barnet,NS
+1563798,2026-10-10,League Two,Rotherham,Gillingham,NS
+1563800,2026-10-10,League Two,Swindon Town,Crewe,NS
+1563796,2026-10-10,League Two,Oldham,Accrington ST,NS
+1556672,2026-10-10,Scottish Premiership,Falkirk,Dundee,NS
+1556671,2026-10-10,Scottish Premiership,Dundee Utd,Hibernian,NS
+1556675,2026-10-10,Scottish Premiership,Rangers,Kilmarnock,NS
+1556673,2026-10-10,Scottish Premiership,Heart Of Midlothian,ST Mirren,NS
+1563189,2026-10-10,EFL Championship,West Brom,Birmingham,NS
+1563187,2026-10-10,EFL Championship,Swansea,Norwich,NS
+1563181,2026-10-10,EFL Championship,Charlton,Bristol City,NS
+1563188,2026-10-10,EFL Championship,Watford,Burnley,NS
+1563184,2026-10-10,EFL Championship,Preston,Millwall,NS
+1563185,2026-10-10,EFL Championship,Sheffield Utd,Lincoln,NS
+1563179,2026-10-10,EFL Championship,Blackburn,Cardiff,NS
+1563180,2026-10-10,EFL Championship,Bolton,Stoke City,NS
+1570410,2026-10-10,La Liga,Rayo Vallecano,Athletic Club,NS
+1563182,2026-10-10,EFL Championship,Derby,Wrexham,NS
+1557417,2026-10-10,Premier League,Arsenal,Leeds,NS
+1564353,2026-10-10,League One,Stockport County,Barnsley,NS
+1564351,2026-10-10,League One,Plymouth,AFC Wimbledon,NS
+1557425,2026-10-10,Premier League,Manchester United,Tottenham,NS
+1564348,2026-10-10,League One,Mansfield Town,Bromley,NS
+1564344,2026-10-10,League One,Cambridge United,Blackpool,NS
+1564352,2026-10-10,League One,Stevenage,Wigan,NS
+1564354,2026-10-10,League One,Wycombe,Luton,NS
+1564345,2026-10-10,League One,Doncaster,Burton Albion,NS
+1564349,2026-10-10,League One,Milton Keynes Dons,Reading,NS
+1564343,2026-10-10,League One,Bradford,Leyton Orient,NS
+1564347,2026-10-10,League One,Leicester,Peterborough,NS
+1557426,2026-10-10,Premier League,Sunderland,Brighton,NS
+1564350,2026-10-10,League One,Notts County,Oxford United,NS
+1557419,2026-10-10,Premier League,Chelsea,Bournemouth,NS
+1557418,2026-10-10,Premier League,Aston Villa,Brentford,NS
+1557423,2026-10-10,Premier League,Ipswich,Fulham,NS
+1564346,2026-10-10,League One,Huddersfield,Sheffield Wednesday,NS
+1557421,2026-10-11,Premier League,Crystal Palace,Nottingham Forest,NS
+1557422,2026-10-11,Premier League,Hull City,Everton,NS
+1557424,2026-10-11,Premier League,Liverpool,Manchester City,NS
+1556674,2026-10-11,Scottish Premiership,Motherwell,Celtic,NS
+1556670,2026-10-11,Scottish Premiership,Aberdeen,ST Johnstone,NS
+1570409,2026-10-11,La Liga,Racing Santander,Valencia,NS
+1563186,2026-10-11,EFL Championship,Southampton,Portsmouth,NS
+1570405,2026-10-11,La Liga,Real Betis,Osasuna,NS
+1570412,2026-10-11,La Liga,Real Sociedad,Deportivo La Coruna,NS
+1570406,2026-10-11,La Liga,Elche,Celta Vigo,NS
+1570407,2026-10-12,La Liga,Levante,Sevilla,NS
+1557420,2026-10-12,Premier League,Coventry,Newcastle,NS
+1563194,2026-10-13,EFL Championship,Cardiff,Watford,NS
+1563195,2026-10-13,EFL Championship,Millwall,Swansea,NS
+1563196,2026-10-13,EFL Championship,Stoke City,Middlesbrough,NS
+1563191,2026-10-13,EFL Championship,Birmingham,Preston,NS
+1563198,2026-10-13,EFL Championship,Wrexham,West Brom,NS
+1563192,2026-10-13,EFL Championship,Bristol City,Blackburn,NS
+1563193,2026-10-13,EFL Championship,Burnley,Charlton,NS
+1563197,2026-10-13,EFL Championship,Wolves,Bolton,NS
+1563202,2026-10-14,EFL Championship,QPR,Derby,NS
+1563201,2026-10-14,EFL Championship,Portsmouth,Sheffield Utd,NS
+1563200,2026-10-14,EFL Championship,Norwich,Southampton,NS
+1563199,2026-10-14,EFL Championship,Lincoln,West Ham,NS
+1564359,2026-10-15,League One,Mansfield Town,Oxford United,NS
+1570415,2026-10-16,La Liga,Deportivo La Coruna,Levante,NS
+1563205,2026-10-16,EFL Championship,Burnley,Wolves,NS
+1563812,2026-10-17,League Two,Shrewsbury,Bristol Rovers,NS
+1557428,2026-10-17,Premier League,Brentford,Liverpool,NS
+1557433,2026-10-17,Premier League,Manchester City,Ipswich,NS
+1557431,2026-10-17,Premier League,Fulham,Hull City,NS
+1557430,2026-10-17,Premier League,Everton,Chelsea,NS
+1556678,2026-10-17,Scottish Premiership,Dundee,Rangers,NS
+1556681,2026-10-17,Scottish Premiership,ST Johnstone,Dundee Utd,NS
+1556676,2026-10-17,Scottish Premiership,Aberdeen,ST Mirren,NS
+1556680,2026-10-17,Scottish Premiership,Kilmarnock,Motherwell,NS
+1556679,2026-10-17,Scottish Premiership,Hibernian,Falkirk,NS
+1564358,2026-10-17,League One,Leyton Orient,Blackpool,NS
+1564364,2026-10-17,League One,Stockport County,Bromley,NS
+1563807,2026-10-17,League Two,Grimsby,Northampton,NS
+1563805,2026-10-17,League Two,Crewe,Rochdale,NS
+1563804,2026-10-17,League Two,Colchester,Exeter City,NS
+1563803,2026-10-17,League Two,Accrington ST,Gillingham,NS
+1563813,2026-10-17,League Two,Swindon Town,Walsall,NS
+1563810,2026-10-17,League Two,Port Vale,Chesterfield,NS
+1563809,2026-10-17,League Two,Oldham,Cheltenham,NS
+1563806,2026-10-17,League Two,Fleetwood Town,Rotherham,NS
+1564366,2026-10-17,League One,Wycombe,Notts County,NS
+1563203,2026-10-17,EFL Championship,Birmingham,QPR,NS
+1564356,2026-10-17,League One,Bradford,Stevenage,NS
+1564360,2026-10-17,League One,Milton Keynes Dons,Luton,NS
+1564361,2026-10-17,League One,Peterborough,Burton Albion,NS
+1564357,2026-10-17,League One,Leicester,Doncaster,NS
+1564365,2026-10-17,League One,Wigan,Reading,NS
+1570416,2026-10-17,La Liga,Espanyol,Atletico Madrid,NS
+1570422,2026-10-17,La Liga,Villarreal,Elche,NS
+1570413,2026-10-17,La Liga,Real Betis,Barcelona,NS
+1570421,2026-10-17,La Liga,Valencia,Athletic Club,NS
+1564362,2026-10-17,League One,Plymouth,Huddersfield,NS
+1563811,2026-10-17,League Two,Salford City,Crawley Town,NS
+1563814,2026-10-17,League Two,Tranmere,Barnet,NS
+1563808,2026-10-17,League Two,Newport County,York,NS
+1557434,2026-10-17,Premier League,Newcastle,Aston Villa,NS
+1563211,2026-10-17,EFL Championship,Swansea,West Ham,NS
+1564355,2026-10-17,League One,Barnsley,Cambridge United,NS
+1563212,2026-10-17,EFL Championship,Watford,Charlton,NS
+1563208,2026-10-17,EFL Championship,Millwall,Lincoln,NS
+1563207,2026-10-17,EFL Championship,Middlesbrough,Cardiff,NS
+1563210,2026-10-17,EFL Championship,Southampton,Bolton,NS
+1563214,2026-10-17,EFL Championship,Wrexham,Preston,NS
+1563204,2026-10-17,EFL Championship,Bristol City,Sheffield Utd,NS
+1564363,2026-10-17,League One,Sheffield Wednesday,AFC Wimbledon,NS
+1563213,2026-10-17,EFL Championship,West Brom,Blackburn,NS
+1563206,2026-10-17,EFL Championship,Derby,Stoke City,NS
+1563209,2026-10-17,EFL Championship,Norwich,Portsmouth,NS
+1570414,2026-10-18,La Liga,Celta Vigo,Alaves,NS
+1570418,2026-10-18,La Liga,Malaga,Real Sociedad,NS
+1570420,2026-10-18,La Liga,Real Madrid,Sevilla,NS
+1556677,2026-10-18,Scottish Premiership,Celtic,Heart Of Midlothian,NS
+1557435,2026-10-18,Premier League,Nottingham Forest,Arsenal,NS
+1557427,2026-10-18,Premier League,Bournemouth,Sunderland,NS
+1557432,2026-10-18,Premier League,Leeds,Manchester United,NS
+1557429,2026-10-18,Premier League,Brighton,Crystal Palace,NS
+1570419,2026-10-18,La Liga,Osasuna,Racing Santander,NS
+1570417,2026-10-19,La Liga,Getafe,Rayo Vallecano,NS
+1557436,2026-10-19,Premier League,Tottenham,Coventry,NS
+1563821,2026-10-20,League Two,Gillingham,Port Vale,NS
+1563826,2026-10-20,League Two,York,Accrington ST,NS
+1563817,2026-10-20,League Two,Cheltenham,Fleetwood Town,NS
+1563815,2026-10-20,League Two,Barnet,Swindon Town,NS
+1563820,2026-10-20,League Two,Exeter City,Crewe,NS
+1563819,2026-10-20,League Two,Crawley Town,Shrewsbury,NS
+1563818,2026-10-20,League Two,Chesterfield,Colchester,NS
+1563825,2026-10-20,League Two,Walsall,Oldham,NS
+1563823,2026-10-20,League Two,Rochdale,Grimsby,NS
+1563822,2026-10-20,League Two,Northampton,Tranmere,NS
+1563824,2026-10-20,League Two,Rotherham,Newport County,NS
+1563150,2026-10-20,EFL Championship,Wolves,Portsmouth,NS
+1564373,2026-10-20,League One,Huddersfield,Peterborough,NS
+1564370,2026-10-20,League One,Burton Albion,Bradford,NS
+1564367,2026-10-20,League One,AFC Wimbledon,Mansfield Town,NS
+1563816,2026-10-20,League Two,Bristol Rovers,Salford City,NS
+1564372,2026-10-20,League One,Doncaster,Stockport County,NS
+1564368,2026-10-20,League One,Blackpool,Milton Keynes Dons,NS
+1564374,2026-10-20,League One,Luton,Barnsley,NS
+1564376,2026-10-20,League One,Oxford United,Wigan,NS
+1564377,2026-10-20,League One,Stevenage,Plymouth,NS
+1564369,2026-10-20,League One,Bromley,Leicester,NS
+1564371,2026-10-20,League One,Cambridge United,Wycombe,NS
+1564375,2026-10-20,League One,Notts County,Sheffield Wednesday,NS
+1564378,2026-10-21,League One,Reading,Leyton Orient,NS
+1570389,2026-10-21,La Liga,Levante,Athletic Club,NS
+1557443,2026-10-23,Premier League,Ipswich,Nottingham Forest,NS
+1563216,2026-10-23,EFL Championship,Bolton,Middlesbrough,NS
+1564390,2026-10-24,League One,Stevenage,Milton Keynes Dons,NS
+1563226,2026-10-24,EFL Championship,Wolves,Watford,NS
+1563217,2026-10-24,EFL Championship,Cardiff,Birmingham,NS
+1563225,2026-10-24,EFL Championship,West Ham,Southampton,NS
+1563221,2026-10-24,EFL Championship,Preston,West Brom,NS
+1563215,2026-10-24,EFL Championship,Blackburn,Wrexham,NS
+1563222,2026-10-24,EFL Championship,QPR,Swansea,NS
+1563224,2026-10-24,EFL Championship,Stoke City,Bristol City,NS
+1563219,2026-10-24,EFL Championship,Lincoln,Burnley,NS
+1564381,2026-10-24,League One,Bromley,Peterborough,NS
+1564387,2026-10-24,League One,Notts County,Stockport County,NS
+1564383,2026-10-24,League One,Cambridge United,Plymouth,NS
+1564379,2026-10-24,League One,AFC Wimbledon,Wycombe,NS
+1564384,2026-10-24,League One,Doncaster,Sheffield Wednesday,NS
+1564380,2026-10-24,League One,Blackpool,Mansfield Town,NS
+1563220,2026-10-24,EFL Championship,Portsmouth,Millwall,NS
+1564388,2026-10-24,League One,Oxford United,Bradford,NS
+1556683,2026-10-24,Scottish Premiership,Falkirk,Kilmarnock,NS
+1563838,2026-10-24,League Two,York,Port Vale,NS
+1556682,2026-10-24,Scottish Premiership,Dundee Utd,Aberdeen,NS
+1556686,2026-10-24,Scottish Premiership,Rangers,ST Johnstone,NS
+1556687,2026-10-24,Scottish Premiership,ST Mirren,Dundee,NS
+1564385,2026-10-24,League One,Huddersfield,Wigan,NS
+1563223,2026-10-24,EFL Championship,Sheffield Utd,Derby,NS
+1564386,2026-10-24,League One,Luton,Leicester,NS
+1563828,2026-10-24,League Two,Bristol Rovers,Swindon Town,NS
+1563218,2026-10-24,EFL Championship,Charlton,Norwich,NS
+1563834,2026-10-24,League Two,Northampton,Colchester,NS
+1563836,2026-10-24,League Two,Rotherham,Shrewsbury,NS
+1563835,2026-10-24,League Two,Rochdale,Accrington ST,NS
+1563830,2026-10-24,League Two,Chesterfield,Crewe,NS
+1563833,2026-10-24,League Two,Gillingham,Grimsby,NS
+1563831,2026-10-24,League Two,Crawley Town,Tranmere,NS
+1563832,2026-10-24,League Two,Exeter City,Fleetwood Town,NS
+1563827,2026-10-24,League Two,Barnet,Oldham,NS
+1563829,2026-10-24,League Two,Cheltenham,Newport County,NS
+1564382,2026-10-24,League One,Burton Albion,Leyton Orient,NS
+1564389,2026-10-24,League One,Reading,Barnsley,NS
+1557438,2026-10-24,Premier League,Aston Villa,Manchester City,NS
+1557437,2026-10-24,Premier League,Arsenal,Everton,NS
+1557440,2026-10-24,Premier League,Coventry,Fulham,NS
+1557439,2026-10-24,Premier League,Chelsea,Tottenham,NS
+1570424,2026-10-25,La Liga,Athletic Club,Getafe,NS
+1570428,2026-10-25,La Liga,Racing Santander,Espanyol,NS
+1570429,2026-10-25,La Liga,Rayo Vallecano,Elche,NS
+1570430,2026-10-25,La Liga,Real Sociedad,Levante,NS
+1570423,2026-10-25,La Liga,Alaves,Malaga,NS
+1570427,2026-10-25,La Liga,Celta Vigo,Real Betis,NS
+1570431,2026-10-25,La Liga,Sevilla,Osasuna,NS
+1570432,2026-10-25,La Liga,Valencia,Villarreal,NS
+1570425,2026-10-25,La Liga,Atletico Madrid,Deportivo La Coruna,NS
+1570426,2026-10-25,La Liga,Barcelona,Real Madrid,NS
+1557446,2026-10-25,Premier League,Sunderland,Leeds,NS
+1557442,2026-10-25,Premier League,Hull City,Brentford,NS
+1557441,2026-10-25,Premier League,Crystal Palace,Newcastle,NS
+1557444,2026-10-25,Premier League,Liverpool,Brighton,NS
+1557445,2026-10-25,Premier League,Manchester United,Bournemouth,NS
+1556684,2026-10-25,Scottish Premiership,Hibernian,Celtic,NS
+1556685,2026-10-25,Scottish Premiership,Motherwell,Heart Of Midlothian,NS
+1563837,2026-10-26,League Two,Walsall,Salford City,NS
+1564338,2026-10-27,League One,Oxford United,Stockport County,NS
+1564323,2026-10-27,League One,Leicester,Wigan,NS
+1556692,2026-10-28,Scottish Premiership,ST Johnstone,Motherwell,NS
+1556689,2026-10-28,Scottish Premiership,Celtic,Dundee Utd,NS
+1556691,2026-10-28,Scottish Premiership,Heart Of Midlothian,Rangers,NS
+1556690,2026-10-28,Scottish Premiership,Dundee,Kilmarnock,NS
+1556688,2026-10-28,Scottish Premiership,Aberdeen,Falkirk,NS
+1556693,2026-10-28,Scottish Premiership,ST Mirren,Hibernian,NS
+1563233,2026-10-30,EFL Championship,Sheffield Utd,Wrexham,NS
+1563844,2026-10-30,League Two,Newport County,Chesterfield,NS
+1563230,2026-10-31,EFL Championship,Middlesbrough,Charlton,NS
+1556694,2026-10-31,Scottish Premiership,Dundee Utd,Heart Of Midlothian,NS
+1556699,2026-10-31,Scottish Premiership,Rangers,Aberdeen,NS
+1556698,2026-10-31,Scottish Premiership,Motherwell,ST Mirren,NS
+1556697,2026-10-31,Scottish Premiership,Kilmarnock,ST Johnstone,NS
+1564400,2026-10-31,League One,Stockport County,AFC Wimbledon,NS
+1564395,2026-10-31,League One,Mansfield Town,Notts County,NS
+1564402,2026-10-31,League One,Wycombe,Burton Albion,NS
+1564397,2026-10-31,League One,Peterborough,Luton,NS
+1564396,2026-10-31,League One,Milton Keynes Dons,Doncaster,NS
+1564391,2026-10-31,League One,Barnsley,Oxford United,NS
+1564401,2026-10-31,League One,Wigan,Bromley,NS
+1564393,2026-10-31,League One,Leicester,Stevenage,NS
+1564394,2026-10-31,League One,Leyton Orient,Cambridge United,NS
+1564398,2026-10-31,League One,Plymouth,Reading,NS
+1564392,2026-10-31,League One,Bradford,Huddersfield,NS
+1556695,2026-10-31,Scottish Premiership,Falkirk,Celtic,NS
+1563238,2026-10-31,EFL Championship,Wolves,Cardiff,NS
+1563234,2026-10-31,EFL Championship,Southampton,QPR,NS
+1563228,2026-10-31,EFL Championship,Burnley,Portsmouth,NS
+1563232,2026-10-31,EFL Championship,Norwich,Watford,NS
+1563231,2026-10-31,EFL Championship,Millwall,Derby,NS
+1563846,2026-10-31,League Two,Port Vale,Rochdale,NS
+1563843,2026-10-31,League Two,Grimsby,York,NS
+1563842,2026-10-31,League Two,Fleetwood Town,Bristol Rovers,NS
+1563845,2026-10-31,League Two,Oldham,Crawley Town,NS
+1563848,2026-10-31,League Two,Shrewsbury,Gillingham,NS
+1563227,2026-10-31,EFL Championship,Bolton,Bristol City,NS
+1563849,2026-10-31,League Two,Swindon Town,Rotherham,NS
+1563840,2026-10-31,League Two,Colchester,Walsall,NS
+1563841,2026-10-31,League Two,Crewe,Barnet,NS
+1563850,2026-10-31,League Two,Tranmere,Cheltenham,NS
+1563847,2026-10-31,League Two,Salford City,Exeter City,NS
+1556696,2026-10-31,Scottish Premiership,Hibernian,Dundee,NS
+1563235,2026-10-31,EFL Championship,Stoke City,Preston,NS
+1563237,2026-10-31,EFL Championship,West Ham,West Brom,NS
+1563839,2026-10-31,League Two,Accrington ST,Northampton,NS
+1563229,2026-10-31,EFL Championship,Lincoln,Birmingham,NS
+1563236,2026-10-31,EFL Championship,Swansea,Blackburn,NS
+1557451,2026-10-31,Premier League,Coventry,Sunderland,NS
+1557450,2026-10-31,Premier League,Chelsea,Manchester United,NS
+1557448,2026-10-31,Premier League,Bournemouth,Leeds,NS
+1557454,2026-10-31,Premier League,Manchester City,Brighton,NS
+1557449,2026-10-31,Premier League,Brentford,Nottingham Forest,NS
+1557452,2026-10-31,Premier League,Hull City,Ipswich,NS
+1557447,2026-10-31,Premier League,Aston Villa,Fulham,NS
+1557456,2026-10-31,Premier League,Tottenham,Crystal Palace,NS
+1570440,2026-11-01,La Liga,Racing Santander,Real Madrid,NS
+1570437,2026-11-01,La Liga,Elche,Valencia,NS
+1564399,2026-11-01,League One,Sheffield Wednesday,Blackpool,NS
+1570441,2026-11-01,La Liga,Rayo Vallecano,Celta Vigo,NS
+1570433,2026-11-01,La Liga,Athletic Club,Real Sociedad,NS
+1570436,2026-11-01,La Liga,Deportivo La Coruna,Osasuna,NS
+1570435,2026-11-01,La Liga,Real Betis,Malaga,NS
+1570439,2026-11-01,La Liga,Levante,Atletico Madrid,NS
+1570442,2026-11-01,La Liga,Villarreal,Espanyol,NS
+1570438,2026-11-01,La Liga,Getafe,Sevilla,NS
+1557453,2026-11-01,Premier League,Liverpool,Arsenal,NS
+1570434,2026-11-01,La Liga,Barcelona,Alaves,NS
+1557455,2026-11-02,Premier League,Newcastle,Everton,NS
+1564322,2026-11-03,League One,Huddersfield,Luton,NS
+1563239,2026-11-03,EFL Championship,Birmingham,Millwall,NS
+1563246,2026-11-03,EFL Championship,West Brom,Southampton,NS
+1563244,2026-11-03,EFL Championship,QPR,Burnley,NS
+1563241,2026-11-03,EFL Championship,Derby,Norwich,NS
+1563249,2026-11-03,EFL Championship,Charlton,Bolton,NS
+1563240,2026-11-03,EFL Championship,Blackburn,Stoke City,NS
+1563243,2026-11-03,EFL Championship,Preston,Sheffield Utd,NS
+1563245,2026-11-03,EFL Championship,Watford,Lincoln,NS
+1563242,2026-11-03,EFL Championship,Portsmouth,Swansea,NS
+1564266,2026-11-04,League One,Oxford United,Reading,NS
+1563247,2026-11-04,EFL Championship,Bristol City,Wolves,NS
+1563250,2026-11-04,EFL Championship,Wrexham,Middlesbrough,NS
+1563248,2026-11-04,EFL Championship,Cardiff,West Ham,NS
+1563256,2026-11-06,EFL Championship,Derby,Bolton,NS
+1563257,2026-11-07,EFL Championship,Portsmouth,Stoke City,NS
+1563253,2026-11-07,EFL Championship,Bristol City,Norwich,NS
+1563262,2026-11-07,EFL Championship,Wrexham,Wolves,NS
+1557462,2026-11-07,Premier League,Ipswich,Bournemouth,NS
+1563260,2026-11-07,EFL Championship,Watford,Middlesbrough,NS
+1557466,2026-11-07,Premier League,Sunderland,Chelsea,NS
+1557464,2026-11-07,Premier League,Manchester United,Aston Villa,NS
+1557458,2026-11-07,Premier League,Brighton,Brentford,NS
+1556704,2026-11-07,Scottish Premiership,ST Mirren,Rangers,NS
+1556700,2026-11-07,Scottish Premiership,Aberdeen,Hibernian,NS
+1556703,2026-11-07,Scottish Premiership,ST Johnstone,Dundee,NS
+1556702,2026-11-07,Scottish Premiership,Dundee Utd,Motherwell,NS
+1563255,2026-11-07,EFL Championship,Charlton,Sheffield Utd,NS
+1563259,2026-11-07,EFL Championship,QPR,Lincoln,NS
+1557459,2026-11-07,Premier League,Crystal Palace,Liverpool,NS
+1563252,2026-11-07,EFL Championship,Blackburn,West Ham,NS
+1557465,2026-11-07,Premier League,Nottingham Forest,Manchester City,NS
+1563254,2026-11-07,EFL Championship,Cardiff,Burnley,NS
+1557460,2026-11-07,Premier League,Everton,Coventry,NS
+1557457,2026-11-07,Premier League,Arsenal,Hull City,NS
+1557461,2026-11-07,Premier League,Fulham,Newcastle,NS
+1557463,2026-11-07,Premier League,Leeds,Tottenham,NS
+1563258,2026-11-07,EFL Championship,Preston,Southampton,NS
+1563261,2026-11-07,EFL Championship,West Brom,Millwall,NS
+1563251,2026-11-07,EFL Championship,Birmingham,Swansea,NS
+1556705,2026-11-08,Scottish Premiership,Heart Of Midlothian,Falkirk,NS
+1556701,2026-11-08,Scottish Premiership,Celtic,Kilmarnock,NS
+1570443,2026-11-08,La Liga,Atletico Madrid,Barcelona,NS
+1570448,2026-11-08,La Liga,Osasuna,Athletic Club,NS
+1570449,2026-11-08,La Liga,Real Sociedad,Rayo Vallecano,NS
+1570444,2026-11-08,La Liga,Celta Vigo,Levante,NS
+1570450,2026-11-08,La Liga,Sevilla,Alaves,NS
+1570447,2026-11-08,La Liga,Malaga,Racing Santander,NS
+1570452,2026-11-08,La Liga,Villarreal,Getafe,NS
+1570451,2026-11-08,La Liga,Valencia,Real Madrid,NS
+1570445,2026-11-08,La Liga,Elche,Real Betis,NS
+1570446,2026-11-08,La Liga,Espanyol,Deportivo La Coruna,NS
+1564412,2026-11-14,League One,Stockport County,Reading,NS
+1564404,2026-11-14,League One,Bromley,Notts County,NS
+1564411,2026-11-14,League One,Stevenage,Mansfield Town,NS
+1564407,2026-11-14,League One,Luton,Cambridge United,NS
+1563855,2026-11-14,League Two,Fleetwood Town,Tranmere,NS
+1563859,2026-11-14,League Two,Salford City,Northampton,NS
+1563853,2026-11-14,League Two,Crewe,Newport County,NS
+1563852,2026-11-14,League Two,Colchester,Gillingham,NS
+1563861,2026-11-14,League Two,Swindon Town,Grimsby,NS
+1563860,2026-11-14,League Two,Shrewsbury,Oldham,NS
+1563856,2026-11-14,League Two,Port Vale,Accrington ST,NS
+1563862,2026-11-14,League Two,Walsall,Barnet,NS
+1563857,2026-11-14,League Two,Rochdale,York,NS
+1563851,2026-11-14,League Two,Bristol Rovers,Chesterfield,NS
+1563858,2026-11-14,League Two,Rotherham,Crawley Town,NS
+1564414,2026-11-14,League One,Wycombe,Huddersfield,NS
+1563854,2026-11-14,League Two,Exeter City,Cheltenham,NS
+1564409,2026-11-14,League One,Peterborough,Oxford United,NS
+1564408,2026-11-14,League One,Milton Keynes Dons,Burton Albion,NS
+1564403,2026-11-14,League One,AFC Wimbledon,Blackpool,NS
+1564410,2026-11-14,League One,Sheffield Wednesday,Plymouth,NS
+1564413,2026-11-14,League One,Wigan,Barnsley,NS
+1564406,2026-11-14,League One,Leicester,Bradford,NS
+1564405,2026-11-14,League One,Doncaster,Leyton Orient,NS
+1564415,2026-11-20,League One,Barnsley,Sheffield Wednesday,NS
+1563874,2026-11-21,League Two,York,Walsall,NS
+1557470,2026-11-21,Premier League,Chelsea,Leeds,NS
+1557476,2026-11-21,Premier League,Tottenham,Ipswich,NS
+1563265,2026-11-21,EFL Championship,Lincoln,Wrexham,NS
+1563272,2026-11-21,EFL Championship,Swansea,West Brom,NS
+1563263,2026-11-21,EFL Championship,Bolton,Portsmouth,NS
+1563873,2026-11-21,League Two,Tranmere,Colchester,NS
+1563269,2026-11-21,EFL Championship,Sheffield Utd,Watford,NS
+1563273,2026-11-21,EFL Championship,West Ham,Preston,NS
+1563274,2026-11-21,EFL Championship,Wolves,Charlton,NS
+1563268,2026-11-21,EFL Championship,Norwich,Cardiff,NS
+1563271,2026-11-21,EFL Championship,Stoke City,Birmingham,NS
+1563865,2026-11-21,League Two,Cheltenham,Bristol Rovers,NS
+1563867,2026-11-21,League Two,Crawley Town,Fleetwood Town,NS
+1563869,2026-11-21,League Two,Grimsby,Rotherham,NS
+1563267,2026-11-21,EFL Championship,Millwall,QPR,NS
+1563863,2026-11-21,League Two,Accrington ST,Salford City,NS
+1563872,2026-11-21,League Two,Oldham,Exeter City,NS
+1563866,2026-11-21,League Two,Chesterfield,Shrewsbury,NS
+1563871,2026-11-21,League Two,Northampton,Rochdale,NS
+1563870,2026-11-21,League Two,Newport County,Swindon Town,NS
+1563868,2026-11-21,League Two,Gillingham,Crewe,NS
+1556708,2026-11-21,Scottish Premiership,Falkirk,ST Johnstone,NS
+1556711,2026-11-21,Scottish Premiership,Motherwell,Rangers,NS
+1556707,2026-11-21,Scottish Premiership,Dundee,Heart Of Midlothian,NS
+1556710,2026-11-21,Scottish Premiership,Kilmarnock,Aberdeen,NS
+1556709,2026-11-21,Scottish Premiership,Hibernian,Dundee Utd,NS
+1556706,2026-11-21,Scottish Premiership,Celtic,ST Mirren,NS
+1563864,2026-11-21,League Two,Barnet,Port Vale,NS
+1563270,2026-11-21,EFL Championship,Southampton,Derby,NS
+1563266,2026-11-21,EFL Championship,Middlesbrough,Bristol City,NS
+1557471,2026-11-21,Premier League,Coventry,Crystal Palace,NS
+1564418,2026-11-21,League One,Burton Albion,Luton,NS
+1564420,2026-11-21,League One,Huddersfield,Leicester,NS
+1564425,2026-11-21,League One,Plymouth,Peterborough,NS
+1564419,2026-11-21,League One,Cambridge United,Stockport County,NS
+1564421,2026-11-21,League One,Leyton Orient,AFC Wimbledon,NS
+1564422,2026-11-21,League One,Mansfield Town,Milton Keynes Dons,NS
+1564423,2026-11-21,League One,Notts County,Stevenage,NS
+1557473,2026-11-21,Premier League,Liverpool,Manchester United,NS
+1557468,2026-11-21,Premier League,Bournemouth,Nottingham Forest,NS
+1557475,2026-11-21,Premier League,Newcastle,Arsenal,NS
+1564416,2026-11-21,League One,Blackpool,Wigan,NS
+1564426,2026-11-21,League One,Reading,Bromley,NS
+1564424,2026-11-21,League One,Oxford United,Wycombe,NS
+1564417,2026-11-21,League One,Bradford,Doncaster,NS
+1557467,2026-11-21,Premier League,Aston Villa,Sunderland,NS
+1557472,2026-11-21,Premier League,Hull City,Brighton,NS
+1557469,2026-11-21,Premier League,Brentford,Everton,NS
+1557474,2026-11-21,Premier League,Manchester City,Fulham,NS
+1570460,2026-11-22,La Liga,Rayo Vallecano,Valencia,NS
+1570455,2026-11-22,La Liga,Barcelona,Villarreal,NS
+1570454,2026-11-22,La Liga,Athletic Club,Espanyol,NS
+1570462,2026-11-22,La Liga,Sevilla,Real Betis,NS
+1570457,2026-11-22,La Liga,Levante,Elche,NS
+1570461,2026-11-22,La Liga,Real Madrid,Celta Vigo,NS
+1563264,2026-11-22,EFL Championship,Burnley,Blackburn,NS
+1570453,2026-11-22,La Liga,Alaves,Deportivo La Coruna,NS
+1570456,2026-11-22,La Liga,Getafe,Atletico Madrid,NS
+1570458,2026-11-22,La Liga,Osasuna,Malaga,NS
+1570459,2026-11-22,La Liga,Racing Santander,Real Sociedad,NS
+1563279,2026-11-24,EFL Championship,Norwich,QPR,NS
+1563276,2026-11-24,EFL Championship,Cardiff,Preston,NS
+1563275,2026-11-24,EFL Championship,Bristol City,Wrexham,NS
+1563281,2026-11-24,EFL Championship,Sheffield Utd,Southampton,NS
+1563282,2026-11-24,EFL Championship,Wolves,Derby,NS
+1563280,2026-11-24,EFL Championship,Portsmouth,West Ham,NS
+1563277,2026-11-24,EFL Championship,Charlton,Lincoln,NS
+1563278,2026-11-24,EFL Championship,Middlesbrough,Swansea,NS
+1563285,2026-11-25,EFL Championship,Stoke City,Millwall,NS
+1563284,2026-11-25,EFL Championship,Burnley,Birmingham,NS
+1563286,2026-11-25,EFL Championship,Watford,Blackburn,NS
+1563283,2026-11-25,EFL Championship,Bolton,West Brom,NS
+1564429,2026-11-26,League One,Doncaster,Huddersfield,NS
+1563294,2026-11-27,EFL Championship,Southampton,Middlesbrough,NS
+1563288,2026-11-28,EFL Championship,Blackburn,Charlton,NS
+1556712,2026-11-28,Scottish Premiership,Aberdeen,Dundee,NS
+1556715,2026-11-28,Scottish Premiership,Motherwell,Hibernian,NS
+1556716,2026-11-28,Scottish Premiership,Rangers,Falkirk,NS
+1556713,2026-11-28,Scottish Premiership,Dundee Utd,ST Johnstone,NS
+1563292,2026-11-28,EFL Championship,Preston,Norwich,NS
+1556717,2026-11-28,Scottish Premiership,ST Mirren,Kilmarnock,NS
+1563293,2026-11-28,EFL Championship,QPR,Sheffield Utd,NS
+1564434,2026-11-28,League One,Sheffield Wednesday,Reading,NS
+1563880,2026-11-28,League Two,Port Vale,Newport County,NS
+1557484,2026-11-28,Premier League,Manchester United,Brentford,NS
+1563881,2026-11-28,League Two,Rochdale,Barnet,NS
+1563886,2026-11-28,League Two,Walsall,Northampton,NS
+1564435,2026-11-28,League One,Stevenage,Blackpool,NS
+1563884,2026-11-28,League Two,Shrewsbury,Cheltenham,NS
+1563885,2026-11-28,League Two,Swindon Town,Chesterfield,NS
+1563876,2026-11-28,League Two,Colchester,York,NS
+1563877,2026-11-28,League Two,Crewe,Grimsby,NS
+1563883,2026-11-28,League Two,Salford City,Gillingham,NS
+1564432,2026-11-28,League One,Milton Keynes Dons,Notts County,NS
+1564433,2026-11-28,League One,Peterborough,Cambridge United,NS
+1564430,2026-11-28,League One,Leicester,Mansfield Town,NS
+1564437,2026-11-28,League One,Wigan,Plymouth,NS
+1564427,2026-11-28,League One,AFC Wimbledon,Barnsley,NS
+1564438,2026-11-28,League One,Wycombe,Bradford,NS
+1564436,2026-11-28,League One,Stockport County,Leyton Orient,NS
+1564428,2026-11-28,League One,Bromley,Burton Albion,NS
+1563298,2026-11-28,EFL Championship,Wrexham,Portsmouth,NS
+1557481,2026-11-28,Premier League,Fulham,Bournemouth,NS
+1564431,2026-11-28,League One,Luton,Oxford United,NS
+1563296,2026-11-28,EFL Championship,West Brom,Bristol City,NS
+1557480,2026-11-28,Premier League,Everton,Liverpool,NS
+1557478,2026-11-28,Premier League,Brighton,Newcastle,NS
+1563289,2026-11-28,EFL Championship,Derby,Watford,NS
+1557479,2026-11-28,Premier League,Crystal Palace,Hull City,NS
+1557482,2026-11-28,Premier League,Ipswich,Aston Villa,NS
+1557483,2026-11-28,Premier League,Leeds,Coventry,NS
+1557485,2026-11-28,Premier League,Nottingham Forest,Chelsea,NS
+1557477,2026-11-28,Premier League,Arsenal,Manchester City,NS
+1563875,2026-11-28,League Two,Bristol Rovers,Tranmere,NS
+1563878,2026-11-28,League Two,Exeter City,Crawley Town,NS
+1563882,2026-11-28,League Two,Rotherham,Oldham,NS
+1563879,2026-11-28,League Two,Fleetwood Town,Accrington ST,NS
+1563290,2026-11-28,EFL Championship,Lincoln,Wolves,NS
+1563297,2026-11-28,EFL Championship,West Ham,Stoke City,NS
+1563287,2026-11-28,EFL Championship,Birmingham,Bolton,NS
+1563291,2026-11-28,EFL Championship,Millwall,Burnley,NS
+1557486,2026-11-28,Premier League,Sunderland,Tottenham,NS
+1556714,2026-11-29,Scottish Premiership,Heart Of Midlothian,Celtic,NS
+1570466,2026-11-29,La Liga,Elche,Atletico Madrid,NS
+1570467,2026-11-29,La Liga,Espanyol,Getafe,NS
+1570465,2026-11-29,La Liga,Deportivo La Coruna,Barcelona,NS
+1570463,2026-11-29,La Liga,Real Betis,Rayo Vallecano,NS
+1570470,2026-11-29,La Liga,Real Madrid,Alaves,NS
+1570468,2026-11-29,La Liga,Levante,Racing Santander,NS
+1570464,2026-11-29,La Liga,Celta Vigo,Villarreal,NS
+1570469,2026-11-29,La Liga,Malaga,Athletic Club,NS
+1570472,2026-11-29,La Liga,Valencia,Osasuna,NS
+1563295,2026-11-29,EFL Championship,Swansea,Cardiff,NS
+1570471,2026-11-29,La Liga,Real Sociedad,Sevilla,NS
+1563890,2026-12-01,League Two,Chesterfield,Exeter City,NS
+1563892,2026-12-01,League Two,Gillingham,Swindon Town,NS
+1563895,2026-12-01,League Two,Northampton,Fleetwood Town,NS
+1564439,2026-12-01,League One,Barnsley,Wycombe,NS
+1563891,2026-12-01,League Two,Crawley Town,Port Vale,NS
+1563893,2026-12-01,League Two,Grimsby,Colchester,NS
+1563894,2026-12-01,League Two,Newport County,Walsall,NS
+1563888,2026-12-01,League Two,Barnet,Rotherham,NS
+1563889,2026-12-01,League Two,Cheltenham,Rochdale,NS
+1563898,2026-12-01,League Two,York,Shrewsbury,NS
+1563897,2026-12-01,League Two,Tranmere,Salford City,NS
+1564444,2026-12-01,League One,Huddersfield,Stevenage,NS
+1563896,2026-12-01,League Two,Oldham,Bristol Rovers,NS
+1564450,2026-12-01,League One,Reading,Doncaster,NS
+1564446,2026-12-01,League One,Mansfield Town,Stockport County,NS
+1564445,2026-12-01,League One,Leyton Orient,Peterborough,NS
+1564443,2026-12-01,League One,Cambridge United,Leicester,NS
+1564449,2026-12-01,League One,Plymouth,Bromley,NS
+1564440,2026-12-01,League One,Blackpool,Luton,NS
+1564441,2026-12-01,League One,Bradford,Milton Keynes Dons,NS
+1564448,2026-12-01,League One,Oxford United,Sheffield Wednesday,NS
+1564442,2026-12-01,League One,Burton Albion,Wigan,NS
+1564447,2026-12-01,League One,Notts County,AFC Wimbledon,NS
+1563887,2026-12-01,League Two,Accrington ST,Crewe,NS
+1557489,2026-12-02,Premier League,Brentford,Arsenal,NS
+1557487,2026-12-02,Premier League,Aston Villa,Everton,NS
+1557492,2026-12-02,Premier League,Hull City,Nottingham Forest,NS
+1556721,2026-12-02,Scottish Premiership,Kilmarnock,Hibernian,NS
+1557494,2026-12-02,Premier League,Manchester City,Leeds,NS
+1557490,2026-12-02,Premier League,Chelsea,Crystal Palace,NS
+1557496,2026-12-02,Premier League,Tottenham,Fulham,NS
+1557493,2026-12-02,Premier League,Liverpool,Sunderland,NS
+1557491,2026-12-02,Premier League,Coventry,Ipswich,NS
+1556718,2026-12-02,Scottish Premiership,Dundee,Celtic,NS
+1556723,2026-12-02,Scottish Premiership,ST Johnstone,ST Mirren,NS
+1556722,2026-12-02,Scottish Premiership,Rangers,Dundee Utd,NS
+1556720,2026-12-02,Scottish Premiership,Heart Of Midlothian,Aberdeen,NS
+1557488,2026-12-02,Premier League,Bournemouth,Brighton,NS
+1556719,2026-12-02,Scottish Premiership,Falkirk,Motherwell,NS
+1557495,2026-12-02,Premier League,Newcastle,Manchester United,NS
+1563307,2026-12-04,EFL Championship,Sheffield Utd,West Ham,NS
+1557502,2026-12-05,Premier League,Leeds,Ipswich,NS
+1557505,2026-12-05,Premier League,Nottingham Forest,Brighton,NS
+1557497,2026-12-05,Premier League,Aston Villa,Crystal Palace,NS
+1563306,2026-12-05,EFL Championship,Portsmouth,West Brom,NS
+1563303,2026-12-05,EFL Championship,Charlton,Birmingham,NS
+1563308,2026-12-05,EFL Championship,Stoke City,QPR,NS
+1563305,2026-12-05,EFL Championship,Norwich,Wrexham,NS
+1563302,2026-12-05,EFL Championship,Cardiff,Lincoln,NS
+1557503,2026-12-05,Premier League,Manchester United,Coventry,NS
+1557504,2026-12-05,Premier League,Newcastle,Sunderland,NS
+1557506,2026-12-05,Premier League,Tottenham,Arsenal,NS
+1557500,2026-12-05,Premier League,Chelsea,Liverpool,NS
+1557499,2026-12-05,Premier League,Brentford,Manchester City,NS
+1563310,2026-12-05,EFL Championship,Wolves,Southampton,NS
+1563304,2026-12-05,EFL Championship,Middlesbrough,Derby,NS
+1563299,2026-12-05,EFL Championship,Bolton,Blackburn,NS
+1563300,2026-12-05,EFL Championship,Bristol City,Swansea,NS
+1563309,2026-12-05,EFL Championship,Watford,Millwall,NS
+1557498,2026-12-05,Premier League,Bournemouth,Hull City,NS
+1557501,2026-12-05,Premier League,Everton,Fulham,NS
+1556729,2026-12-05,Scottish Premiership,ST Mirren,Heart Of Midlothian,NS
+1556727,2026-12-05,Scottish Premiership,Hibernian,Rangers,NS
+1556725,2026-12-05,Scottish Premiership,Celtic,ST Johnstone,NS
+1556724,2026-12-05,Scottish Premiership,Aberdeen,Dundee Utd,NS
+1556726,2026-12-05,Scottish Premiership,Dundee,Falkirk,NS
+1556728,2026-12-05,Scottish Premiership,Motherwell,Kilmarnock,NS
+1570479,2026-12-06,La Liga,Racing Santander,Deportivo La Coruna,NS
+1570480,2026-12-06,La Liga,Rayo Vallecano,Levante,NS
+1570478,2026-12-06,La Liga,Osasuna,Elche,NS
+1570477,2026-12-06,La Liga,Getafe,Valencia,NS
+1570473,2026-12-06,La Liga,Alaves,Espanyol,NS
+1570481,2026-12-06,La Liga,Sevilla,Malaga,NS
+1570482,2026-12-06,La Liga,Villarreal,Real Sociedad,NS
+1570474,2026-12-06,La Liga,Athletic Club,Real Madrid,NS
+1570475,2026-12-06,La Liga,Atletico Madrid,Real Betis,NS
+1570476,2026-12-06,La Liga,Barcelona,Celta Vigo,NS
+1563301,2026-12-06,EFL Championship,Burnley,Preston,NS
+1563311,2026-12-08,EFL Championship,Birmingham,Watford,NS
+1563317,2026-12-08,EFL Championship,West Ham,Middlesbrough,NS
+1563313,2026-12-08,EFL Championship,Millwall,Sheffield Utd,NS
+1563318,2026-12-08,EFL Championship,Wrexham,Charlton,NS
+1563315,2026-12-08,EFL Championship,Swansea,Bolton,NS
+1563314,2026-12-08,EFL Championship,QPR,Wolves,NS
+1563316,2026-12-08,EFL Championship,West Brom,Cardiff,NS
+1563312,2026-12-08,EFL Championship,Blackburn,Norwich,NS
+1563321,2026-12-09,EFL Championship,Preston,Portsmouth,NS
+1563320,2026-12-09,EFL Championship,Lincoln,Stoke City,NS
+1563322,2026-12-09,EFL Championship,Southampton,Burnley,NS
+1563319,2026-12-09,EFL Championship,Derby,Bristol City,NS
+1564455,2026-12-10,League One,Leicester,Sheffield Wednesday,NS
+1563324,2026-12-11,EFL Championship,Bolton,Wrexham,NS
+1563325,2026-12-12,EFL Championship,Cardiff,Southampton,NS
+1563332,2026-12-12,EFL Championship,Stoke City,West Brom,NS
+1563330,2026-12-12,EFL Championship,QPR,Watford,NS
+1563329,2026-12-12,EFL Championship,Preston,Middlesbrough,NS
+1563328,2026-12-12,EFL Championship,Portsmouth,Birmingham,NS
+1564459,2026-12-12,League One,Notts County,Plymouth,NS
+1564457,2026-12-12,League One,Mansfield Town,Wycombe,NS
+1563334,2026-12-12,EFL Championship,Wolves,Millwall,NS
+1563333,2026-12-12,EFL Championship,West Ham,Bristol City,NS
+1564461,2026-12-12,League One,Peterborough,Barnsley,NS
+1557511,2026-12-12,Premier League,Fulham,Brentford,NS
+1564456,2026-12-12,League One,Luton,Wigan,NS
+1557514,2026-12-12,Premier League,Liverpool,Leeds,NS
+1557507,2026-12-12,Premier League,Arsenal,Bournemouth,NS
+1557515,2026-12-12,Premier League,Manchester City,Chelsea,NS
+1556735,2026-12-12,Scottish Premiership,ST Johnstone,Rangers,NS
+1556731,2026-12-12,Scottish Premiership,Dundee Utd,ST Mirren,NS
+1556732,2026-12-12,Scottish Premiership,Falkirk,Aberdeen,NS
+1557508,2026-12-12,Premier League,Brighton,Everton,NS
+1557510,2026-12-12,Premier League,Crystal Palace,Manchester United,NS
+1557513,2026-12-12,Premier League,Ipswich,Newcastle,NS
+1557512,2026-12-12,Premier League,Hull City,Tottenham,NS
+1557516,2026-12-12,Premier League,Sunderland,Nottingham Forest,NS
+1557509,2026-12-12,Premier League,Coventry,Aston Villa,NS
+1563331,2026-12-12,EFL Championship,Sheffield Utd,Burnley,NS
+1564453,2026-12-12,League One,Doncaster,Bromley,NS
+1564460,2026-12-12,League One,Oxford United,Blackpool,NS
+1564458,2026-12-12,League One,Milton Keynes Dons,Cambridge United,NS
+1563908,2026-12-12,League Two,Salford City,Colchester,NS
+1563901,2026-12-12,League Two,Cheltenham,Crewe,NS
+1563899,2026-12-12,League Two,Barnet,Northampton,NS
+1563904,2026-12-12,League Two,Exeter City,Rochdale,NS
+1563903,2026-12-12,League Two,Crawley Town,Newport County,NS
+1563909,2026-12-12,League Two,Shrewsbury,Port Vale,NS
+1563906,2026-12-12,League Two,Oldham,Gillingham,NS
+1563905,2026-12-12,League Two,Fleetwood Town,Swindon Town,NS
+1563900,2026-12-12,League Two,Bristol Rovers,Accrington ST,NS
+1563907,2026-12-12,League Two,Rotherham,Walsall,NS
+1563910,2026-12-12,League Two,Tranmere,York,NS
+1563902,2026-12-12,League Two,Chesterfield,Grimsby,NS
+1556734,2026-12-12,Scottish Premiership,Kilmarnock,Dundee,NS
+1563326,2026-12-12,EFL Championship,Charlton,Swansea,NS
+1564451,2026-12-12,League One,Bradford,AFC Wimbledon,NS
+1563323,2026-12-12,EFL Championship,Blackburn,Derby,NS
+1564454,2026-12-12,League One,Huddersfield,Leyton Orient,NS
+1564462,2026-12-12,League One,Stevenage,Stockport County,NS
+1564452,2026-12-12,League One,Burton Albion,Reading,NS
+1570492,2026-12-13,La Liga,Villarreal,Rayo Vallecano,NS
+1556733,2026-12-13,Scottish Premiership,Heart Of Midlothian,Motherwell,NS
+1570489,2026-12-13,La Liga,Malaga,Barcelona,NS
+1556730,2026-12-13,Scottish Premiership,Celtic,Hibernian,NS
+1570491,2026-12-13,La Liga,Real Sociedad,Getafe,NS
+1570485,2026-12-13,La Liga,Deportivo La Coruna,Athletic Club,NS
+1570484,2026-12-13,La Liga,Real Betis,Racing Santander,NS
+1570490,2026-12-13,La Liga,Real Madrid,Osasuna,NS
+1570487,2026-12-13,La Liga,Espanyol,Celta Vigo,NS
+1570488,2026-12-13,La Liga,Levante,Alaves,NS
+1563327,2026-12-13,EFL Championship,Lincoln,Norwich,NS
+1570486,2026-12-13,La Liga,Elche,Sevilla,NS
+1570483,2026-12-13,La Liga,Atletico Madrid,Valencia,NS
+1564321,2026-12-15,League One,Doncaster,Oxford United,NS
+1563913,2026-12-17,League Two,Crewe,Salford City,NS
+1563345,2026-12-18,EFL Championship,West Brom,Sheffield Utd,NS
+1564467,2026-12-18,League One,Cambridge United,Stevenage,NS
+1563336,2026-12-19,EFL Championship,Bristol City,Cardiff,NS
+1563344,2026-12-19,EFL Championship,Watford,Bolton,NS
+1563335,2026-12-19,EFL Championship,Birmingham,West Ham,NS
+1563340,2026-12-19,EFL Championship,Millwall,Charlton,NS
+1564466,2026-12-19,League One,Bromley,Bradford,NS
+1563342,2026-12-19,EFL Championship,Southampton,Blackburn,NS
+1563912,2026-12-19,League Two,Colchester,Fleetwood Town,NS
+1563919,2026-12-19,League Two,Rochdale,Bristol Rovers,NS
+1563921,2026-12-19,League Two,Walsall,Shrewsbury,NS
+1563914,2026-12-19,League Two,Gillingham,Cheltenham,NS
+1563918,2026-12-19,League Two,Port Vale,Rotherham,NS
+1563920,2026-12-19,League Two,Swindon Town,Tranmere,NS
+1563911,2026-12-19,League Two,Accrington ST,Chesterfield,NS
+1563915,2026-12-19,League Two,Grimsby,Barnet,NS
+1563916,2026-12-19,League Two,Newport County,Oldham,NS
+1564471,2026-12-19,League One,Sheffield Wednesday,Luton,NS
+1564470,2026-12-19,League One,Reading,Leicester,NS
+1564473,2026-12-19,League One,Wigan,Peterborough,NS
+1564463,2026-12-19,League One,AFC Wimbledon,Oxford United,NS
+1564465,2026-12-19,League One,Blackpool,Burton Albion,NS
+1564469,2026-12-19,League One,Plymouth,Mansfield Town,NS
+1564474,2026-12-19,League One,Wycombe,Doncaster,NS
+1564468,2026-12-19,League One,Leyton Orient,Notts County,NS
+1563917,2026-12-19,League Two,Northampton,Exeter City,NS
+1564472,2026-12-19,League One,Stockport County,Milton Keynes Dons,NS
+1563922,2026-12-19,League Two,York,Crawley Town,NS
+1557523,2026-12-19,Premier League,Liverpool,Tottenham,NS
+1557517,2026-12-19,Premier League,Arsenal,Manchester United,NS
+1563346,2026-12-19,EFL Championship,Wrexham,QPR,NS
+1563341,2026-12-19,EFL Championship,Norwich,Wolves,NS
+1563339,2026-12-19,EFL Championship,Middlesbrough,Portsmouth,NS
+1563338,2026-12-19,EFL Championship,Derby,Lincoln,NS
+1563337,2026-12-19,EFL Championship,Burnley,Stoke City,NS
+1563343,2026-12-19,EFL Championship,Swansea,Preston,NS
+1564464,2026-12-19,League One,Barnsley,Huddersfield,NS
+1557518,2026-12-19,Premier League,Bournemouth,Coventry,NS
+1556737,2026-12-19,Scottish Premiership,Dundee Utd,Kilmarnock,NS
+1557525,2026-12-19,Premier League,Nottingham Forest,Everton,NS
+1557526,2026-12-19,Premier League,Sunderland,Crystal Palace,NS
+1557519,2026-12-19,Premier League,Brentford,Newcastle,NS
+1557520,2026-12-19,Premier League,Brighton,Ipswich,NS
+1557524,2026-12-19,Premier League,Manchester City,Hull City,NS
+1557521,2026-12-19,Premier League,Chelsea,Aston Villa,NS
+1556738,2026-12-19,Scottish Premiership,Hibernian,ST Johnstone,NS
+1556741,2026-12-19,Scottish Premiership,ST Mirren,Falkirk,NS
+1556736,2026-12-19,Scottish Premiership,Aberdeen,Celtic,NS
+1556739,2026-12-19,Scottish Premiership,Motherwell,Dundee,NS
+1557522,2026-12-19,Premier League,Leeds,Fulham,NS
+1570495,2026-12-20,La Liga,Barcelona,Real Sociedad,NS
+1570499,2026-12-20,La Liga,Osasuna,Villarreal,NS
+1570498,2026-12-20,La Liga,Getafe,Levante,NS
+1570497,2026-12-20,La Liga,Deportivo La Coruna,Real Madrid,NS
+1570500,2026-12-20,La Liga,Rayo Vallecano,Malaga,NS
+1570496,2026-12-20,La Liga,Celta Vigo,Atletico Madrid,NS
+1556740,2026-12-20,Scottish Premiership,Rangers,Heart Of Midlothian,NS
+1570501,2026-12-20,La Liga,Sevilla,Racing Santander,NS
+1570502,2026-12-20,La Liga,Valencia,Espanyol,NS
+1570494,2026-12-20,La Liga,Athletic Club,Real Betis,NS
+1570493,2026-12-20,La Liga,Alaves,Elche,NS
+1564477,2026-12-26,League One,Doncaster,Wigan,NS
+1564480,2026-12-26,League One,Luton,Bromley,NS
+1564486,2026-12-26,League One,Stevenage,Reading,NS
+1563350,2026-12-26,EFL Championship,Charlton,Southampton,NS
+1557533,2026-12-26,Premier League,Ipswich,Brentford,NS
+1563351,2026-12-26,EFL Championship,Lincoln,West Brom,NS
+1563352,2026-12-26,EFL Championship,Portsmouth,Watford,NS
+1563356,2026-12-26,EFL Championship,Stoke City,Wrexham,NS
+1563354,2026-12-26,EFL Championship,QPR,Bristol City,NS
+1563347,2026-12-26,EFL Championship,Blackburn,Birmingham,NS
+1563353,2026-12-26,EFL Championship,Preston,Derby,NS
+1563357,2026-12-26,EFL Championship,West Ham,Norwich,NS
+1563349,2026-12-26,EFL Championship,Cardiff,Millwall,NS
+1563358,2026-12-26,EFL Championship,Wolves,Swansea,NS
+1563348,2026-12-26,EFL Championship,Bolton,Burnley,NS
+1564481,2026-12-26,League One,Mansfield Town,Barnsley,NS
+1564485,2026-12-26,League One,Peterborough,Wycombe,NS
+1563934,2026-12-26,League Two,Tranmere,Accrington ST,NS
+1564475,2026-12-26,League One,Bradford,Stockport County,NS
+1557532,2026-12-26,Premier League,Hull City,Liverpool,NS
+1557527,2026-12-26,Premier League,Aston Villa,Leeds,NS
+1557528,2026-12-26,Premier League,Coventry,Chelsea,NS
+1563932,2026-12-26,League Two,Salford City,Grimsby,NS
+1556742,2026-12-26,Scottish Premiership,Celtic,Motherwell,NS
+1556743,2026-12-26,Scottish Premiership,Dundee,ST Mirren,NS
+1557536,2026-12-26,Premier League,Tottenham,Bournemouth,NS
+1564482,2026-12-26,League One,Milton Keynes Dons,Leyton Orient,NS
+1557530,2026-12-26,Premier League,Everton,Sunderland,NS
+1557535,2026-12-26,Premier League,Newcastle,Manchester City,NS
+1557534,2026-12-26,Premier League,Manchester United,Nottingham Forest,NS
+1564478,2026-12-26,League One,Huddersfield,Blackpool,NS
+1564479,2026-12-26,League One,Leicester,AFC Wimbledon,NS
+1564476,2026-12-26,League One,Burton Albion,Sheffield Wednesday,NS
+1564484,2026-12-26,League One,Oxford United,Plymouth,NS
+1563355,2026-12-26,EFL Championship,Sheffield Utd,Middlesbrough,NS
+1557531,2026-12-26,Premier League,Fulham,Brighton,NS
+1564483,2026-12-26,League One,Notts County,Cambridge United,NS
+1557529,2026-12-26,Premier League,Crystal Palace,Arsenal,NS
+1556746,2026-12-26,Scottish Premiership,Kilmarnock,Rangers,NS
+1556747,2026-12-26,Scottish Premiership,ST Johnstone,Aberdeen,NS
+1556744,2026-12-26,Scottish Premiership,Falkirk,Dundee Utd,NS
+1563931,2026-12-26,League Two,Rotherham,Rochdale,NS
+1563929,2026-12-26,League Two,Fleetwood Town,Crewe,NS
+1563926,2026-12-26,League Two,Chesterfield,Northampton,NS
+1563924,2026-12-26,League Two,Bristol Rovers,Walsall,NS
+1563933,2026-12-26,League Two,Shrewsbury,Swindon Town,NS
+1563927,2026-12-26,League Two,Crawley Town,Gillingham,NS
+1563928,2026-12-26,League Two,Exeter City,Newport County,NS
+1563923,2026-12-26,League Two,Barnet,Colchester,NS
+1563925,2026-12-26,League Two,Cheltenham,Port Vale,NS
+1563930,2026-12-26,League Two,Oldham,York,NS
+1556745,2026-12-27,Scottish Premiership,Heart Of Midlothian,Hibernian,NS
+1563944,2026-12-29,League Two,Swindon Town,Exeter City,NS
+1563939,2026-12-29,League Two,Grimsby,Oldham,NS
+1563937,2026-12-29,League Two,Crewe,Tranmere,NS
+1563936,2026-12-29,League Two,Colchester,Crawley Town,NS
+1563935,2026-12-29,League Two,Accrington ST,Rotherham,NS
+1563942,2026-12-29,League Two,Port Vale,Bristol Rovers,NS
+1564493,2026-12-29,League One,Plymouth,Milton Keynes Dons,NS
+1563945,2026-12-29,League Two,Walsall,Chesterfield,NS
+1563943,2026-12-29,League Two,Rochdale,Salford City,NS
+1563941,2026-12-29,League Two,Northampton,Cheltenham,NS
+1563366,2026-12-29,EFL Championship,Southampton,West Ham,NS
+1564495,2026-12-29,League One,Stockport County,Huddersfield,NS
+1564498,2026-12-29,League One,Reading,Peterborough,NS
+1564497,2026-12-29,League One,Wycombe,Stevenage,NS
+1563359,2026-12-29,EFL Championship,Birmingham,Cardiff,NS
+1563938,2026-12-29,League Two,Gillingham,Barnet,NS
+1563365,2026-12-29,EFL Championship,Norwich,Charlton,NS
+1564489,2026-12-29,League One,Blackpool,Bradford,NS
+1564487,2026-12-29,League One,AFC Wimbledon,Luton,NS
+1564488,2026-12-29,League One,Barnsley,Burton Albion,NS
+1564494,2026-12-29,League One,Sheffield Wednesday,Mansfield Town,NS
+1564496,2026-12-29,League One,Wigan,Notts County,NS
+1564491,2026-12-29,League One,Cambridge United,Doncaster,NS
+1564492,2026-12-29,League One,Leyton Orient,Leicester,NS
+1564490,2026-12-29,League One,Bromley,Oxford United,NS
+1563367,2026-12-29,EFL Championship,Swansea,QPR,NS
+1563946,2026-12-29,League Two,York,Fleetwood Town,NS
+1563940,2026-12-29,League Two,Newport County,Shrewsbury,NS
+1563368,2026-12-29,EFL Championship,Watford,Wolves,NS
+1563361,2026-12-29,EFL Championship,Burnley,Lincoln,NS
+1563360,2026-12-29,EFL Championship,Bristol City,Stoke City,NS
+1563364,2026-12-29,EFL Championship,Millwall,Portsmouth,NS
+1563370,2026-12-29,EFL Championship,Wrexham,Blackburn,NS
+1563362,2026-12-29,EFL Championship,Derby,Sheffield Utd,NS
+1563363,2026-12-29,EFL Championship,Middlesbrough,Bolton,NS
+1563369,2026-12-29,EFL Championship,West Brom,Preston,NS
+1557544,2026-12-30,Premier League,Manchester United,Sunderland,NS
+1557545,2026-12-30,Premier League,Newcastle,Nottingham Forest,NS
+1557541,2026-12-30,Premier League,Fulham,Arsenal,NS
+1557540,2026-12-30,Premier League,Everton,Manchester City,NS
+1557546,2026-12-30,Premier League,Tottenham,Brighton,NS
+1557539,2026-12-30,Premier League,Crystal Palace,Bournemouth,NS
+1557543,2026-12-30,Premier League,Ipswich,Chelsea,NS
+1557542,2026-12-30,Premier League,Hull City,Leeds,NS
+1557538,2026-12-30,Premier League,Coventry,Brentford,NS
+1556749,2026-12-30,Scottish Premiership,Dundee Utd,Celtic,NS
+1556753,2026-12-30,Scottish Premiership,ST Johnstone,Heart Of Midlothian,NS
+1557537,2026-12-30,Premier League,Aston Villa,Liverpool,NS
+1556748,2026-12-30,Scottish Premiership,Aberdeen,Motherwell,NS
+1556750,2026-12-30,Scottish Premiership,Hibernian,ST Mirren,NS
+1556751,2026-12-30,Scottish Premiership,Kilmarnock,Falkirk,NS
+1556752,2026-12-30,Scottish Premiership,Rangers,Dundee,NS
+1563373,2027-01-01,EFL Championship,Burnley,Sheffield Utd,NS
+1563382,2027-01-01,EFL Championship,Wrexham,Bolton,NS
+1563379,2027-01-01,EFL Championship,Swansea,Charlton,NS
+1563371,2027-01-01,EFL Championship,Birmingham,Portsmouth,NS
+1563951,2027-01-01,League Two,Grimsby,Tranmere,NS
+1563381,2027-01-01,EFL Championship,West Brom,Stoke City,NS
+1563380,2027-01-01,EFL Championship,Watford,QPR,NS
+1563376,2027-01-01,EFL Championship,Millwall,Wolves,NS
+1563374,2027-01-01,EFL Championship,Derby,Blackburn,NS
+1563958,2027-01-01,League Two,York,Salford City,NS
+1563375,2027-01-01,EFL Championship,Middlesbrough,Preston,NS
+1563952,2027-01-01,League Two,Newport County,Barnet,NS
+1563378,2027-01-01,EFL Championship,Southampton,Cardiff,NS
+1563372,2027-01-01,EFL Championship,Bristol City,West Ham,NS
+1564502,2027-01-01,League One,Bromley,Stevenage,NS
+1564501,2027-01-01,League One,Blackpool,Doncaster,NS
+1563948,2027-01-01,League Two,Colchester,Rotherham,NS
+1563377,2027-01-01,EFL Championship,Norwich,Lincoln,NS
+1564506,2027-01-01,League One,Reading,Milton Keynes Dons,NS
+1564509,2027-01-01,League One,Wigan,Bradford,NS
+1564507,2027-01-01,League One,Sheffield Wednesday,Huddersfield,NS
+1564500,2027-01-01,League One,Barnsley,Notts County,NS
+1564499,2027-01-01,League One,AFC Wimbledon,Peterborough,NS
+1564504,2027-01-01,League One,Leyton Orient,Oxford United,NS
+1563949,2027-01-01,League Two,Crewe,Oldham,NS
+1563947,2027-01-01,League Two,Accrington ST,Shrewsbury,NS
+1563956,2027-01-01,League Two,Swindon Town,Crawley Town,NS
+1563954,2027-01-01,League Two,Port Vale,Fleetwood Town,NS
+1563957,2027-01-01,League Two,Walsall,Cheltenham,NS
+1563955,2027-01-01,League Two,Rochdale,Chesterfield,NS
+1564510,2027-01-01,League One,Wycombe,Leicester,NS
+1564508,2027-01-02,League One,Stockport County,Burton Albion,NS
+1564503,2027-01-02,League One,Cambridge United,Mansfield Town,NS
+1564505,2027-01-02,League One,Plymouth,Luton,NS
+1557549,2027-01-02,Premier League,Brentford,Crystal Palace,NS
+1557553,2027-01-02,Premier League,Liverpool,Coventry,NS
+1557548,2027-01-02,Premier League,Bournemouth,Aston Villa,NS
+1556756,2027-01-02,Scottish Premiership,Heart Of Midlothian,Kilmarnock,NS
+1556757,2027-01-02,Scottish Premiership,Motherwell,ST Johnstone,NS
+1556755,2027-01-02,Scottish Premiership,Falkirk,Hibernian,NS
+1563953,2027-01-02,League Two,Northampton,Bristol Rovers,NS
+1557556,2027-01-02,Premier League,Sunderland,Hull City,NS
+1557555,2027-01-02,Premier League,Nottingham Forest,Fulham,NS
+1557552,2027-01-02,Premier League,Leeds,Everton,NS
+1563950,2027-01-02,League Two,Gillingham,Exeter City,NS
+1557550,2027-01-02,Premier League,Brighton,Manchester United,NS
+1556754,2027-01-02,Scottish Premiership,Dundee,Dundee Utd,NS
+1557554,2027-01-02,Premier League,Manchester City,Tottenham,NS
+1557547,2027-01-02,Premier League,Arsenal,Ipswich,NS
+1557551,2027-01-02,Premier League,Chelsea,Newcastle,NS
+1570512,2027-01-03,La Liga,Villarreal,Sevilla,NS
+1570507,2027-01-03,La Liga,Malaga,Elche,NS
+1570504,2027-01-03,La Liga,Celta Vigo,Deportivo La Coruna,NS
+1570506,2027-01-03,La Liga,Levante,Valencia,NS
+1570505,2027-01-03,La Liga,Espanyol,Barcelona,NS
+1570510,2027-01-03,La Liga,Real Madrid,Getafe,NS
+1556759,2027-01-03,Scottish Premiership,ST Mirren,Aberdeen,NS
+1556758,2027-01-03,Scottish Premiership,Rangers,Celtic,NS
+1570503,2027-01-03,La Liga,Real Betis,Alaves,NS
+1570511,2027-01-03,La Liga,Real Sociedad,Osasuna,NS
+1570509,2027-01-03,La Liga,Rayo Vallecano,Atletico Madrid,NS
+1570508,2027-01-03,La Liga,Racing Santander,Athletic Club,NS
+1557566,2027-01-06,Premier League,Sunderland,Liverpool,NS
+1557562,2027-01-06,Premier League,Ipswich,Coventry,NS
+1557563,2027-01-06,Premier League,Leeds,Manchester City,NS
+1557559,2027-01-06,Premier League,Crystal Palace,Chelsea,NS
+1557558,2027-01-06,Premier League,Brighton,Bournemouth,NS
+1557560,2027-01-06,Premier League,Everton,Aston Villa,NS
+1557557,2027-01-06,Premier League,Arsenal,Brentford,NS
+1557561,2027-01-06,Premier League,Fulham,Tottenham,NS
+1557565,2027-01-06,Premier League,Nottingham Forest,Hull City,NS
+1557564,2027-01-06,Premier League,Manchester United,Newcastle,NS
+1564512,2027-01-08,League One,Burton Albion,Blackpool,NS
+1564511,2027-01-09,League One,Bradford,Bromley,NS
+1564515,2027-01-09,League One,Leicester,Reading,NS
+1564514,2027-01-09,League One,Huddersfield,Barnsley,NS
+1564522,2027-01-09,League One,Stevenage,Cambridge United,NS
+1564520,2027-01-09,League One,Oxford United,AFC Wimbledon,NS
+1556765,2027-01-09,Scottish Premiership,ST Johnstone,Falkirk,NS
+1556762,2027-01-09,Scottish Premiership,Dundee Utd,Rangers,NS
+1556760,2027-01-09,Scottish Premiership,Aberdeen,Heart Of Midlothian,NS
+1556764,2027-01-09,Scottish Premiership,Kilmarnock,ST Mirren,NS
+1556763,2027-01-09,Scottish Premiership,Hibernian,Motherwell,NS
+1556761,2027-01-09,Scottish Premiership,Celtic,Dundee,NS
+1564518,2027-01-09,League One,Milton Keynes Dons,Stockport County,NS
+1564521,2027-01-09,League One,Peterborough,Wigan,NS
+1563963,2027-01-09,League Two,Crawley Town,York,NS
+1564516,2027-01-09,League One,Luton,Sheffield Wednesday,NS
+1563961,2027-01-09,League Two,Cheltenham,Gillingham,NS
+1563970,2027-01-09,League Two,Tranmere,Swindon Town,NS
+1563968,2027-01-09,League Two,Salford City,Crewe,NS
+1564513,2027-01-09,League One,Doncaster,Wycombe,NS
+1563962,2027-01-09,League Two,Chesterfield,Accrington ST,NS
+1563969,2027-01-09,League Two,Shrewsbury,Walsall,NS
+1563959,2027-01-09,League Two,Barnet,Grimsby,NS
+1563960,2027-01-09,League Two,Bristol Rovers,Rochdale,NS
+1563964,2027-01-09,League Two,Exeter City,Northampton,NS
+1563965,2027-01-09,League Two,Fleetwood Town,Colchester,NS
+1563966,2027-01-09,League Two,Oldham,Newport County,NS
+1564519,2027-01-09,League One,Notts County,Leyton Orient,NS
+1564517,2027-01-09,League One,Mansfield Town,Plymouth,NS
+1563967,2027-01-09,League Two,Rotherham,Port Vale,NS
+1570515,2027-01-10,La Liga,Atletico Madrid,Racing Santander,NS
+1570514,2027-01-10,La Liga,Athletic Club,Villarreal,NS
+1570517,2027-01-10,La Liga,Elche,Getafe,NS
+1570521,2027-01-10,La Liga,Sevilla,Celta Vigo,NS
+1570518,2027-01-10,La Liga,Espanyol,Real Betis,NS
+1570520,2027-01-10,La Liga,Real Madrid,Levante,NS
+1570513,2027-01-10,La Liga,Alaves,Real Sociedad,NS
+1570522,2027-01-10,La Liga,Valencia,Malaga,NS
+1570519,2027-01-10,La Liga,Osasuna,Barcelona,NS
+1570516,2027-01-10,La Liga,Deportivo La Coruna,Rayo Vallecano,NS
+1563979,2027-01-16,League Two,Rochdale,Crewe,NS
+1557571,2027-01-16,Premier League,Coventry,Everton,NS
+1557567,2027-01-16,Premier League,Aston Villa,Manchester United,NS
+1557572,2027-01-16,Premier League,Hull City,Arsenal,NS
+1557569,2027-01-16,Premier League,Brentford,Brighton,NS
+1557574,2027-01-16,Premier League,Manchester City,Nottingham Forest,NS
+1557570,2027-01-16,Premier League,Chelsea,Sunderland,NS
+1557576,2027-01-16,Premier League,Tottenham,Leeds,NS
+1557573,2027-01-16,Premier League,Liverpool,Crystal Palace,NS
+1563387,2027-01-16,EFL Championship,Lincoln,Millwall,NS
+1563388,2027-01-16,EFL Championship,Portsmouth,Norwich,NS
+1563386,2027-01-16,EFL Championship,Charlton,Watford,NS
+1563392,2027-01-16,EFL Championship,Stoke City,Derby,NS
+1563390,2027-01-16,EFL Championship,QPR,Birmingham,NS
+1563384,2027-01-16,EFL Championship,Bolton,Southampton,NS
+1563978,2027-01-16,League Two,Northampton,Grimsby,NS
+1563383,2027-01-16,EFL Championship,Blackburn,West Brom,NS
+1563389,2027-01-16,EFL Championship,Preston,Wrexham,NS
+1563980,2027-01-16,League Two,Rotherham,Fleetwood Town,NS
+1563385,2027-01-16,EFL Championship,Cardiff,Middlesbrough,NS
+1563394,2027-01-16,EFL Championship,Wolves,Burnley,NS
+1557575,2027-01-16,Premier League,Newcastle,Fulham,NS
+1557568,2027-01-16,Premier League,Bournemouth,Ipswich,NS
+1563982,2027-01-16,League Two,York,Newport County,NS
+1563973,2027-01-16,League Two,Cheltenham,Oldham,NS
+1563971,2027-01-16,League Two,Barnet,Tranmere,NS
+1563976,2027-01-16,League Two,Exeter City,Colchester,NS
+1563975,2027-01-16,League Two,Crawley Town,Salford City,NS
+1563972,2027-01-16,League Two,Bristol Rovers,Shrewsbury,NS
+1563974,2027-01-16,League Two,Chesterfield,Port Vale,NS
+1563981,2027-01-16,League Two,Walsall,Swindon Town,NS
+1563391,2027-01-16,EFL Championship,Sheffield Utd,Bristol City,NS
+1563977,2027-01-16,League Two,Gillingham,Accrington ST,NS
+1563393,2027-01-16,EFL Championship,West Ham,Swansea,NS
+1564526,2027-01-16,League One,Burton Albion,Peterborough,NS
+1564531,2027-01-16,League One,Notts County,Wycombe,NS
+1564525,2027-01-16,League One,Bromley,Stockport County,NS
+1564527,2027-01-16,League One,Cambridge United,Barnsley,NS
+1564530,2027-01-16,League One,Luton,Milton Keynes Dons,NS
+1564524,2027-01-16,League One,Blackpool,Leyton Orient,NS
+1564534,2027-01-16,League One,Stevenage,Bradford,NS
+1564532,2027-01-16,League One,Oxford United,Mansfield Town,NS
+1564523,2027-01-16,League One,AFC Wimbledon,Sheffield Wednesday,NS
+1564533,2027-01-16,League One,Reading,Wigan,NS
+1564529,2027-01-16,League One,Huddersfield,Plymouth,NS
+1564528,2027-01-16,League One,Doncaster,Leicester,NS
+1570524,2027-01-17,La Liga,Barcelona,Elche,NS
+1570523,2027-01-17,La Liga,Atletico Madrid,Real Sociedad,NS
+1570529,2027-01-17,La Liga,Malaga,Real Madrid,NS
+1570526,2027-01-17,La Liga,Celta Vigo,Valencia,NS
+1570528,2027-01-17,La Liga,Levante,Espanyol,NS
+1570525,2027-01-17,La Liga,Real Betis,Deportivo La Coruna,NS
+1570527,2027-01-17,La Liga,Getafe,Athletic Club,NS
+1570531,2027-01-17,La Liga,Rayo Vallecano,Sevilla,NS
+1570532,2027-01-17,La Liga,Villarreal,Alaves,NS
+1570530,2027-01-17,La Liga,Racing Santander,Osasuna,NS
+1564540,2027-01-19,League One,Milton Keynes Dons,Blackpool,NS
+1564542,2027-01-19,League One,Plymouth,Stevenage,NS
+1564546,2027-01-19,League One,Wycombe,Cambridge United,NS
+1564538,2027-01-19,League One,Leyton Orient,Reading,NS
+1564539,2027-01-19,League One,Mansfield Town,AFC Wimbledon,NS
+1564544,2027-01-19,League One,Stockport County,Doncaster,NS
+1563991,2027-01-19,League Two,Salford City,Bristol Rovers,NS
+1563994,2027-01-19,League Two,Tranmere,Northampton,NS
+1563988,2027-01-19,League Two,Newport County,Rotherham,NS
+1563987,2027-01-19,League Two,Grimsby,Rochdale,NS
+1563985,2027-01-19,League Two,Crewe,Exeter City,NS
+1563984,2027-01-19,League Two,Colchester,Chesterfield,NS
+1563983,2027-01-19,League Two,Accrington ST,York,NS
+1563993,2027-01-19,League Two,Swindon Town,Barnet,NS
+1563992,2027-01-19,League Two,Shrewsbury,Crawley Town,NS
+1563990,2027-01-19,League Two,Port Vale,Gillingham,NS
+1564541,2027-01-19,League One,Peterborough,Huddersfield,NS
+1564536,2027-01-19,League One,Bradford,Burton Albion,NS
+1563986,2027-01-19,League Two,Fleetwood Town,Cheltenham,NS
+1564537,2027-01-19,League One,Leicester,Bromley,NS
+1564545,2027-01-19,League One,Wigan,Oxford United,NS
+1564543,2027-01-19,League One,Sheffield Wednesday,Notts County,NS
+1564535,2027-01-19,League One,Barnsley,Luton,NS
+1563989,2027-01-19,League Two,Oldham,Walsall,NS
+1564003,2027-01-23,League Two,Salford City,Walsall,NS
+1557577,2027-01-23,Premier League,Arsenal,Newcastle,NS
+1556767,2027-01-23,Scottish Premiership,Falkirk,Heart Of Midlothian,NS
+1556770,2027-01-23,Scottish Premiership,Rangers,ST Johnstone,NS
+1556769,2027-01-23,Scottish Premiership,Motherwell,Dundee Utd,NS
+1556766,2027-01-23,Scottish Premiership,Dundee,Aberdeen,NS
+1564552,2027-01-23,League One,Milton Keynes Dons,Stevenage,NS
+1564547,2027-01-23,League One,Barnsley,Reading,NS
+1556768,2027-01-23,Scottish Premiership,Hibernian,Kilmarnock,NS
+1564555,2027-01-23,League One,Sheffield Wednesday,Doncaster,NS
+1564557,2027-01-23,League One,Wigan,Huddersfield,NS
+1564549,2027-01-23,League One,Leicester,Luton,NS
+1557580,2027-01-23,Premier League,Everton,Brentford,NS
+1557578,2027-01-23,Premier League,Brighton,Manchester City,NS
+1557579,2027-01-23,Premier League,Crystal Palace,Tottenham,NS
+1557582,2027-01-23,Premier League,Ipswich,Hull City,NS
+1557583,2027-01-23,Premier League,Leeds,Chelsea,NS
+1557584,2027-01-23,Premier League,Manchester United,Liverpool,NS
+1557585,2027-01-23,Premier League,Nottingham Forest,Bournemouth,NS
+1564006,2027-01-23,League Two,Tranmere,Crawley Town,NS
+1557586,2027-01-23,Premier League,Sunderland,Coventry,NS
+1557581,2027-01-23,Premier League,Fulham,Aston Villa,NS
+1564548,2027-01-23,League One,Bradford,Oxford United,NS
+1564554,2027-01-23,League One,Plymouth,Cambridge United,NS
+1563395,2027-01-23,EFL Championship,Birmingham,Lincoln,NS
+1563397,2027-01-23,EFL Championship,Bristol City,Bolton,NS
+1564553,2027-01-23,League One,Peterborough,Bromley,NS
+1563402,2027-01-23,EFL Championship,Preston,Stoke City,NS
+1563405,2027-01-23,EFL Championship,West Brom,West Ham,NS
+1563396,2027-01-23,EFL Championship,Blackburn,Swansea,NS
+1563400,2027-01-23,EFL Championship,Derby,Millwall,NS
+1563403,2027-01-23,EFL Championship,QPR,Southampton,NS
+1563399,2027-01-23,EFL Championship,Charlton,Middlesbrough,NS
+1563401,2027-01-23,EFL Championship,Portsmouth,Burnley,NS
+1563406,2027-01-23,EFL Championship,Wrexham,Sheffield Utd,NS
+1563398,2027-01-23,EFL Championship,Cardiff,Wolves,NS
+1564551,2027-01-23,League One,Mansfield Town,Blackpool,NS
+1564556,2027-01-23,League One,Stockport County,Notts County,NS
+1564000,2027-01-23,League Two,Newport County,Cheltenham,NS
+1563999,2027-01-23,League Two,Grimsby,Gillingham,NS
+1563997,2027-01-23,League Two,Crewe,Chesterfield,NS
+1563996,2027-01-23,League Two,Colchester,Northampton,NS
+1563995,2027-01-23,League Two,Accrington ST,Rochdale,NS
+1564005,2027-01-23,League Two,Swindon Town,Bristol Rovers,NS
+1564004,2027-01-23,League Two,Shrewsbury,Rotherham,NS
+1564002,2027-01-23,League Two,Port Vale,York,NS
+1564001,2027-01-23,League Two,Oldham,Barnet,NS
+1563998,2027-01-23,League Two,Fleetwood Town,Exeter City,NS
+1564558,2027-01-23,League One,Wycombe,AFC Wimbledon,NS
+1564550,2027-01-23,League One,Leyton Orient,Burton Albion,NS
+1563404,2027-01-23,EFL Championship,Watford,Norwich,NS
+1570536,2027-01-24,La Liga,Elche,Rayo Vallecano,NS
+1570541,2027-01-24,La Liga,Real Sociedad,Malaga,NS
+1570539,2027-01-24,La Liga,Racing Santander,Celta Vigo,NS
+1556771,2027-01-24,Scottish Premiership,ST Mirren,Celtic,NS
+1570538,2027-01-24,La Liga,Getafe,Osasuna,NS
+1570535,2027-01-24,La Liga,Deportivo La Coruna,Atletico Madrid,NS
+1570533,2027-01-24,La Liga,Alaves,Barcelona,NS
+1570540,2027-01-24,La Liga,Real Madrid,Real Betis,NS
+1570537,2027-01-24,La Liga,Espanyol,Villarreal,NS
+1570542,2027-01-24,La Liga,Valencia,Sevilla,NS
+1570534,2027-01-24,La Liga,Athletic Club,Levante,NS
+1563412,2027-01-26,EFL Championship,Sheffield Utd,Preston,NS
+1563407,2027-01-26,EFL Championship,Bolton,Charlton,NS
+1563411,2027-01-26,EFL Championship,Norwich,Derby,NS
+1563410,2027-01-26,EFL Championship,Millwall,Birmingham,NS
+1563408,2027-01-26,EFL Championship,Burnley,QPR,NS
+1563413,2027-01-26,EFL Championship,Southampton,West Brom,NS
+1563409,2027-01-26,EFL Championship,Lincoln,Watford,NS
+1563414,2027-01-26,EFL Championship,Stoke City,Blackburn,NS
+1563418,2027-01-27,EFL Championship,Wolves,Bristol City,NS
+1563417,2027-01-27,EFL Championship,West Ham,Cardiff,NS
+1563415,2027-01-27,EFL Championship,Middlesbrough,Wrexham,NS
+1563416,2027-01-27,EFL Championship,Swansea,Portsmouth,NS
+1564016,2027-01-30,League Two,Rotherham,Swindon Town,NS
+1564013,2027-01-30,League Two,Gillingham,Shrewsbury,NS
+1564565,2027-01-30,League One,Huddersfield,Bradford,NS
+1564569,2027-01-30,League One,Reading,Plymouth,NS
+1564008,2027-01-30,League Two,Bristol Rovers,Fleetwood Town,NS
+1564009,2027-01-30,League Two,Cheltenham,Tranmere,NS
+1564015,2027-01-30,League Two,Rochdale,Port Vale,NS
+1564012,2027-01-30,League Two,Exeter City,Salford City,NS
+1564007,2027-01-30,League Two,Barnet,Crewe,NS
+1564570,2027-01-30,League One,Stevenage,Leicester,NS
+1564018,2027-01-30,League Two,York,Grimsby,NS
+1564561,2027-01-30,League One,Bromley,Wigan,NS
+1564567,2027-01-30,League One,Notts County,Mansfield Town,NS
+1564563,2027-01-30,League One,Cambridge United,Leyton Orient,NS
+1564562,2027-01-30,League One,Burton Albion,Wycombe,NS
+1564559,2027-01-30,League One,AFC Wimbledon,Stockport County,NS
+1564568,2027-01-30,League One,Oxford United,Barnsley,NS
+1564564,2027-01-30,League One,Doncaster,Milton Keynes Dons,NS
+1564560,2027-01-30,League One,Blackpool,Sheffield Wednesday,NS
+1564566,2027-01-30,League One,Luton,Peterborough,NS
+1564014,2027-01-30,League Two,Northampton,Accrington ST,NS
+1564011,2027-01-30,League Two,Crawley Town,Oldham,NS
+1564010,2027-01-30,League Two,Chesterfield,Newport County,NS
+1563429,2027-01-30,EFL Championship,West Ham,Blackburn,NS
+1563420,2027-01-30,EFL Championship,Burnley,Cardiff,NS
+1564017,2027-01-30,League Two,Walsall,Colchester,NS
+1563423,2027-01-30,EFL Championship,Millwall,West Brom,NS
+1563425,2027-01-30,EFL Championship,Sheffield Utd,Charlton,NS
+1563419,2027-01-30,EFL Championship,Bolton,Derby,NS
+1563422,2027-01-30,EFL Championship,Middlesbrough,Watford,NS
+1563424,2027-01-30,EFL Championship,Norwich,Bristol City,NS
+1563427,2027-01-30,EFL Championship,Stoke City,Portsmouth,NS
+1563428,2027-01-30,EFL Championship,Swansea,Birmingham,NS
+1563421,2027-01-30,EFL Championship,Lincoln,QPR,NS
+1563426,2027-01-30,EFL Championship,Southampton,Preston,NS
+1556776,2027-01-30,Scottish Premiership,Kilmarnock,Motherwell,NS
+1556772,2027-01-30,Scottish Premiership,Aberdeen,Rangers,NS
+1556774,2027-01-30,Scottish Premiership,Dundee,Hibernian,NS
+1556775,2027-01-30,Scottish Premiership,Heart Of Midlothian,ST Mirren,NS
+1563430,2027-01-30,EFL Championship,Wolves,Wrexham,NS
+1557595,2027-01-30,Premier League,Newcastle,Brighton,NS
+1557588,2027-01-30,Premier League,Bournemouth,Fulham,NS
+1557593,2027-01-30,Premier League,Liverpool,Everton,NS
+1557596,2027-01-30,Premier League,Tottenham,Sunderland,NS
+1557590,2027-01-30,Premier League,Chelsea,Nottingham Forest,NS
+1557594,2027-01-30,Premier League,Manchester City,Arsenal,NS
+1557589,2027-01-30,Premier League,Brentford,Manchester United,NS
+1557592,2027-01-30,Premier League,Hull City,Crystal Palace,NS
+1557587,2027-01-30,Premier League,Aston Villa,Ipswich,NS
+1557591,2027-01-30,Premier League,Coventry,Leeds,NS
+1556777,2027-01-30,Scottish Premiership,ST Johnstone,Dundee Utd,NS
+1556773,2027-01-31,Scottish Premiership,Celtic,Falkirk,NS
+1570550,2027-01-31,La Liga,Rayo Vallecano,Real Madrid,NS
+1570549,2027-01-31,La Liga,Osasuna,Deportivo La Coruna,NS
+1570547,2027-01-31,La Liga,Levante,Real Sociedad,NS
+1570546,2027-01-31,La Liga,Celta Vigo,Getafe,NS
+1570551,2027-01-31,La Liga,Sevilla,Athletic Club,NS
+1570548,2027-01-31,La Liga,Malaga,Alaves,NS
+1570552,2027-01-31,La Liga,Villarreal,Racing Santander,NS
+1570543,2027-01-31,La Liga,Atletico Madrid,Espanyol,NS
+1570545,2027-01-31,La Liga,Real Betis,Elche,NS
+1570544,2027-01-31,La Liga,Barcelona,Valencia,NS
+1556781,2027-02-03,Scottish Premiership,Motherwell,Celtic,NS
+1556780,2027-02-03,Scottish Premiership,Heart Of Midlothian,Dundee,NS
+1556778,2027-02-03,Scottish Premiership,Aberdeen,Falkirk,NS
+1556783,2027-02-03,Scottish Premiership,ST Mirren,ST Johnstone,NS
+1556779,2027-02-03,Scottish Premiership,Dundee Utd,Hibernian,NS
+1556782,2027-02-03,Scottish Premiership,Rangers,Kilmarnock,NS
+1563436,2027-02-06,EFL Championship,Derby,Southampton,NS
+1564030,2027-02-06,League Two,Tranmere,Newport County,NS
+1564021,2027-02-06,League Two,Cheltenham,Barnet,NS
+1564024,2027-02-06,League Two,Exeter City,York,NS
+1564023,2027-02-06,League Two,Crewe,Port Vale,NS
+1564019,2027-02-06,League Two,Accrington ST,Walsall,NS
+1564028,2027-02-06,League Two,Salford City,Shrewsbury,NS
+1564029,2027-02-06,League Two,Swindon Town,Oldham,NS
+1564027,2027-02-06,League Two,Rochdale,Colchester,NS
+1564026,2027-02-06,League Two,Northampton,Gillingham,NS
+1564025,2027-02-06,League Two,Fleetwood Town,Grimsby,NS
+1564020,2027-02-06,League Two,Bristol Rovers,Crawley Town,NS
+1563435,2027-02-06,EFL Championship,Charlton,Wolves,NS
+1563439,2027-02-06,EFL Championship,QPR,Millwall,NS
+1564022,2027-02-06,League Two,Chesterfield,Rotherham,NS
+1563441,2027-02-06,EFL Championship,West Brom,Swansea,NS
+1563438,2027-02-06,EFL Championship,Preston,West Ham,NS
+1563433,2027-02-06,EFL Championship,Bristol City,Middlesbrough,NS
+1564582,2027-02-06,League One,Wycombe,Stockport County,NS
+1564575,2027-02-06,League One,Doncaster,Stevenage,NS
+1564579,2027-02-06,League One,Peterborough,Blackpool,NS
+1564572,2027-02-06,League One,Bradford,Plymouth,NS
+1564574,2027-02-06,League One,Burton Albion,Notts County,NS
+1564571,2027-02-06,League One,Barnsley,Leyton Orient,NS
+1564573,2027-02-06,League One,Bromley,Sheffield Wednesday,NS
+1564581,2027-02-06,League One,Wigan,AFC Wimbledon,NS
+1564577,2027-02-06,League One,Leicester,Milton Keynes Dons,NS
+1564576,2027-02-06,League One,Huddersfield,Cambridge United,NS
+1563437,2027-02-06,EFL Championship,Portsmouth,Bolton,NS
+1563440,2027-02-06,EFL Championship,Watford,Sheffield Utd,NS
+1563434,2027-02-06,EFL Championship,Cardiff,Norwich,NS
+1563431,2027-02-06,EFL Championship,Birmingham,Stoke City,NS
+1564580,2027-02-06,League One,Reading,Oxford United,NS
+1563442,2027-02-06,EFL Championship,Wrexham,Lincoln,NS
+1564578,2027-02-06,League One,Luton,Mansfield Town,NS
+1563432,2027-02-06,EFL Championship,Blackburn,Burnley,NS
+1557606,2027-02-06,Premier League,Sunderland,Aston Villa,NS
+1557605,2027-02-06,Premier League,Nottingham Forest,Brentford,NS
+1557603,2027-02-06,Premier League,Leeds,Bournemouth,NS
+1557602,2027-02-06,Premier League,Ipswich,Tottenham,NS
+1557599,2027-02-06,Premier League,Crystal Palace,Coventry,NS
+1557600,2027-02-06,Premier League,Everton,Newcastle,NS
+1557597,2027-02-06,Premier League,Arsenal,Liverpool,NS
+1557598,2027-02-06,Premier League,Brighton,Hull City,NS
+1557604,2027-02-06,Premier League,Manchester United,Chelsea,NS
+1557601,2027-02-06,Premier League,Fulham,Manchester City,NS
+1570559,2027-02-07,La Liga,Espanyol,Rayo Vallecano,NS
+1570553,2027-02-07,La Liga,Alaves,Celta Vigo,NS
+1570558,2027-02-07,La Liga,Elche,Levante,NS
+1570561,2027-02-07,La Liga,Real Sociedad,Real Madrid,NS
+1570560,2027-02-07,La Liga,Getafe,Villarreal,NS
+1570562,2027-02-07,La Liga,Valencia,Racing Santander,NS
+1570555,2027-02-07,La Liga,Barcelona,Atletico Madrid,NS
+1570556,2027-02-07,La Liga,Real Betis,Sevilla,NS
+1570554,2027-02-07,La Liga,Athletic Club,Osasuna,NS
+1570557,2027-02-07,La Liga,Deportivo La Coruna,Malaga,NS
+1564583,2027-02-09,League One,AFC Wimbledon,Burton Albion,NS
+1564592,2027-02-09,League One,Sheffield Wednesday,Wycombe,NS
+1564042,2027-02-09,League Two,York,Cheltenham,NS
+1564031,2027-02-09,League Two,Barnet,Exeter City,NS
+1564590,2027-02-09,League One,Oxford United,Huddersfield,NS
+1564594,2027-02-09,League One,Stockport County,Luton,NS
+1564584,2027-02-09,League One,Blackpool,Barnsley,NS
+1564591,2027-02-09,League One,Plymouth,Leicester,NS
+1564593,2027-02-09,League One,Stevenage,Peterborough,NS
+1564585,2027-02-09,League One,Cambridge United,Bradford,NS
+1564586,2027-02-09,League One,Leyton Orient,Bromley,NS
+1564587,2027-02-09,League One,Mansfield Town,Reading,NS
+1564589,2027-02-09,League One,Notts County,Doncaster,NS
+1564588,2027-02-09,League One,Milton Keynes Dons,Wigan,NS
+1564036,2027-02-09,League Two,Newport County,Salford City,NS
+1564033,2027-02-09,League Two,Crawley Town,Northampton,NS
+1564041,2027-02-09,League Two,Walsall,Crewe,NS
+1564032,2027-02-09,League Two,Colchester,Bristol Rovers,NS
+1564040,2027-02-09,League Two,Shrewsbury,Rochdale,NS
+1564038,2027-02-09,League Two,Port Vale,Swindon Town,NS
+1564039,2027-02-09,League Two,Rotherham,Tranmere,NS
+1564035,2027-02-09,League Two,Grimsby,Accrington ST,NS
+1564034,2027-02-09,League Two,Gillingham,Chesterfield,NS
+1564037,2027-02-09,League Two,Oldham,Fleetwood Town,NS
+1557614,2027-02-10,Premier League,Manchester United,Brighton,NS
+1557615,2027-02-10,Premier League,Newcastle,Chelsea,NS
+1557611,2027-02-10,Premier League,Fulham,Nottingham Forest,NS
+1557610,2027-02-10,Premier League,Everton,Leeds,NS
+1557608,2027-02-10,Premier League,Coventry,Liverpool,NS
+1557612,2027-02-10,Premier League,Hull City,Sunderland,NS
+1557613,2027-02-10,Premier League,Ipswich,Arsenal,NS
+1557609,2027-02-10,Premier League,Crystal Palace,Brentford,NS
+1557616,2027-02-10,Premier League,Tottenham,Manchester City,NS
+1557607,2027-02-10,Premier League,Aston Villa,Bournemouth,NS
+1563450,2027-02-13,EFL Championship,Portsmouth,Charlton,NS
+1563452,2027-02-13,EFL Championship,Stoke City,Watford,NS
+1564604,2027-02-13,League One,Sheffield Wednesday,Peterborough,NS
+1564595,2027-02-13,League One,AFC Wimbledon,Bromley,NS
+1564602,2027-02-13,League One,Oxford United,Leicester,NS
+1563447,2027-02-13,EFL Championship,Lincoln,Preston,NS
+1564600,2027-02-13,League One,Milton Keynes Dons,Wycombe,NS
+1563448,2027-02-13,EFL Championship,Millwall,Blackburn,NS
+1563444,2027-02-13,EFL Championship,Bristol City,Southampton,NS
+1563453,2027-02-13,EFL Championship,Wolves,Sheffield Utd,NS
+1563446,2027-02-13,EFL Championship,Cardiff,Bolton,NS
+1563445,2027-02-13,EFL Championship,Burnley,Swansea,NS
+1563443,2027-02-13,EFL Championship,Birmingham,Derby,NS
+1563454,2027-02-13,EFL Championship,Wrexham,West Ham,NS
+1564596,2027-02-13,League One,Blackpool,Reading,NS
+1564054,2027-02-13,League Two,York,Crewe,NS
+1564605,2027-02-13,League One,Stevenage,Barnsley,NS
+1556786,2027-02-13,Scottish Premiership,Falkirk,Rangers,NS
+1556785,2027-02-13,Scottish Premiership,Dundee,ST Johnstone,NS
+1556789,2027-02-13,Scottish Premiership,ST Mirren,Motherwell,NS
+1556788,2027-02-13,Scottish Premiership,Kilmarnock,Dundee Utd,NS
+1556787,2027-02-13,Scottish Premiership,Hibernian,Aberdeen,NS
+1556784,2027-02-13,Scottish Premiership,Celtic,Heart Of Midlothian,NS
+1564051,2027-02-13,League Two,Rotherham,Bristol Rovers,NS
+1564053,2027-02-13,League Two,Walsall,Exeter City,NS
+1564046,2027-02-13,League Two,Gillingham,Rochdale,NS
+1564049,2027-02-13,League Two,Oldham,Tranmere,NS
+1564050,2027-02-13,League Two,Port Vale,Salford City,NS
+1564052,2027-02-13,League Two,Shrewsbury,Fleetwood Town,NS
+1564044,2027-02-13,League Two,Colchester,Swindon Town,NS
+1564045,2027-02-13,League Two,Crawley Town,Accrington ST,NS
+1564047,2027-02-13,League Two,Grimsby,Cheltenham,NS
+1564048,2027-02-13,League Two,Newport County,Northampton,NS
+1564043,2027-02-13,League Two,Barnet,Chesterfield,NS
+1564597,2027-02-13,League One,Cambridge United,Burton Albion,NS
+1564598,2027-02-13,League One,Leyton Orient,Luton,NS
+1564599,2027-02-13,League One,Mansfield Town,Bradford,NS
+1564601,2027-02-13,League One,Notts County,Huddersfield,NS
+1564606,2027-02-13,League One,Stockport County,Wigan,NS
+1564603,2027-02-13,League One,Plymouth,Doncaster,NS
+1563449,2027-02-13,EFL Championship,Norwich,Middlesbrough,NS
+1563451,2027-02-13,EFL Championship,QPR,West Brom,NS
+1570569,2027-02-14,La Liga,Real Sociedad,Real Betis,NS
+1570567,2027-02-14,La Liga,Racing Santander,Getafe,NS
+1570568,2027-02-14,La Liga,Real Madrid,Athletic Club,NS
+1570565,2027-02-14,La Liga,Levante,Malaga,NS
+1570563,2027-02-14,La Liga,Celta Vigo,Rayo Vallecano,NS
+1570570,2027-02-14,La Liga,Sevilla,Espanyol,NS
+1570566,2027-02-14,La Liga,Osasuna,Atletico Madrid,NS
+1570564,2027-02-14,La Liga,Elche,Deportivo La Coruna,NS
+1570572,2027-02-14,La Liga,Villarreal,Barcelona,NS
+1570571,2027-02-14,La Liga,Valencia,Alaves,NS
+1563460,2027-02-16,EFL Championship,Watford,Cardiff,NS
+1563456,2027-02-16,EFL Championship,Charlton,Burnley,NS
+1563457,2027-02-16,EFL Championship,Derby,QPR,NS
+1563462,2027-02-16,EFL Championship,West Ham,Lincoln,NS
+1563458,2027-02-16,EFL Championship,Preston,Birmingham,NS
+1563455,2027-02-16,EFL Championship,Blackburn,Bristol City,NS
+1563459,2027-02-16,EFL Championship,Sheffield Utd,Portsmouth,NS
+1563461,2027-02-16,EFL Championship,West Brom,Wrexham,NS
+1563465,2027-02-17,EFL Championship,Southampton,Norwich,NS
+1563463,2027-02-17,EFL Championship,Bolton,Wolves,NS
+1563464,2027-02-17,EFL Championship,Middlesbrough,Stoke City,NS
+1563466,2027-02-17,EFL Championship,Swansea,Millwall,NS
+1557625,2027-02-20,Premier League,Nottingham Forest,Manchester United,NS
+1557622,2027-02-20,Premier League,Leeds,Aston Villa,NS
+1557619,2027-02-20,Premier League,Brentford,Coventry,NS
+1564609,2027-02-20,League One,Bromley,Blackpool,NS
+1564614,2027-02-20,League One,Luton,Stevenage,NS
+1564608,2027-02-20,League One,Bradford,Notts County,NS
+1564611,2027-02-20,League One,Doncaster,AFC Wimbledon,NS
+1564615,2027-02-20,League One,Peterborough,Milton Keynes Dons,NS
+1557626,2027-02-20,Premier League,Sunderland,Everton,NS
+1564610,2027-02-20,League One,Burton Albion,Oxford United,NS
+1564607,2027-02-20,League One,Barnsley,Plymouth,NS
+1564618,2027-02-20,League One,Wycombe,Leyton Orient,NS
+1564057,2027-02-20,League Two,Cheltenham,Crawley Town,NS
+1564617,2027-02-20,League One,Wigan,Sheffield Wednesday,NS
+1564059,2027-02-20,League Two,Crewe,Colchester,NS
+1564055,2027-02-20,League Two,Accrington ST,Barnet,NS
+1564616,2027-02-20,League One,Reading,Cambridge United,NS
+1564058,2027-02-20,League Two,Chesterfield,Oldham,NS
+1564063,2027-02-20,League Two,Rochdale,Walsall,NS
+1564062,2027-02-20,League Two,Northampton,Shrewsbury,NS
+1564061,2027-02-20,League Two,Fleetwood Town,Newport County,NS
+1564056,2027-02-20,League Two,Bristol Rovers,Grimsby,NS
+1556792,2027-02-20,Scottish Premiership,Hibernian,Celtic,NS
+1556793,2027-02-20,Scottish Premiership,Motherwell,Heart Of Midlothian,NS
+1556794,2027-02-20,Scottish Premiership,Rangers,ST Mirren,NS
+1556795,2027-02-20,Scottish Premiership,ST Johnstone,Kilmarnock,NS
+1556790,2027-02-20,Scottish Premiership,Dundee Utd,Aberdeen,NS
+1556791,2027-02-20,Scottish Premiership,Falkirk,Dundee,NS
+1564060,2027-02-20,League Two,Exeter City,Port Vale,NS
+1564065,2027-02-20,League Two,Swindon Town,York,NS
+1564613,2027-02-20,League One,Leicester,Stockport County,NS
+1564066,2027-02-20,League Two,Tranmere,Gillingham,NS
+1563471,2027-02-20,EFL Championship,Middlesbrough,Birmingham,NS
+1563470,2027-02-20,EFL Championship,Derby,Burnley,NS
+1563468,2027-02-20,EFL Championship,Bolton,Norwich,NS
+1563467,2027-02-20,EFL Championship,Blackburn,Portsmouth,NS
+1563475,2027-02-20,EFL Championship,Swansea,Lincoln,NS
+1563469,2027-02-20,EFL Championship,Charlton,Cardiff,NS
+1563473,2027-02-20,EFL Championship,Sheffield Utd,Stoke City,NS
+1563472,2027-02-20,EFL Championship,Preston,QPR,NS
+1563477,2027-02-20,EFL Championship,West Brom,Wolves,NS
+1563476,2027-02-20,EFL Championship,Watford,Bristol City,NS
+1557620,2027-02-20,Premier League,Brighton,Tottenham,NS
+1557624,2027-02-20,Premier League,Manchester City,Newcastle,NS
+1557621,2027-02-20,Premier League,Chelsea,Ipswich,NS
+1557617,2027-02-20,Premier League,Arsenal,Fulham,NS
+1557623,2027-02-20,Premier League,Liverpool,Hull City,NS
+1557618,2027-02-20,Premier League,Bournemouth,Crystal Palace,NS
+1564064,2027-02-20,League Two,Salford City,Rotherham,NS
+1563474,2027-02-20,EFL Championship,Southampton,Wrexham,NS
+1564612,2027-02-20,League One,Huddersfield,Mansfield Town,NS
+1570574,2027-02-21,La Liga,Athletic Club,Celta Vigo,NS
+1570576,2027-02-21,La Liga,Barcelona,Levante,NS
+1570575,2027-02-21,La Liga,Atletico Madrid,Elche,NS
+1570579,2027-02-21,La Liga,Malaga,Real Betis,NS
+1570581,2027-02-21,La Liga,Sevilla,Real Madrid,NS
+1570578,2027-02-21,La Liga,Espanyol,Osasuna,NS
+1570573,2027-02-21,La Liga,Alaves,Racing Santander,NS
+1570577,2027-02-21,La Liga,Deportivo La Coruna,Real Sociedad,NS
+1570580,2027-02-21,La Liga,Rayo Vallecano,Getafe,NS
+1563478,2027-02-21,EFL Championship,West Ham,Millwall,NS
+1570582,2027-02-21,La Liga,Villarreal,Valencia,NS
+1564078,2027-02-27,League Two,York,Rochdale,NS
+1564075,2027-02-27,League Two,Northampton,Salford City,NS
+1564070,2027-02-27,League Two,Chesterfield,Bristol Rovers,NS
+1564072,2027-02-27,League Two,Gillingham,Colchester,NS
+1564076,2027-02-27,League Two,Oldham,Shrewsbury,NS
+1564067,2027-02-27,League Two,Accrington ST,Port Vale,NS
+1564074,2027-02-27,League Two,Newport County,Crewe,NS
+1564073,2027-02-27,League Two,Grimsby,Swindon Town,NS
+1564068,2027-02-27,League Two,Barnet,Walsall,NS
+1564069,2027-02-27,League Two,Cheltenham,Exeter City,NS
+1557634,2027-02-27,Premier League,Manchester United,Arsenal,NS
+1557635,2027-02-27,Premier League,Newcastle,Brentford,NS
+1564071,2027-02-27,League Two,Crawley Town,Rotherham,NS
+1564077,2027-02-27,League Two,Tranmere,Fleetwood Town,NS
+1556796,2027-02-27,Scottish Premiership,Aberdeen,ST Johnstone,NS
+1564630,2027-02-27,League One,Reading,Stockport County,NS
+1564619,2027-02-27,League One,Barnsley,Wigan,NS
+1563490,2027-02-27,EFL Championship,Wrexham,Derby,NS
+1564624,2027-02-27,League One,Huddersfield,Wycombe,NS
+1564623,2027-02-27,League One,Cambridge United,Peterborough,NS
+1557631,2027-02-27,Premier League,Fulham,Leeds,NS
+1557630,2027-02-27,Premier League,Everton,Nottingham Forest,NS
+1557636,2027-02-27,Premier League,Tottenham,Liverpool,NS
+1557629,2027-02-27,Premier League,Crystal Palace,Sunderland,NS
+1557633,2027-02-27,Premier League,Ipswich,Brighton,NS
+1557632,2027-02-27,Premier League,Hull City,Manchester City,NS
+1564622,2027-02-27,League One,Burton Albion,Milton Keynes Dons,NS
+1557627,2027-02-27,Premier League,Aston Villa,Chelsea,NS
+1563489,2027-02-27,EFL Championship,Wolves,Middlesbrough,NS
+1563482,2027-02-27,EFL Championship,Cardiff,Blackburn,NS
+1563481,2027-02-27,EFL Championship,Burnley,Watford,NS
+1563479,2027-02-27,EFL Championship,Birmingham,West Brom,NS
+1563480,2027-02-27,EFL Championship,Bristol City,Charlton,NS
+1563484,2027-02-27,EFL Championship,Millwall,Preston,NS
+1563485,2027-02-27,EFL Championship,Norwich,Swansea,NS
+1563487,2027-02-27,EFL Championship,QPR,West Ham,NS
+1563488,2027-02-27,EFL Championship,Stoke City,Bolton,NS
+1563483,2027-02-27,EFL Championship,Lincoln,Sheffield Utd,NS
+1557628,2027-02-27,Premier League,Coventry,Bournemouth,NS
+1564628,2027-02-27,League One,Oxford United,Luton,NS
+1556798,2027-02-27,Scottish Premiership,Dundee,Kilmarnock,NS
+1556801,2027-02-27,Scottish Premiership,ST Mirren,Hibernian,NS
+1556797,2027-02-27,Scottish Premiership,Celtic,Rangers,NS
+1556799,2027-02-27,Scottish Premiership,Heart Of Midlothian,Dundee Utd,NS
+1556800,2027-02-27,Scottish Premiership,Motherwell,Falkirk,NS
+1564627,2027-02-27,League One,Notts County,Bromley,NS
+1564626,2027-02-27,League One,Mansfield Town,Stevenage,NS
+1564625,2027-02-27,League One,Leyton Orient,Doncaster,NS
+1564629,2027-02-27,League One,Plymouth,Sheffield Wednesday,NS
+1564620,2027-02-27,League One,Blackpool,AFC Wimbledon,NS
+1564621,2027-02-27,League One,Bradford,Leicester,NS
+1570590,2027-02-28,La Liga,Racing Santander,Rayo Vallecano,NS
+1570589,2027-02-28,La Liga,Osasuna,Sevilla,NS
+1570583,2027-02-28,La Liga,Athletic Club,Barcelona,NS
+1570588,2027-02-28,La Liga,Malaga,Atletico Madrid,NS
+1570585,2027-02-28,La Liga,Celta Vigo,Espanyol,NS
+1563486,2027-02-28,EFL Championship,Portsmouth,Southampton,NS
+1570591,2027-02-28,La Liga,Real Madrid,Valencia,NS
+1570584,2027-02-28,La Liga,Real Betis,Villarreal,NS
+1570586,2027-02-28,La Liga,Getafe,Alaves,NS
+1570592,2027-02-28,La Liga,Real Sociedad,Elche,NS
+1570587,2027-02-28,La Liga,Levante,Deportivo La Coruna,NS
+1563498,2027-03-02,EFL Championship,Watford,Wrexham,NS
+1563494,2027-03-02,EFL Championship,Cardiff,Derby,NS
+1563493,2027-03-02,EFL Championship,Burnley,West Brom,NS
+1563492,2027-03-02,EFL Championship,Bristol City,Birmingham,NS
+1563491,2027-03-02,EFL Championship,Bolton,QPR,NS
+1563497,2027-03-02,EFL Championship,Norwich,Millwall,NS
+1563495,2027-03-02,EFL Championship,Charlton,West Ham,NS
+1563496,2027-03-02,EFL Championship,Middlesbrough,Blackburn,NS
+1563499,2027-03-03,EFL Championship,Portsmouth,Lincoln,NS
+1557646,2027-03-03,Premier League,Sunderland,Manchester United,NS
+1557645,2027-03-03,Premier League,Nottingham Forest,Newcastle,NS
+1557642,2027-03-03,Premier League,Leeds,Hull City,NS
+1557639,2027-03-03,Premier League,Brentford,Ipswich,NS
+1557640,2027-03-03,Premier League,Brighton,Fulham,NS
+1557641,2027-03-03,Premier League,Chelsea,Coventry,NS
+1557644,2027-03-03,Premier League,Manchester City,Everton,NS
+1557637,2027-03-03,Premier League,Arsenal,Crystal Palace,NS
+1557638,2027-03-03,Premier League,Bournemouth,Tottenham,NS
+1557643,2027-03-03,Premier League,Liverpool,Aston Villa,NS
+1563501,2027-03-03,EFL Championship,Stoke City,Southampton,NS
+1563500,2027-03-03,EFL Championship,Sheffield Utd,Swansea,NS
+1563502,2027-03-03,EFL Championship,Wolves,Preston,NS
+1563511,2027-03-06,EFL Championship,Swansea,Stoke City,NS
+1563509,2027-03-06,EFL Championship,QPR,Portsmouth,NS
+1563505,2027-03-06,EFL Championship,Derby,Charlton,NS
+1563504,2027-03-06,EFL Championship,Blackburn,Wolves,NS
+1563507,2027-03-06,EFL Championship,Millwall,Bristol City,NS
+1563514,2027-03-06,EFL Championship,Wrexham,Cardiff,NS
+1563506,2027-03-06,EFL Championship,Lincoln,Middlesbrough,NS
+1563510,2027-03-06,EFL Championship,Southampton,Watford,NS
+1563513,2027-03-06,EFL Championship,West Ham,Burnley,NS
+1563503,2027-03-06,EFL Championship,Birmingham,Sheffield Utd,NS
+1563508,2027-03-06,EFL Championship,Preston,Bolton,NS
+1563512,2027-03-06,EFL Championship,West Brom,Norwich,NS
+1564632,2027-03-06,League One,Bromley,Barnsley,NS
+1564640,2027-03-06,League One,Stockport County,Plymouth,NS
+1564639,2027-03-06,League One,Stevenage,Burton Albion,NS
+1564635,2027-03-06,League One,Luton,Reading,NS
+1564642,2027-03-06,League One,Wycombe,Blackpool,NS
+1564633,2027-03-06,League One,Doncaster,Mansfield Town,NS
+1564637,2027-03-06,League One,Peterborough,Bradford,NS
+1564636,2027-03-06,League One,Milton Keynes Dons,Oxford United,NS
+1564086,2027-03-06,League Two,Rotherham,Cheltenham,NS
+1564638,2027-03-06,League One,Sheffield Wednesday,Leyton Orient,NS
+1564641,2027-03-06,League One,Wigan,Cambridge United,NS
+1564634,2027-03-06,League One,Leicester,Notts County,NS
+1564631,2027-03-06,League One,AFC Wimbledon,Huddersfield,NS
+1564079,2027-03-06,League Two,Bristol Rovers,York,NS
+1564083,2027-03-06,League Two,Fleetwood Town,Chesterfield,NS
+1564085,2027-03-06,League Two,Rochdale,Newport County,NS
+1564090,2027-03-06,League Two,Walsall,Gillingham,NS
+1564084,2027-03-06,League Two,Port Vale,Oldham,NS
+1564088,2027-03-06,League Two,Shrewsbury,Tranmere,NS
+1564089,2027-03-06,League Two,Swindon Town,Northampton,NS
+1564080,2027-03-06,League Two,Colchester,Accrington ST,NS
+1564087,2027-03-06,League Two,Salford City,Barnet,NS
+1564082,2027-03-06,League Two,Exeter City,Grimsby,NS
+1564081,2027-03-06,League Two,Crewe,Crawley Town,NS
+1570597,2027-03-07,La Liga,Elche,Malaga,NS
+1570599,2027-03-07,La Liga,Rayo Vallecano,Osasuna,NS
+1570594,2027-03-07,La Liga,Atletico Madrid,Celta Vigo,NS
+1570601,2027-03-07,La Liga,Valencia,Levante,NS
+1570596,2027-03-07,La Liga,Deportivo La Coruna,Getafe,NS
+1570593,2027-03-07,La Liga,Alaves,Athletic Club,NS
+1570598,2027-03-07,La Liga,Espanyol,Racing Santander,NS
+1570602,2027-03-07,La Liga,Villarreal,Real Madrid,NS
+1570600,2027-03-07,La Liga,Sevilla,Real Sociedad,NS
+1570595,2027-03-07,La Liga,Barcelona,Real Betis,NS
+1556804,2027-03-13,Scottish Premiership,Hibernian,Falkirk,NS
+1556805,2027-03-13,Scottish Premiership,Kilmarnock,Heart Of Midlothian,NS
+1556802,2027-03-13,Scottish Premiership,Aberdeen,ST Mirren,NS
+1556806,2027-03-13,Scottish Premiership,Rangers,Motherwell,NS
+1556807,2027-03-13,Scottish Premiership,ST Johnstone,Celtic,NS
+1557650,2027-03-13,Premier League,Coventry,Manchester City,NS
+1557655,2027-03-13,Premier League,Sunderland,Brentford,NS
+1557647,2027-03-13,Premier League,Aston Villa,Hull City,NS
+1557652,2027-03-13,Premier League,Leeds,Brighton,NS
+1557651,2027-03-13,Premier League,Crystal Palace,Fulham,NS
+1557649,2027-03-13,Premier League,Chelsea,Arsenal,NS
+1557653,2027-03-13,Premier League,Liverpool,Ipswich,NS
+1557648,2027-03-13,Premier League,Bournemouth,Newcastle,NS
+1557654,2027-03-13,Premier League,Manchester United,Everton,NS
+1556803,2027-03-13,Scottish Premiership,Dundee Utd,Dundee,NS
+1557656,2027-03-13,Premier League,Tottenham,Nottingham Forest,NS
+1564098,2027-03-13,League Two,Newport County,Bristol Rovers,NS
+1564094,2027-03-13,League Two,Chesterfield,Salford City,NS
+1564649,2027-03-13,League One,Leyton Orient,Wigan,NS
+1564647,2027-03-13,League One,Cambridge United,Bromley,NS
+1564653,2027-03-13,League One,Plymouth,Wycombe,NS
+1564644,2027-03-13,League One,Blackpool,Stockport County,NS
+1564645,2027-03-13,League One,Bradford,Sheffield Wednesday,NS
+1564652,2027-03-13,League One,Oxford United,Stevenage,NS
+1564646,2027-03-13,League One,Burton Albion,Leicester,NS
+1564643,2027-03-13,League One,Barnsley,Doncaster,NS
+1564654,2027-03-13,League One,Reading,AFC Wimbledon,NS
+1564648,2027-03-13,League One,Huddersfield,Milton Keynes Dons,NS
+1563525,2027-03-13,EFL Championship,Watford,Derby,NS
+1563526,2027-03-13,EFL Championship,Wolves,Lincoln,NS
+1563518,2027-03-13,EFL Championship,Cardiff,Swansea,NS
+1563517,2027-03-13,EFL Championship,Burnley,Millwall,NS
+1563516,2027-03-13,EFL Championship,Bristol City,West Brom,NS
+1563523,2027-03-13,EFL Championship,Sheffield Utd,QPR,NS
+1563515,2027-03-13,EFL Championship,Bolton,Birmingham,NS
+1563520,2027-03-13,EFL Championship,Middlesbrough,Southampton,NS
+1563521,2027-03-13,EFL Championship,Norwich,Preston,NS
+1563524,2027-03-13,EFL Championship,Stoke City,West Ham,NS
+1563519,2027-03-13,EFL Championship,Charlton,Blackburn,NS
+1563522,2027-03-13,EFL Championship,Portsmouth,Wrexham,NS
+1564099,2027-03-13,League Two,Northampton,Crewe,NS
+1564102,2027-03-13,League Two,York,Rotherham,NS
+1564101,2027-03-13,League Two,Tranmere,Port Vale,NS
+1564093,2027-03-13,League Two,Cheltenham,Swindon Town,NS
+1564092,2027-03-13,League Two,Barnet,Shrewsbury,NS
+1564650,2027-03-13,League One,Mansfield Town,Peterborough,NS
+1564651,2027-03-13,League One,Notts County,Luton,NS
+1564100,2027-03-13,League Two,Oldham,Colchester,NS
+1564096,2027-03-13,League Two,Gillingham,Fleetwood Town,NS
+1564091,2027-03-13,League Two,Accrington ST,Exeter City,NS
+1564095,2027-03-13,League Two,Crawley Town,Rochdale,NS
+1564097,2027-03-13,League Two,Grimsby,Walsall,NS
+1570611,2027-03-14,La Liga,Racing Santander,Atletico Madrid,NS
+1570605,2027-03-14,La Liga,Barcelona,Deportivo La Coruna,NS
+1570604,2027-03-14,La Liga,Athletic Club,Valencia,NS
+1570609,2027-03-14,La Liga,Malaga,Rayo Vallecano,NS
+1570612,2027-03-14,La Liga,Real Madrid,Espanyol,NS
+1570603,2027-03-14,La Liga,Alaves,Sevilla,NS
+1570606,2027-03-14,La Liga,Real Betis,Levante,NS
+1570608,2027-03-14,La Liga,Getafe,Real Sociedad,NS
+1570610,2027-03-14,La Liga,Osasuna,Celta Vigo,NS
+1570607,2027-03-14,La Liga,Elche,Villarreal,NS
+1563534,2027-03-16,EFL Championship,Wrexham,Norwich,NS
+1563531,2027-03-16,EFL Championship,Southampton,Wolves,NS
+1563529,2027-03-16,EFL Championship,Preston,Burnley,NS
+1563533,2027-03-16,EFL Championship,West Brom,Portsmouth,NS
+1563527,2027-03-16,EFL Championship,Derby,Middlesbrough,NS
+1563530,2027-03-16,EFL Championship,QPR,Stoke City,NS
+1563532,2027-03-16,EFL Championship,Swansea,Bristol City,NS
+1563528,2027-03-16,EFL Championship,Lincoln,Cardiff,NS
+1563537,2027-03-17,EFL Championship,Millwall,Watford,NS
+1563535,2027-03-17,EFL Championship,Birmingham,Charlton,NS
+1563536,2027-03-17,EFL Championship,Blackburn,Bolton,NS
+1563538,2027-03-17,EFL Championship,West Ham,Sheffield Utd,NS
+1557664,2027-03-20,Premier League,Manchester City,Manchester United,NS
+1564662,2027-03-20,League One,Sheffield Wednesday,Barnsley,NS
+1564665,2027-03-20,League One,Wigan,Blackpool,NS
+1564658,2027-03-20,League One,Leicester,Huddersfield,NS
+1557660,2027-03-20,Premier League,Everton,Tottenham,NS
+1557665,2027-03-20,Premier League,Newcastle,Leeds,NS
+1564110,2027-03-20,League Two,Rotherham,Grimsby,NS
+1564103,2027-03-20,League Two,Bristol Rovers,Cheltenham,NS
+1564107,2027-03-20,League Two,Fleetwood Town,Crawley Town,NS
+1564109,2027-03-20,League Two,Rochdale,Northampton,NS
+1564114,2027-03-20,League Two,Walsall,York,NS
+1564108,2027-03-20,League Two,Port Vale,Barnet,NS
+1564112,2027-03-20,League Two,Shrewsbury,Chesterfield,NS
+1564113,2027-03-20,League Two,Swindon Town,Newport County,NS
+1564104,2027-03-20,League Two,Colchester,Tranmere,NS
+1564105,2027-03-20,League Two,Crewe,Gillingham,NS
+1564106,2027-03-20,League Two,Exeter City,Oldham,NS
+1564111,2027-03-20,League Two,Salford City,Accrington ST,NS
+1563544,2027-03-20,EFL Championship,Millwall,Cardiff,NS
+1563540,2027-03-20,EFL Championship,Bristol City,QPR,NS
+1563539,2027-03-20,EFL Championship,Birmingham,Blackburn,NS
+1563541,2027-03-20,EFL Championship,Burnley,Bolton,NS
+1563546,2027-03-20,EFL Championship,Southampton,Charlton,NS
+1563548,2027-03-20,EFL Championship,Watford,Portsmouth,NS
+1564655,2027-03-20,League One,AFC Wimbledon,Leyton Orient,NS
+1564660,2027-03-20,League One,Milton Keynes Dons,Mansfield Town,NS
+1557661,2027-03-20,Premier League,Fulham,Liverpool,NS
+1564657,2027-03-20,League One,Doncaster,Bradford,NS
+1557659,2027-03-20,Premier League,Brighton,Coventry,NS
+1557658,2027-03-20,Premier League,Brentford,Bournemouth,NS
+1557663,2027-03-20,Premier League,Ipswich,Crystal Palace,NS
+1557662,2027-03-20,Premier League,Hull City,Chelsea,NS
+1557666,2027-03-20,Premier League,Nottingham Forest,Aston Villa,NS
+1556810,2027-03-20,Scottish Premiership,Falkirk,Kilmarnock,NS
+1556812,2027-03-20,Scottish Premiership,ST Johnstone,Hibernian,NS
+1564661,2027-03-20,League One,Peterborough,Plymouth,NS
+1556809,2027-03-20,Scottish Premiership,Dundee,Motherwell,NS
+1556813,2027-03-20,Scottish Premiership,ST Mirren,Dundee Utd,NS
+1556808,2027-03-20,Scottish Premiership,Celtic,Aberdeen,NS
+1556811,2027-03-20,Scottish Premiership,Heart Of Midlothian,Rangers,NS
+1564666,2027-03-20,League One,Wycombe,Oxford United,NS
+1563550,2027-03-20,EFL Championship,Wrexham,Stoke City,NS
+1564659,2027-03-20,League One,Luton,Burton Albion,NS
+1564663,2027-03-20,League One,Stevenage,Notts County,NS
+1564656,2027-03-20,League One,Bromley,Reading,NS
+1564664,2027-03-20,League One,Stockport County,Cambridge United,NS
+1557657,2027-03-20,Premier League,Arsenal,Sunderland,NS
+1563549,2027-03-20,EFL Championship,West Brom,Lincoln,NS
+1563542,2027-03-20,EFL Championship,Derby,Preston,NS
+1563543,2027-03-20,EFL Championship,Middlesbrough,Sheffield Utd,NS
+1563545,2027-03-20,EFL Championship,Norwich,West Ham,NS
+1563547,2027-03-20,EFL Championship,Swansea,Wolves,NS
+1570617,2027-03-21,La Liga,Racing Santander,Real Betis,NS
+1570618,2027-03-21,La Liga,Rayo Vallecano,Barcelona,NS
+1570619,2027-03-21,La Liga,Real Sociedad,Alaves,NS
+1570615,2027-03-21,La Liga,Espanyol,Athletic Club,NS
+1570616,2027-03-21,La Liga,Levante,Osasuna,NS
+1570620,2027-03-21,La Liga,Sevilla,Elche,NS
+1570613,2027-03-21,La Liga,Atletico Madrid,Getafe,NS
+1570622,2027-03-21,La Liga,Villarreal,Malaga,NS
+1570621,2027-03-21,La Liga,Valencia,Deportivo La Coruna,NS
+1570614,2027-03-21,La Liga,Celta Vigo,Real Madrid,NS
+1564117,2027-03-26,League Two,Cheltenham,Walsall,NS
+1564124,2027-03-26,League Two,Salford City,York,NS
+1564126,2027-03-26,League Two,Tranmere,Grimsby,NS
+1564123,2027-03-26,League Two,Rotherham,Colchester,NS
+1564120,2027-03-26,League Two,Exeter City,Gillingham,NS
+1564675,2027-03-26,League One,Notts County,Barnsley,NS
+1564673,2027-03-26,League One,Mansfield Town,Cambridge United,NS
+1564115,2027-03-26,League Two,Barnet,Newport County,NS
+1564672,2027-03-26,League One,Luton,Plymouth,NS
+1564669,2027-03-26,League One,Doncaster,Blackpool,NS
+1564677,2027-03-26,League One,Peterborough,AFC Wimbledon,NS
+1564674,2027-03-26,League One,Milton Keynes Dons,Sheffield Wednesday,NS
+1564667,2027-03-26,League One,Bradford,Wigan,NS
+1564676,2027-03-26,League One,Oxford United,Leyton Orient,NS
+1564678,2027-03-26,League One,Stevenage,Bromley,NS
+1564671,2027-03-26,League One,Leicester,Wycombe,NS
+1564670,2027-03-26,League One,Huddersfield,Reading,NS
+1564125,2027-03-26,League Two,Shrewsbury,Accrington ST,NS
+1564116,2027-03-26,League Two,Bristol Rovers,Northampton,NS
+1564121,2027-03-26,League Two,Fleetwood Town,Port Vale,NS
+1564122,2027-03-26,League Two,Oldham,Crewe,NS
+1564118,2027-03-26,League Two,Chesterfield,Rochdale,NS
+1564668,2027-03-26,League One,Burton Albion,Stockport County,NS
+1564119,2027-03-26,League Two,Crawley Town,Swindon Town,NS
+1564687,2027-03-29,League One,Sheffield Wednesday,Burton Albion,NS
+1564680,2027-03-29,League One,Barnsley,Mansfield Town,NS
+1564685,2027-03-29,League One,Plymouth,Notts County,NS
+1564681,2027-03-29,League One,Blackpool,Oxford United,NS
+1564690,2027-03-29,League One,Wycombe,Peterborough,NS
+1564683,2027-03-29,League One,Cambridge United,Milton Keynes Dons,NS
+1564684,2027-03-29,League One,Leyton Orient,Huddersfield,NS
+1564682,2027-03-29,League One,Bromley,Doncaster,NS
+1564688,2027-03-29,League One,Stockport County,Bradford,NS
+1564679,2027-03-29,League One,AFC Wimbledon,Leicester,NS
+1564132,2027-03-29,League Two,Newport County,Exeter City,NS
+1564138,2027-03-29,League Two,York,Oldham,NS
+1564686,2027-03-29,League One,Reading,Stevenage,NS
+1564133,2027-03-29,League Two,Northampton,Chesterfield,NS
+1564135,2027-03-29,League Two,Rochdale,Rotherham,NS
+1564137,2027-03-29,League Two,Walsall,Bristol Rovers,NS
+1564130,2027-03-29,League Two,Gillingham,Crawley Town,NS
+1564134,2027-03-29,League Two,Port Vale,Cheltenham,NS
+1564136,2027-03-29,League Two,Swindon Town,Shrewsbury,NS
+1564127,2027-03-29,League Two,Accrington ST,Tranmere,NS
+1564689,2027-03-29,League One,Wigan,Luton,NS
+1564129,2027-03-29,League Two,Crewe,Fleetwood Town,NS
+1564128,2027-03-29,League Two,Colchester,Barnet,NS
+1564131,2027-03-29,League Two,Grimsby,Salford City,NS
+1564143,2027-04-03,League Two,Crawley Town,Colchester,NS
+1564149,2027-04-03,League Two,Shrewsbury,Newport County,NS
+1564146,2027-04-03,League Two,Oldham,Grimsby,NS
+1564142,2027-04-03,League Two,Chesterfield,Walsall,NS
+1564145,2027-04-03,League Two,Fleetwood Town,York,NS
+1564140,2027-04-03,League Two,Bristol Rovers,Port Vale,NS
+1564147,2027-04-03,League Two,Rotherham,Accrington ST,NS
+1564150,2027-04-03,League Two,Tranmere,Crewe,NS
+1564139,2027-04-03,League Two,Barnet,Gillingham,NS
+1564141,2027-04-03,League Two,Cheltenham,Northampton,NS
+1564144,2027-04-03,League Two,Exeter City,Swindon Town,NS
+1564148,2027-04-03,League Two,Salford City,Rochdale,NS
+1563562,2027-04-03,EFL Championship,Wolves,Norwich,NS
+1563559,2027-04-03,EFL Championship,Sheffield Utd,West Brom,NS
+1564699,2027-04-03,League One,Notts County,Wigan,NS
+1556814,2027-04-03,Scottish Premiership,Dundee Utd,Falkirk,NS
+1556818,2027-04-03,Scottish Premiership,Rangers,Hibernian,NS
+1556817,2027-04-03,Scottish Premiership,Motherwell,Aberdeen,NS
+1556815,2027-04-03,Scottish Premiership,Heart Of Midlothian,ST Johnstone,NS
+1556819,2027-04-03,Scottish Premiership,ST Mirren,Dundee,NS
+1556816,2027-04-03,Scottish Premiership,Kilmarnock,Celtic,NS
+1563555,2027-04-03,EFL Championship,Lincoln,Derby,NS
+1563556,2027-04-03,EFL Championship,Portsmouth,Middlesbrough,NS
+1563560,2027-04-03,EFL Championship,Stoke City,Burnley,NS
+1563558,2027-04-03,EFL Championship,QPR,Wrexham,NS
+1563552,2027-04-03,EFL Championship,Bolton,Watford,NS
+1563551,2027-04-03,EFL Championship,Blackburn,Southampton,NS
+1563554,2027-04-03,EFL Championship,Charlton,Millwall,NS
+1563557,2027-04-03,EFL Championship,Preston,Swansea,NS
+1564697,2027-04-03,League One,Mansfield Town,Sheffield Wednesday,NS
+1563561,2027-04-03,EFL Championship,West Ham,Birmingham,NS
+1564702,2027-04-03,League One,Stevenage,Wycombe,NS
+1564693,2027-04-03,League One,Doncaster,Cambridge United,NS
+1564696,2027-04-03,League One,Luton,AFC Wimbledon,NS
+1564694,2027-04-03,League One,Huddersfield,Stockport County,NS
+1564695,2027-04-03,League One,Leicester,Leyton Orient,NS
+1564692,2027-04-03,League One,Burton Albion,Barnsley,NS
+1563553,2027-04-03,EFL Championship,Cardiff,Bristol City,NS
+1564691,2027-04-03,League One,Bradford,Blackpool,NS
+1564698,2027-04-03,League One,Milton Keynes Dons,Plymouth,NS
+1564701,2027-04-03,League One,Peterborough,Reading,NS
+1564700,2027-04-03,League One,Oxford United,Bromley,NS
+1570632,2027-04-04,La Liga,Real Sociedad,Valencia,NS
+1570628,2027-04-04,La Liga,Getafe,Espanyol,NS
+1570626,2027-04-04,La Liga,Deportivo La Coruna,Villarreal,NS
+1570625,2027-04-04,La Liga,Real Betis,Celta Vigo,NS
+1570631,2027-04-04,La Liga,Real Madrid,Atletico Madrid,NS
+1570629,2027-04-04,La Liga,Levante,Rayo Vallecano,NS
+1570624,2027-04-04,La Liga,Barcelona,Sevilla,NS
+1570627,2027-04-04,La Liga,Elche,Alaves,NS
+1570623,2027-04-04,La Liga,Athletic Club,Racing Santander,NS
+1570630,2027-04-04,La Liga,Malaga,Osasuna,NS
+1563568,2027-04-06,EFL Championship,Stoke City,Cardiff,NS
+1563566,2027-04-06,EFL Championship,Portsmouth,Wolves,NS
+1563564,2027-04-06,EFL Championship,Lincoln,Bristol City,NS
+1563567,2027-04-06,EFL Championship,QPR,Charlton,NS
+1563565,2027-04-06,EFL Championship,Millwall,Middlesbrough,NS
+1563569,2027-04-06,EFL Championship,Swansea,Southampton,NS
+1563563,2027-04-06,EFL Championship,Burnley,Wrexham,NS
+1563570,2027-04-06,EFL Championship,West Ham,Bolton,NS
+1563572,2027-04-07,EFL Championship,Preston,Watford,NS
+1563574,2027-04-07,EFL Championship,West Brom,Derby,NS
+1563573,2027-04-07,EFL Championship,Sheffield Utd,Blackburn,NS
+1563571,2027-04-07,EFL Championship,Birmingham,Norwich,NS
+1556821,2027-04-10,Scottish Premiership,Celtic,Dundee Utd,NS
+1556824,2027-04-10,Scottish Premiership,Hibernian,Heart Of Midlothian,NS
+1564160,2027-04-10,League Two,Swindon Town,Fleetwood Town,NS
+1564158,2027-04-10,League Two,Port Vale,Shrewsbury,NS
+1564162,2027-04-10,League Two,York,Tranmere,NS
+1564156,2027-04-10,League Two,Newport County,Crawley Town,NS
+1564153,2027-04-10,League Two,Crewe,Cheltenham,NS
+1556820,2027-04-10,Scottish Premiership,Aberdeen,Kilmarnock,NS
+1564151,2027-04-10,League Two,Accrington ST,Bristol Rovers,NS
+1564154,2027-04-10,League Two,Gillingham,Oldham,NS
+1564161,2027-04-10,League Two,Walsall,Rotherham,NS
+1564159,2027-04-10,League Two,Rochdale,Exeter City,NS
+1564157,2027-04-10,League Two,Northampton,Barnet,NS
+1556822,2027-04-10,Scottish Premiership,Dundee,Rangers,NS
+1564155,2027-04-10,League Two,Grimsby,Chesterfield,NS
+1564152,2027-04-10,League Two,Colchester,Salford City,NS
+1556823,2027-04-10,Scottish Premiership,Falkirk,ST Mirren,NS
+1563583,2027-04-10,EFL Championship,Southampton,Lincoln,NS
+1563584,2027-04-10,EFL Championship,Watford,West Brom,NS
+1564704,2027-04-10,League One,Barnsley,Peterborough,NS
+1563578,2027-04-10,EFL Championship,Cardiff,Portsmouth,NS
+1564712,2027-04-10,League One,Stockport County,Stevenage,NS
+1564706,2027-04-10,League One,Bromley,Luton,NS
+1564708,2027-04-10,League One,Leyton Orient,Milton Keynes Dons,NS
+1563585,2027-04-10,EFL Championship,Wolves,Birmingham,NS
+1564707,2027-04-10,League One,Cambridge United,Notts County,NS
+1564709,2027-04-10,League One,Plymouth,Oxford United,NS
+1564705,2027-04-10,League One,Blackpool,Huddersfield,NS
+1556825,2027-04-10,Scottish Premiership,ST Johnstone,Motherwell,NS
+1564710,2027-04-10,League One,Reading,Burton Albion,NS
+1564713,2027-04-10,League One,Wigan,Doncaster,NS
+1564711,2027-04-10,League One,Sheffield Wednesday,Leicester,NS
+1564714,2027-04-10,League One,Wycombe,Mansfield Town,NS
+1563586,2027-04-10,EFL Championship,Wrexham,Swansea,NS
+1564703,2027-04-10,League One,AFC Wimbledon,Bradford,NS
+1563582,2027-04-10,EFL Championship,Norwich,Sheffield Utd,NS
+1557674,2027-04-10,Premier League,Manchester United,Hull City,NS
+1557668,2027-04-10,Premier League,Bournemouth,Manchester City,NS
+1557673,2027-04-10,Premier League,Liverpool,Newcastle,NS
+1563579,2027-04-10,EFL Championship,Charlton,Stoke City,NS
+1557669,2027-04-10,Premier League,Chelsea,Fulham,NS
+1557671,2027-04-10,Premier League,Crystal Palace,Everton,NS
+1557672,2027-04-10,Premier League,Leeds,Nottingham Forest,NS
+1557667,2027-04-10,Premier League,Aston Villa,Brighton,NS
+1557675,2027-04-10,Premier League,Sunderland,Ipswich,NS
+1557676,2027-04-10,Premier League,Tottenham,Brentford,NS
+1563577,2027-04-10,EFL Championship,Bristol City,Burnley,NS
+1557670,2027-04-10,Premier League,Coventry,Arsenal,NS
+1563580,2027-04-10,EFL Championship,Derby,West Ham,NS
+1563581,2027-04-10,EFL Championship,Middlesbrough,QPR,NS
+1563576,2027-04-10,EFL Championship,Bolton,Millwall,NS
+1563575,2027-04-10,EFL Championship,Blackburn,Preston,NS
+1570634,2027-04-11,La Liga,Atletico Madrid,Levante,NS
+1570641,2027-04-11,La Liga,Valencia,Getafe,NS
+1570638,2027-04-11,La Liga,Racing Santander,Barcelona,NS
+1570639,2027-04-11,La Liga,Rayo Vallecano,Real Sociedad,NS
+1570637,2027-04-11,La Liga,Osasuna,Real Madrid,NS
+1570633,2027-04-11,La Liga,Alaves,Real Betis,NS
+1570636,2027-04-11,La Liga,Espanyol,Malaga,NS
+1570635,2027-04-11,La Liga,Celta Vigo,Elche,NS
+1570640,2027-04-11,La Liga,Sevilla,Deportivo La Coruna,NS
+1570642,2027-04-11,La Liga,Villarreal,Athletic Club,NS
+1564719,2027-04-13,League One,Burton Albion,Plymouth,NS
+1564715,2027-04-13,League One,AFC Wimbledon,Cambridge United,NS
+1564716,2027-04-13,League One,Barnsley,Bradford,NS
+1564724,2027-04-13,League One,Sheffield Wednesday,Stevenage,NS
+1564164,2027-04-13,League Two,Barnet,Bristol Rovers,NS
+1564722,2027-04-13,League One,Oxford United,Doncaster,NS
+1564170,2027-04-13,League Two,Grimsby,Port Vale,NS
+1564168,2027-04-13,League Two,Exeter City,Shrewsbury,NS
+1564167,2027-04-13,League Two,Crewe,Swindon Town,NS
+1564166,2027-04-13,League Two,Colchester,Newport County,NS
+1564163,2027-04-13,League Two,Accrington ST,Oldham,NS
+1564169,2027-04-13,League Two,Gillingham,Rotherham,NS
+1564165,2027-04-13,League Two,Chesterfield,Crawley Town,NS
+1564174,2027-04-13,League Two,Walsall,Fleetwood Town,NS
+1564172,2027-04-13,League Two,Rochdale,Tranmere,NS
+1564171,2027-04-13,League Two,Northampton,York,NS
+1564173,2027-04-13,League Two,Salford City,Cheltenham,NS
+1564723,2027-04-13,League One,Peterborough,Stockport County,NS
+1564725,2027-04-13,League One,Wigan,Leicester,NS
+1564721,2027-04-13,League One,Luton,Huddersfield,NS
+1564720,2027-04-13,League One,Leyton Orient,Mansfield Town,NS
+1564718,2027-04-13,League One,Bromley,Milton Keynes Dons,NS
+1564726,2027-04-13,League One,Reading,Wycombe,NS
+1564717,2027-04-13,League One,Blackpool,Notts County,NS
+1564182,2027-04-17,League Two,Rotherham,Northampton,NS
+1564180,2027-04-17,League Two,Oldham,Rochdale,NS
+1557685,2027-04-17,Premier League,Newcastle,Tottenham,NS
+1557681,2027-04-17,Premier League,Fulham,Sunderland,NS
+1557677,2027-04-17,Premier League,Arsenal,Aston Villa,NS
+1557680,2027-04-17,Premier League,Everton,Bournemouth,NS
+1557684,2027-04-17,Premier League,Manchester City,Crystal Palace,NS
+1557679,2027-04-17,Premier League,Brighton,Chelsea,NS
+1557678,2027-04-17,Premier League,Brentford,Leeds,NS
+1557686,2027-04-17,Premier League,Nottingham Forest,Liverpool,NS
+1563588,2027-04-17,EFL Championship,Burnley,Norwich,NS
+1564175,2027-04-17,League Two,Bristol Rovers,Gillingham,NS
+1557682,2027-04-17,Premier League,Hull City,Coventry,NS
+1563598,2027-04-17,EFL Championship,West Ham,Watford,NS
+1563587,2027-04-17,EFL Championship,Birmingham,Wrexham,NS
+1563590,2027-04-17,EFL Championship,Millwall,Southampton,NS
+1563592,2027-04-17,EFL Championship,Preston,Charlton,NS
+1563597,2027-04-17,EFL Championship,West Brom,Middlesbrough,NS
+1563589,2027-04-17,EFL Championship,Lincoln,Bolton,NS
+1563591,2027-04-17,EFL Championship,Portsmouth,Bristol City,NS
+1563596,2027-04-17,EFL Championship,Swansea,Derby,NS
+1563595,2027-04-17,EFL Championship,Stoke City,Wolves,NS
+1557683,2027-04-17,Premier League,Ipswich,Manchester United,NS
+1563593,2027-04-17,EFL Championship,QPR,Blackburn,NS
+1564178,2027-04-17,League Two,Fleetwood Town,Barnet,NS
+1564183,2027-04-17,League Two,Shrewsbury,Crewe,NS
+1564733,2027-04-17,League One,Milton Keynes Dons,AFC Wimbledon,NS
+1564730,2027-04-17,League One,Huddersfield,Bromley,NS
+1564731,2027-04-17,League One,Leicester,Barnsley,NS
+1564727,2027-04-17,League One,Bradford,Luton,NS
+1564729,2027-04-17,League One,Doncaster,Peterborough,NS
+1564735,2027-04-17,League One,Plymouth,Blackpool,NS
+1564738,2027-04-17,League One,Wycombe,Wigan,NS
+1564736,2027-04-17,League One,Stevenage,Leyton Orient,NS
+1564728,2027-04-17,League One,Cambridge United,Oxford United,NS
+1564732,2027-04-17,League One,Mansfield Town,Burton Albion,NS
+1564734,2027-04-17,League One,Notts County,Reading,NS
+1564737,2027-04-17,League One,Stockport County,Sheffield Wednesday,NS
+1564181,2027-04-17,League Two,Port Vale,Walsall,NS
+1563594,2027-04-17,EFL Championship,Sheffield Utd,Cardiff,NS
+1564186,2027-04-17,League Two,York,Chesterfield,NS
+1564185,2027-04-17,League Two,Tranmere,Exeter City,NS
+1564176,2027-04-17,League Two,Cheltenham,Colchester,NS
+1564179,2027-04-17,League Two,Newport County,Accrington ST,NS
+1564177,2027-04-17,League Two,Crawley Town,Grimsby,NS
+1564184,2027-04-17,League Two,Swindon Town,Salford City,NS
+1570650,2027-04-18,La Liga,Levante,Villarreal,NS
+1570645,2027-04-18,La Liga,Barcelona,Espanyol,NS
+1570643,2027-04-18,La Liga,Alaves,Rayo Vallecano,NS
+1570646,2027-04-18,La Liga,Real Betis,Athletic Club,NS
+1570648,2027-04-18,La Liga,Elche,Osasuna,NS
+1570652,2027-04-18,La Liga,Real Sociedad,Racing Santander,NS
+1570649,2027-04-18,La Liga,Getafe,Real Madrid,NS
+1570647,2027-04-18,La Liga,Deportivo La Coruna,Celta Vigo,NS
+1570651,2027-04-18,La Liga,Malaga,Valencia,NS
+1570644,2027-04-18,La Liga,Atletico Madrid,Sevilla,NS
+1563603,2027-04-20,EFL Championship,Norwich,Stoke City,NS
+1563604,2027-04-20,EFL Championship,Southampton,Birmingham,NS
+1563599,2027-04-20,EFL Championship,Bolton,Sheffield Utd,NS
+1563601,2027-04-20,EFL Championship,Derby,Portsmouth,NS
+1563602,2027-04-20,EFL Championship,Middlesbrough,Burnley,NS
+1563600,2027-04-20,EFL Championship,Charlton,West Brom,NS
+1563606,2027-04-20,EFL Championship,Wrexham,Millwall,NS
+1563605,2027-04-20,EFL Championship,Wolves,West Ham,NS
+1570656,2027-04-21,La Liga,Getafe,Real Betis,NS
+1570659,2027-04-21,La Liga,Real Madrid,Elche,NS
+1570655,2027-04-21,La Liga,Espanyol,Real Sociedad,NS
+1570654,2027-04-21,La Liga,Celta Vigo,Barcelona,NS
+1570660,2027-04-21,La Liga,Sevilla,Levante,NS
+1570662,2027-04-21,La Liga,Villarreal,Atletico Madrid,NS
+1570661,2027-04-21,La Liga,Valencia,Rayo Vallecano,NS
+1570653,2027-04-21,La Liga,Athletic Club,Deportivo La Coruna,NS
+1570658,2027-04-21,La Liga,Racing Santander,Malaga,NS
+1563610,2027-04-21,EFL Championship,Watford,Swansea,NS
+1563609,2027-04-21,EFL Championship,Cardiff,QPR,NS
+1563608,2027-04-21,EFL Championship,Bristol City,Preston,NS
+1563607,2027-04-21,EFL Championship,Blackburn,Lincoln,NS
+1570657,2027-04-21,La Liga,Osasuna,Alaves,NS
+1564189,2027-04-24,League Two,Chesterfield,Cheltenham,NS
+1564193,2027-04-24,League Two,Gillingham,York,NS
+1564187,2027-04-24,League Two,Accrington ST,Swindon Town,NS
+1564190,2027-04-24,League Two,Colchester,Shrewsbury,NS
+1564191,2027-04-24,League Two,Crewe,Rotherham,NS
+1564192,2027-04-24,League Two,Exeter City,Bristol Rovers,NS
+1564194,2027-04-24,League Two,Grimsby,Newport County,NS
+1564188,2027-04-24,League Two,Barnet,Crawley Town,NS
+1557691,2027-04-24,Premier League,Everton,Brighton,NS
+1557688,2027-04-24,Premier League,Bournemouth,Arsenal,NS
+1564748,2027-04-24,League One,Reading,Huddersfield,NS
+1564749,2027-04-24,League One,Sheffield Wednesday,Milton Keynes Dons,NS
+1564198,2027-04-24,League Two,Walsall,Tranmere,NS
+1564740,2027-04-24,League One,Barnsley,Stockport County,NS
+1564743,2027-04-24,League One,Burton Albion,Doncaster,NS
+1564739,2027-04-24,League One,AFC Wimbledon,Plymouth,NS
+1564746,2027-04-24,League One,Oxford United,Notts County,NS
+1564747,2027-04-24,League One,Peterborough,Leicester,NS
+1564741,2027-04-24,League One,Blackpool,Cambridge United,NS
+1564745,2027-04-24,League One,Luton,Wycombe,NS
+1564744,2027-04-24,League One,Leyton Orient,Bradford,NS
+1564742,2027-04-24,League One,Bromley,Mansfield Town,NS
+1557694,2027-04-24,Premier League,Newcastle,Ipswich,NS
+1557693,2027-04-24,Premier League,Manchester United,Crystal Palace,NS
+1564750,2027-04-24,League One,Wigan,Stevenage,NS
+1564196,2027-04-24,League Two,Rochdale,Fleetwood Town,NS
+1564197,2027-04-24,League Two,Salford City,Oldham,NS
+1557696,2027-04-24,Premier League,Tottenham,Hull City,NS
+1563621,2027-04-24,EFL Championship,Watford,Birmingham,NS
+1563622,2027-04-24,EFL Championship,Wolves,QPR,NS
+1563614,2027-04-24,EFL Championship,Cardiff,West Brom,NS
+1563613,2027-04-24,EFL Championship,Burnley,Southampton,NS
+1563612,2027-04-24,EFL Championship,Bristol City,Derby,NS
+1563619,2027-04-24,EFL Championship,Sheffield Utd,Millwall,NS
+1564195,2027-04-24,League Two,Northampton,Port Vale,NS
+1563616,2027-04-24,EFL Championship,Middlesbrough,West Ham,NS
+1563617,2027-04-24,EFL Championship,Norwich,Blackburn,NS
+1563620,2027-04-24,EFL Championship,Stoke City,Lincoln,NS
+1563611,2027-04-24,EFL Championship,Bolton,Swansea,NS
+1557690,2027-04-24,Premier League,Chelsea,Manchester City,NS
+1557695,2027-04-24,Premier League,Nottingham Forest,Sunderland,NS
+1557687,2027-04-24,Premier League,Aston Villa,Coventry,NS
+1563618,2027-04-24,EFL Championship,Portsmouth,Preston,NS
+1563615,2027-04-24,EFL Championship,Charlton,Wrexham,NS
+1557692,2027-04-24,Premier League,Leeds,Liverpool,NS
+1557689,2027-04-24,Premier League,Brentford,Fulham,NS
+1564759,2027-04-27,League One,Plymouth,Leyton Orient,NS
+1564753,2027-04-27,League One,Doncaster,Luton,NS
+1564760,2027-04-27,League One,Stevenage,AFC Wimbledon,NS
+1564751,2027-04-27,League One,Bradford,Reading,NS
+1564752,2027-04-27,League One,Cambridge United,Sheffield Wednesday,NS
+1564756,2027-04-27,League One,Mansfield Town,Wigan,NS
+1564755,2027-04-27,League One,Leicester,Blackpool,NS
+1564754,2027-04-27,League One,Huddersfield,Burton Albion,NS
+1564206,2027-04-27,League Two,Rotherham,Exeter City,NS
+1564758,2027-04-27,League One,Notts County,Peterborough,NS
+1564761,2027-04-27,League One,Stockport County,Oxford United,NS
+1564762,2027-04-27,League One,Wycombe,Bromley,NS
+1564757,2027-04-27,League One,Milton Keynes Dons,Barnsley,NS
+1564199,2027-04-27,League Two,Bristol Rovers,Crewe,NS
+1564203,2027-04-27,League Two,Newport County,Gillingham,NS
+1564202,2027-04-27,League Two,Fleetwood Town,Salford City,NS
+1564205,2027-04-27,League Two,Port Vale,Colchester,NS
+1564207,2027-04-27,League Two,Shrewsbury,Grimsby,NS
+1564208,2027-04-27,League Two,Swindon Town,Rochdale,NS
+1564201,2027-04-27,League Two,Crawley Town,Walsall,NS
+1564200,2027-04-27,League Two,Cheltenham,Accrington ST,NS
+1564204,2027-04-27,League Two,Oldham,Northampton,NS
+1564210,2027-04-27,League Two,York,Barnet,NS
+1564209,2027-04-27,League Two,Tranmere,Chesterfield,NS
+1557701,2027-05-01,Premier League,Fulham,Everton,NS
+1557697,2027-05-01,Premier League,Arsenal,Tottenham,NS
+1557704,2027-05-01,Premier League,Liverpool,Chelsea,NS
+1557700,2027-05-01,Premier League,Crystal Palace,Aston Villa,NS
+1557703,2027-05-01,Premier League,Ipswich,Leeds,NS
+1557699,2027-05-01,Premier League,Coventry,Manchester United,NS
+1557702,2027-05-01,Premier League,Hull City,Bournemouth,NS
+1557698,2027-05-01,Premier League,Brighton,Nottingham Forest,NS
+1557705,2027-05-01,Premier League,Manchester City,Brentford,NS
+1557706,2027-05-01,Premier League,Sunderland,Newcastle,NS
+1563629,2027-05-01,EFL Championship,QPR,Norwich,NS
+1563630,2027-05-01,EFL Championship,Southampton,Sheffield Utd,NS
+1564772,2027-05-01,League One,Oxford United,Peterborough,NS
+1564765,2027-05-01,League One,Bradford,Wycombe,NS
+1564221,2027-05-01,League Two,Tranmere,Bristol Rovers,NS
+1564764,2027-05-01,League One,Blackpool,Stevenage,NS
+1564773,2027-05-01,League One,Plymouth,Wigan,NS
+1564767,2027-05-01,League One,Cambridge United,Luton,NS
+1564769,2027-05-01,League One,Leyton Orient,Stockport County,NS
+1564771,2027-05-01,League One,Notts County,Milton Keynes Dons,NS
+1564770,2027-05-01,League One,Mansfield Town,Leicester,NS
+1564219,2027-05-01,League Two,Northampton,Walsall,NS
+1564214,2027-05-01,League Two,Chesterfield,Swindon Town,NS
+1564216,2027-05-01,League Two,Gillingham,Salford City,NS
+1564220,2027-05-01,League Two,Oldham,Rotherham,NS
+1564211,2027-05-01,League Two,Accrington ST,Fleetwood Town,NS
+1564215,2027-05-01,League Two,Crawley Town,Exeter City,NS
+1564217,2027-05-01,League Two,Grimsby,Crewe,NS
+1564218,2027-05-01,League Two,Newport County,Port Vale,NS
+1564212,2027-05-01,League Two,Barnet,Rochdale,NS
+1564213,2027-05-01,League Two,Cheltenham,Shrewsbury,NS
+1564766,2027-05-01,League One,Burton Albion,Bromley,NS
+1564763,2027-05-01,League One,Barnsley,AFC Wimbledon,NS
+1564222,2027-05-01,League Two,York,Colchester,NS
+1564768,2027-05-01,League One,Huddersfield,Doncaster,NS
+1563633,2027-05-01,EFL Championship,West Ham,Portsmouth,NS
+1563623,2027-05-01,EFL Championship,Birmingham,Burnley,NS
+1563627,2027-05-01,EFL Championship,Millwall,Stoke City,NS
+1563628,2027-05-01,EFL Championship,Preston,Cardiff,NS
+1564774,2027-05-01,League One,Reading,Sheffield Wednesday,NS
+1563624,2027-05-01,EFL Championship,Blackburn,Watford,NS
+1563632,2027-05-01,EFL Championship,West Brom,Bolton,NS
+1563634,2027-05-01,EFL Championship,Wrexham,Bristol City,NS
+1563626,2027-05-01,EFL Championship,Lincoln,Charlton,NS
+1563631,2027-05-01,EFL Championship,Swansea,Middlesbrough,NS
+1563625,2027-05-01,EFL Championship,Derby,Wolves,NS
+1570667,2027-05-02,La Liga,Deportivo La Coruna,Racing Santander,NS
+1570671,2027-05-02,La Liga,Rayo Vallecano,Villarreal,NS
+1570665,2027-05-02,La Liga,Real Betis,Valencia,NS
+1570664,2027-05-02,La Liga,Barcelona,Osasuna,NS
+1570672,2027-05-02,La Liga,Real Sociedad,Athletic Club,NS
+1570669,2027-05-02,La Liga,Levante,Real Madrid,NS
+1570668,2027-05-02,La Liga,Elche,Espanyol,NS
+1570670,2027-05-02,La Liga,Malaga,Getafe,NS
+1570663,2027-05-02,La Liga,Atletico Madrid,Alaves,NS
+1570666,2027-05-02,La Liga,Celta Vigo,Sevilla,NS
+1557715,2027-05-08,Premier League,Nottingham Forest,Crystal Palace,NS
+1557712,2027-05-08,Premier League,Leeds,Arsenal,NS
+1557708,2027-05-08,Premier League,Brentford,Aston Villa,NS
+1557713,2027-05-08,Premier League,Manchester City,Liverpool,NS
+1557716,2027-05-08,Premier League,Tottenham,Chelsea,NS
+1557710,2027-05-08,Premier League,Everton,Hull City,NS
+1557711,2027-05-08,Premier League,Fulham,Ipswich,NS
+1557707,2027-05-08,Premier League,Bournemouth,Manchester United,NS
+1557714,2027-05-08,Premier League,Newcastle,Coventry,NS
+1557709,2027-05-08,Premier League,Brighton,Sunderland,NS
+1564776,2027-05-08,League One,Bromley,Plymouth,NS
+1564223,2027-05-08,League Two,Bristol Rovers,Oldham,NS
+1564783,2027-05-08,League One,Stevenage,Huddersfield,NS
+1564779,2027-05-08,League One,Luton,Blackpool,NS
+1564786,2027-05-08,League One,Wycombe,Barnsley,NS
+1564777,2027-05-08,League One,Doncaster,Reading,NS
+1564781,2027-05-08,League One,Peterborough,Leyton Orient,NS
+1564780,2027-05-08,League One,Milton Keynes Dons,Bradford,NS
+1564784,2027-05-08,League One,Stockport County,Mansfield Town,NS
+1564775,2027-05-08,League One,AFC Wimbledon,Notts County,NS
+1564782,2027-05-08,League One,Sheffield Wednesday,Oxford United,NS
+1564785,2027-05-08,League One,Wigan,Burton Albion,NS
+1564230,2027-05-08,League Two,Rotherham,Barnet,NS
+1564231,2027-05-08,League Two,Salford City,Tranmere,NS
+1564226,2027-05-08,League Two,Exeter City,Chesterfield,NS
+1564225,2027-05-08,League Two,Crewe,Accrington ST,NS
+1564778,2027-05-08,League One,Leicester,Cambridge United,NS
+1564233,2027-05-08,League Two,Swindon Town,Gillingham,NS
+1564232,2027-05-08,League Two,Shrewsbury,York,NS
+1564228,2027-05-08,League Two,Port Vale,Crawley Town,NS
+1564234,2027-05-08,League Two,Walsall,Newport County,NS
+1564229,2027-05-08,League Two,Rochdale,Cheltenham,NS
+1564224,2027-05-08,League Two,Colchester,Grimsby,NS
+1564227,2027-05-08,League Two,Fleetwood Town,Northampton,NS
+1570678,2027-05-09,La Liga,Racing Santander,Sevilla,NS
+1570677,2027-05-09,La Liga,Osasuna,Real Sociedad,NS
+1570676,2027-05-09,La Liga,Getafe,Elche,NS
+1570675,2027-05-09,La Liga,Real Betis,Espanyol,NS
+1570673,2027-05-09,La Liga,Alaves,Levante,NS
+1570680,2027-05-09,La Liga,Real Madrid,Barcelona,NS
+1570682,2027-05-09,La Liga,Villarreal,Celta Vigo,NS
+1570681,2027-05-09,La Liga,Valencia,Atletico Madrid,NS
+1570674,2027-05-09,La Liga,Athletic Club,Malaga,NS
+1570679,2027-05-09,La Liga,Rayo Vallecano,Deportivo La Coruna,NS
+1557717,2027-05-15,Premier League,Arsenal,Nottingham Forest,NS
+1557725,2027-05-15,Premier League,Manchester United,Leeds,NS
+1557724,2027-05-15,Premier League,Liverpool,Brentford,NS
+1557719,2027-05-15,Premier League,Chelsea,Everton,NS
+1557726,2027-05-15,Premier League,Sunderland,Bournemouth,NS
+1557723,2027-05-15,Premier League,Ipswich,Manchester City,NS
+1557722,2027-05-15,Premier League,Hull City,Fulham,NS
+1557718,2027-05-15,Premier League,Aston Villa,Newcastle,NS
+1557720,2027-05-15,Premier League,Coventry,Tottenham,NS
+1557721,2027-05-15,Premier League,Crystal Palace,Brighton,NS
+1570684,2027-05-16,La Liga,Deportivo La Coruna,Alaves,NS
+1570691,2027-05-16,La Liga,Real Sociedad,Barcelona,NS
+1570689,2027-05-16,La Liga,Osasuna,Real Betis,NS
+1570685,2027-05-16,La Liga,Elche,Athletic Club,NS
+1570690,2027-05-16,La Liga,Real Madrid,Racing Santander,NS
+1570686,2027-05-16,La Liga,Espanyol,Valencia,NS
+1570687,2027-05-16,La Liga,Levante,Getafe,NS
+1570692,2027-05-16,La Liga,Sevilla,Villarreal,NS
+1570683,2027-05-16,La Liga,Atletico Madrid,Rayo Vallecano,NS
+1570688,2027-05-16,La Liga,Malaga,Celta Vigo,NS
+1570693,2027-05-23,La Liga,Alaves,Real Madrid,NS
+1557729,2027-05-23,Premier League,Brighton,Liverpool,NS
+1570697,2027-05-23,La Liga,Deportivo La Coruna,Espanyol,NS
+1570695,2027-05-23,La Liga,Barcelona,Malaga,NS
+1570694,2027-05-23,La Liga,Atletico Madrid,Athletic Club,NS
+1557735,2027-05-23,Premier League,Nottingham Forest,Ipswich,NS
+1557732,2027-05-23,Premier League,Leeds,Sunderland,NS
+1557728,2027-05-23,Premier League,Brentford,Hull City,NS
+1557733,2027-05-23,Premier League,Manchester City,Aston Villa,NS
+1570699,2027-05-23,La Liga,Rayo Vallecano,Real Betis,NS
+1557736,2027-05-23,Premier League,Tottenham,Manchester United,NS
+1557731,2027-05-23,Premier League,Fulham,Coventry,NS
+1557727,2027-05-23,Premier League,Bournemouth,Chelsea,NS
+1557734,2027-05-23,Premier League,Newcastle,Crystal Palace,NS
+1570701,2027-05-23,La Liga,Valencia,Elche,NS
+1570702,2027-05-23,La Liga,Villarreal,Osasuna,NS
+1570700,2027-05-23,La Liga,Sevilla,Getafe,NS
+1570696,2027-05-23,La Liga,Celta Vigo,Real Sociedad,NS
+1557730,2027-05-23,Premier League,Everton,Arsenal,NS
+1570698,2027-05-23,La Liga,Racing Santander,Levante,NS
+1570709,2027-05-30,La Liga,Malaga,Sevilla,NS
+1570707,2027-05-30,La Liga,Getafe,Barcelona,NS
+1570708,2027-05-30,La Liga,Levante,Celta Vigo,NS
+1570703,2027-05-30,La Liga,Athletic Club,Rayo Vallecano,NS
+1570706,2027-05-30,La Liga,Espanyol,Alaves,NS
+1557741,2027-05-30,Premier League,Crystal Palace,Leeds,NS
+1557746,2027-05-30,Premier League,Sunderland,Manchester City,NS
+1557738,2027-05-30,Premier League,Aston Villa,Tottenham,NS
+1557742,2027-05-30,Premier League,Hull City,Newcastle,NS
+1557743,2027-05-30,Premier League,Ipswich,Everton,NS
+1570704,2027-05-30,La Liga,Real Betis,Atletico Madrid,NS
+1557739,2027-05-30,Premier League,Chelsea,Brentford,NS
+1557744,2027-05-30,Premier League,Liverpool,Bournemouth,NS
+1557745,2027-05-30,Premier League,Manchester United,Fulham,NS
+1570711,2027-05-30,La Liga,Real Madrid,Deportivo La Coruna,NS
+1570705,2027-05-30,La Liga,Elche,Racing Santander,NS
+1570710,2027-05-30,La Liga,Osasuna,Valencia,NS
+1570712,2027-05-30,La Liga,Real Sociedad,Villarreal,NS
+1557740,2027-05-30,Premier League,Coventry,Nottingham Forest,NS
+1557737,2027-05-30,Premier League,Arsenal,Brighton,NS

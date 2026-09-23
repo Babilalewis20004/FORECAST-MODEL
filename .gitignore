@@ -1,0 +1,12 @@
+.env
+backend/.env
+venv/
+backend/venv/
+backend/.venv/
+__pycache__/
+*.pyc
+backend/app/ml/model_store/*.joblib
+downloaded_files/
+frontend/node_modules/
+frontend/dist/
+.claude/

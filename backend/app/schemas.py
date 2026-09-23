@@ -1,0 +1,102 @@
+from __future__ import annotations
+
+from datetime import date, datetime
+
+from pydantic import BaseModel, ConfigDict, Field
+
+from app.ml.football_goal_range_model import probabilities_to_odds
+
+# Goal-range labels use hyphens ("1-3") in the model/CSV output, but hyphens
+# aren't valid Postgres/Python identifiers, so DB columns and ORM/ORM-derived
+# fields use underscores (p_1_3). These two maps translate between them so
+# the API's JSON shape matches what upcoming_predictions.csv already used.
+RANGE_LABELS = ["1-3", "1-4", "2-3", "2-4", "2-5", "2-6", "3-5", "3-6"]
+LABEL_TO_FIELD = {label: f"p_{label.replace('-', '_')}" for label in RANGE_LABELS}
+FIELD_TO_LABEL = {field: label for label, field in LABEL_TO_FIELD.items()}
+
+
+class LeagueOut(BaseModel):
+    league: str
+    tier: str
+    last_trained_at: datetime | None = None
+    n_matches: int | None = None
+
+
+class PredictionOut(BaseModel):
+    lambda_home: float
+    lambda_away: float
+    predicted_at: datetime
+    range_probabilities: dict[str, float]
+    # Nullable: rows predicted before these markets shipped won't have them
+    # until the next retrain (see backend/scripts/migrate_add_markets.py).
+    match_result: dict[str, float] | None = None
+    over_under: dict[str, float] | None = None
+    btts: dict[str, float] | None = None
+    # Decimal odds (1/probability, no bookmaker margin) -- computed from the
+    # probabilities above at response time rather than stored, since they're
+    # a pure derived value with no new information. Same keys as their
+    # probability counterparts.
+    range_odds: dict[str, float | None]
+    match_result_odds: dict[str, float | None] | None = None
+    over_under_odds: dict[str, float | None] | None = None
+    btts_odds: dict[str, float | None] | None = None
+
+    @staticmethod
+    def from_orm_row(row) -> "PredictionOut":
+        range_probabilities = {label: getattr(row, field) for label, field in LABEL_TO_FIELD.items()}
+        return PredictionOut(
+            lambda_home=row.lambda_home,
+            lambda_away=row.lambda_away,
+            predicted_at=row.predicted_at,
+            range_probabilities=range_probabilities,
+            match_result=row.match_result,
+            over_under=row.over_under,
+            btts=row.btts,
+            range_odds=probabilities_to_odds(range_probabilities),
+            match_result_odds=probabilities_to_odds(row.match_result) if row.match_result else None,
+            over_under_odds=probabilities_to_odds(row.over_under) if row.over_under else None,
+            btts_odds=probabilities_to_odds(row.btts) if row.btts else None,
+        )
+
+
+class FixtureOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    fixture_id: int
+    date: date
+    league: str
+    home_team: str
+    away_team: str
+    status: str
+    prediction: PredictionOut | None = None
+
+
+class FixtureDetailOut(FixtureOut):
+    goal_distribution: dict[str, float] | None = None
+
+
+class MatchOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    fixture_id: int | None
+    date: date
+    league: str
+    home_team: str
+    away_team: str
+    home_goals: int
+    away_goals: int
+
+
+class RefreshRequest(BaseModel):
+    leagues: list[str] | None = Field(default=None, description="Subset of leagues; omit for all")
+    include_stats: bool = False
+
+
+class JobOut(BaseModel):
+    job_id: str
+    type: str
+    status: str
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+    detail: str | None = None
+    error: str | None = None

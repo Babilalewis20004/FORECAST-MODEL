@@ -1,0 +1,39 @@
+.fixture-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: left;
+}
+
+.fixture-card__header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.fixture-card__teams {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.fixture-card__vs {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.fixture-card__lambdas {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.fixture-card__no-prediction {
+  font-size: 13px;
+  color: var(--text-muted);
+}
