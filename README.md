@@ -223,9 +223,15 @@ For each market, [`ensemble.py`](backend/app/ml/ensemble.py) runs:
    defaults (0.45 for 1X2/BTTS/O-U, 0.80 for goal ranges) apply when that
    split has fewer than 50 matches.
 2. **Calibrate:** Platt scaling (a logistic regression on the logit, the
-   same mapping as `CalibratedClassifierCV(method="sigmoid")`) by default.
-   Isotonic is implemented too. 1X2 is calibrated one-vs-rest, then
-   renormalised.
+   same mapping as `CalibratedClassifierCV(method="sigmoid")`) for the
+   binary markets; isotonic is implemented too. 1X2 uses single-parameter
+   multinomial temperature scaling, `softmax(log P / T)`, kept only if it
+   lowers log loss out-of-fold (5 contiguous folds of the calibration
+   split) compared with the raw blend; otherwise the raw 1X2 blend passes
+   through unchanged. `model_runs.metrics.markets.*.calibrator` records
+   which one each market got. The same gate was tried on the binary
+   markets and dropped, because on held-out data it discarded Platt where
+   Platt helped.
 3. **Evaluate:** Brier score, log loss and ECE for Model A, Model B, the
    raw blend, the calibrated blend, and a base-rate baseline.
 
@@ -368,7 +374,11 @@ How to read it:
   Brier before and after calibration: Over/Under improves in all 6 leagues
   and BTTS in 5 of 6, but 1X2 gets worse in 4 of 6 (League One 0.619 →
   0.631, La Liga, League Two, Scottish Premiership). The blend alone was
-  already well calibrated for 1X2. Fixing this is step 1 below.
+  already well calibrated for 1X2. Fixed since this table was produced:
+  1X2 now uses gated temperature scaling (see Layer 3). On the seed
+  `matches.csv` it beat one-vs-rest Platt on test Brier in 6 of 6 leagues
+  (e.g. League One skill +4.3% → +5.9%, Premier League +2.0% → +2.9%).
+  Retrain to refresh this table.
 
 These numbers change with every retrain. To get the current ones, call
 `GET /api/predict/{fixture_id}` (`brier_scores`), or run
@@ -382,7 +392,7 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-20 tests, no database needed. They cover:
+24 tests, no database needed. They cover:
 - **Leakage:** rewriting later results can't change earlier features.
 - **Train/serve parity:** features built for an upcoming fixture match the
   training features for the same match.
@@ -390,6 +400,8 @@ python -m pytest
   Elo direction.
 - **Metrics:** log loss, Brier score and ECE checked against scikit-learn.
 - **Calibration and blending:** calibrators fix miscalibration out of sample,
+  temperature scaling undoes overconfident 1X2 probabilities, the
+  out-of-fold gate falls back to identity when a calibrator doesn't help,
   and blend weights favour the informative model.
 - **End to end:** ensemble training on synthetic data.
 - **Competitions:** every scraped competition maps to a trained model group,
@@ -416,16 +428,9 @@ roughly 150–350 matches, and the test split about the same. That is enough
 to fit the models, but it leaves the blend weights, calibrators and
 reported skill noticeably noisy. In rough order of expected impact:
 
-1. **Fix 1X2 calibration (quick win).** One-vs-rest Platt scaling plus
-   renormalisation fits six parameters on ~150–350 matches, and on the
-   test split it makes 1X2 *worse* in 4 of 6 leagues (see
-   [Latest evaluation](#latest-evaluation)). Replace it with
-   single-parameter multinomial temperature scaling. Also keep a
-   calibrator only if it improves log loss on the calibration split, and
-   otherwise use identity (the raw blend). *Where:* `MulticlassCalibrator`
-   in [`calibration.py`](backend/app/ml/calibration.py), and the
-   calibrator fit in `train_ensemble` in
-   [`ensemble.py`](backend/app/ml/ensemble.py).
+1. ~~**Fix 1X2 calibration.**~~ Done: gated temperature scaling
+   (`TemperatureCalibrator` and `fit_calibrator_or_identity` in
+   [`calibration.py`](backend/app/ml/calibration.py)).
 2. **Pool training across leagues.** Train one Model B, and fit one set of
    calibrators, on all six leagues (about 11.8k matches), with league and
    tier as categorical features. That's about 6× the data behind every

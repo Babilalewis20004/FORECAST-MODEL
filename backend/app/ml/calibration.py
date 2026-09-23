@@ -14,15 +14,18 @@ Calibrate:  Platt scaling (sigmoid, the default) or isotonic regression,
 Metrics:    log loss, Brier score, and expected calibration error (ECE).
 
 Binary markets take/return P(event) arrays of shape (n,); the 1X2 market
-takes/returns (n, 3) arrays (home/draw/away), calibrated one-vs-rest and
-renormalised so each row still sums to 1.
+takes/returns (n, 3) arrays (home/draw/away), calibrated by multinomial
+temperature scaling, kept only if it beats the raw blend out-of-fold on the
+calibration split (fit_calibrator_or_identity).
 """
 
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 
 import numpy as np
+from scipy.optimize import minimize_scalar
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 
@@ -135,7 +138,9 @@ class BinaryCalibrator:
 
 
 class MulticlassCalibrator:
-    """One-vs-rest BinaryCalibrator per class, rows renormalised to sum to 1."""
+    """One-vs-rest BinaryCalibrator per class, rows renormalised to sum to 1.
+    Superseded for 1X2 by TemperatureCalibrator (six parameters on a few
+    hundred matches overfit); kept so older saved ensembles still load."""
 
     def __init__(self, n_classes: int, method: str = "sigmoid"):
         self.calibrators = [BinaryCalibrator(method) for _ in range(n_classes)]
@@ -150,6 +155,66 @@ class MulticlassCalibrator:
         Q = np.column_stack([cal.transform(P[:, k]) for k, cal in enumerate(self.calibrators)])
         Q = np.clip(Q, EPS, None)
         return Q / Q.sum(axis=1, keepdims=True)
+
+
+class TemperatureCalibrator:
+    """Multinomial temperature scaling: softmax(log P / T). A single parameter
+    that sharpens (T < 1) or softens (T > 1) the whole distribution without
+    reordering classes, and rows sum to 1 by construction."""
+
+    def __init__(self):
+        self.temperature = 1.0
+
+    def fit(self, P: np.ndarray, y: np.ndarray) -> "TemperatureCalibrator":
+        y = np.asarray(y, dtype=int)
+        self.temperature = 1.0
+        if len(np.unique(y)) < 2:
+            return self
+        log_p = np.log(np.clip(np.asarray(P, dtype=float), EPS, 1.0))
+        res = minimize_scalar(
+            lambda t: log_loss_multiclass(_softmax(log_p / t), y), bounds=(0.2, 5.0), method="bounded"
+        )
+        self.temperature = float(res.x)
+        return self
+
+    def transform(self, P: np.ndarray) -> np.ndarray:
+        return _softmax(np.log(np.clip(np.asarray(P, dtype=float), EPS, 1.0)) / self.temperature)
+
+
+class IdentityCalibrator:
+    """Passes probabilities through unchanged: used when no calibrator beats
+    the raw blend out-of-fold."""
+
+    def fit(self, p: np.ndarray, y: np.ndarray) -> "IdentityCalibrator":
+        return self
+
+    def transform(self, p: np.ndarray) -> np.ndarray:
+        return np.asarray(p, dtype=float)
+
+
+def fit_calibrator_or_identity(calibrator, p: np.ndarray, y: np.ndarray, n_folds: int = 5):
+    """Fit `calibrator` on (p, y) and return it only if it lowers log loss
+    out-of-fold (contiguous folds of the calibration split) versus the raw
+    probabilities; otherwise return an IdentityCalibrator. In-sample, any
+    fitted calibrator looks better, so the check has to be out-of-fold."""
+    p = np.asarray(p, dtype=float)
+    y = np.asarray(y)
+    if len(y) < MIN_FIT_SAMPLES:
+        return IdentityCalibrator()
+    loss = log_loss_multiclass if p.ndim == 2 else log_loss_binary
+    oof = np.empty_like(p)
+    for fold in np.array_split(np.arange(len(y)), n_folds):
+        rest = np.setdiff1d(np.arange(len(y)), fold)
+        oof[fold] = copy.deepcopy(calibrator).fit(p[rest], y[rest]).transform(p[fold])
+    if loss(oof, y) >= loss(p, y):
+        return IdentityCalibrator()
+    return calibrator.fit(p, y)
+
+
+def _softmax(z: np.ndarray) -> np.ndarray:
+    z = z - z.max(axis=1, keepdims=True)
+    e = np.exp(z)
+    return e / e.sum(axis=1, keepdims=True)
 
 
 def _logit(p: np.ndarray) -> np.ndarray:
@@ -190,7 +255,7 @@ class MarketCalibration:
     markets (goal ranges), which are calibrated but not blended."""
 
     w_a: float | None
-    calibrator: BinaryCalibrator | MulticlassCalibrator
+    calibrator: BinaryCalibrator | MulticlassCalibrator | TemperatureCalibrator | IdentityCalibrator
 
     def blended(self, p_a: np.ndarray, p_b: np.ndarray | None) -> np.ndarray:
         if self.w_a is None or p_b is None:

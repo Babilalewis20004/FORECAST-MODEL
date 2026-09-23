@@ -24,11 +24,13 @@ import pandas as pd
 
 from app.ml.calibration import (
     BinaryCalibrator,
+    IdentityCalibrator,
     MarketCalibration,
-    MulticlassCalibrator,
+    TemperatureCalibrator,
     base_rate_prediction,
     evaluate,
     fit_blend_weight,
+    fit_calibrator_or_identity,
 )
 from app.ml.features import FEATURE_COLUMNS, build_feature_frame, build_training_frame
 from app.ml.football_goal_range_model import (
@@ -223,11 +225,18 @@ def train_ensemble(
         has_b = market in b_cal
 
         w_a = fit_blend_weight(a_cal[market], b_cal[market], y_cal, market) if has_b else None
+        blended_cal = MarketCalibration(w_a=w_a, calibrator=IdentityCalibrator()).blended(
+            a_cal[market], b_cal.get(market)
+        )
+        # 1X2: temperature scaling, kept only if it beats the raw blend
+        # out-of-fold. Binary markets: Platt unconditionally -- on held-out
+        # data the same gate discarded Platt where it helped.
         calibrator = (
-            MulticlassCalibrator(3, calibration_method) if is_multiclass else BinaryCalibrator(calibration_method)
+            fit_calibrator_or_identity(TemperatureCalibrator(), blended_cal, y_cal)
+            if is_multiclass
+            else BinaryCalibrator(calibration_method).fit(blended_cal, y_cal)
         )
         mc = MarketCalibration(w_a=w_a, calibrator=calibrator)
-        calibrator.fit(mc.blended(a_cal[market], b_cal.get(market)), y_cal)
         calibrations[market] = mc
 
         blended_test, calibrated_test = mc.apply(a_test[market], b_test.get(market))
@@ -241,6 +250,7 @@ def train_ensemble(
         }
         market_metrics[market] = {
             "w_a": w_a,
+            "calibrator": type(mc.calibrator).__name__,
             **{
                 metric: _round_metrics({src: (s[metric] if s else None) for src, s in scored.items()})
                 for metric in ("brier", "log_loss", "ece")

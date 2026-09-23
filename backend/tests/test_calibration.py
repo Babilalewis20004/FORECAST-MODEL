@@ -5,11 +5,14 @@ from sklearn.metrics import brier_score_loss, log_loss
 from app.ml.calibration import (
     DEFAULT_WEIGHTS,
     BinaryCalibrator,
+    IdentityCalibrator,
     MulticlassCalibrator,
+    TemperatureCalibrator,
     brier_binary,
     brier_multiclass,
     expected_calibration_error,
     fit_blend_weight,
+    fit_calibrator_or_identity,
     log_loss_binary,
     log_loss_multiclass,
 )
@@ -58,6 +61,42 @@ def test_multiclass_calibrator_rows_sum_to_one():
     Q = MulticlassCalibrator(3).fit(P**1.5 / (P**1.5).sum(1, keepdims=True), y).transform(P)
     assert np.allclose(Q.sum(axis=1), 1.0)
     assert (Q >= 0).all() and (Q <= 1).all()
+
+
+def _overconfident_1x2(n: int, power: float = 2.0):
+    P = rng.dirichlet([3, 2, 2], n)
+    y = np.array([rng.choice(3, p=row) for row in P])
+    sharp = P**power / (P**power).sum(1, keepdims=True)
+    return P, sharp, y
+
+
+def test_temperature_calibrator_undoes_overconfidence_out_of_sample():
+    _, sharp, y = _overconfident_1x2(6000)
+    fit, held = slice(0, 3000), slice(3000, None)
+    cal = TemperatureCalibrator().fit(sharp[fit], y[fit])
+    assert cal.temperature == pytest.approx(2.0, rel=0.2)
+    Q = cal.transform(sharp[held])
+    assert np.allclose(Q.sum(axis=1), 1.0)
+    assert log_loss_multiclass(Q, y[held]) < log_loss_multiclass(sharp[held], y[held])
+
+
+def test_gate_keeps_a_calibrator_that_helps():
+    _, sharp, y = _overconfident_1x2(1000)
+    cal = fit_calibrator_or_identity(TemperatureCalibrator(), sharp, y)
+    assert isinstance(cal, TemperatureCalibrator)
+
+
+def test_gate_falls_back_to_identity_when_already_calibrated():
+    p = rng.uniform(0.05, 0.95, 300)
+    y = rng.binomial(1, p)
+    cal = fit_calibrator_or_identity(BinaryCalibrator("isotonic"), p, y)
+    assert isinstance(cal, IdentityCalibrator)
+    assert np.array_equal(cal.transform(p), p)
+
+
+def test_gate_uses_identity_on_small_samples():
+    _, sharp, y = _overconfident_1x2(30)
+    assert isinstance(fit_calibrator_or_identity(TemperatureCalibrator(), sharp, y), IdentityCalibrator)
 
 
 def test_single_class_labels_fall_back_to_identity():
