@@ -33,6 +33,10 @@ def _clean(v):
 
 def import_matches(db) -> int:
     df = pd.read_csv(ROOT / "matches.csv", parse_dates=["date"])
+    # Rows without an API-Football fixture_id came from an older source with
+    # its own team spellings ("Nottingham" vs "Nottingham Forest"): they
+    # duplicated scraped matches under phantom teams, so never import them.
+    df = df[df["fixture_id"].notna()]
     n = 0
     for _, r in df.iterrows():
         fixture_id = _clean(r.get("fixture_id"))

@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from app.ml.calibration import DEFAULT_SHRINKAGE_WEIGHT
 from app.ml.ensemble import ALL_MARKETS, BLENDED_MARKETS, RANGE_MARKETS, model_a_flat, nest, train_ensemble
 from app.ml.features import FEATURE_COLUMNS, build_training_frame
 from app.ml.football_goal_range_model import simulate_joint_score_distribution
@@ -52,3 +53,38 @@ def test_combine_produces_consistent_calibrated_markets(trained, synthetic_match
     assert set(out["raw"]) == {"model_a", "model_b", "blended"}
     assert "goal_ranges" not in out["raw"]["model_b"]
     assert out["weights"]["range_2-4"] is None
+
+
+def test_market_shrinkage_fitted_in_training_and_applied_in_serving(synthetic_matches):
+    # Market columns derived from the actual outcome with noise: informative,
+    # so the calibration split should give the market real weight.
+    rng = np.random.default_rng(3)
+    df = synthetic_matches.copy()
+    home_win = (df["home_goals"] > df["away_goals"]).to_numpy()
+    p_home = np.clip(np.where(home_win, 0.62, 0.30) + rng.normal(0, 0.05, len(df)), 0.05, 0.85)
+    df["opening_prob_home"] = p_home
+    df["opening_prob_draw"] = (1 - p_home) * 0.45
+    df["opening_prob_away"] = (1 - p_home) * 0.55
+    df["opening_prob_over_2.5"] = np.nan  # no O/U odds -> that market keeps the default weight
+    model_a, ensemble = train_ensemble(df, "League Two", "lower", validation_sims=500)
+
+    mr = ensemble.metrics["markets"]["match_result"]
+    assert mr["vs_market"]["n"] > 0 and 0.0 <= mr["vs_market"]["w_market_fitted"] <= 1.0
+    assert mr["vs_market"]["w_market"] == DEFAULT_SHRINKAGE_WEIGHT  # fixed weight is what's served
+    assert set(mr["vs_market"]["brier"]) == {"calibrated", "shrunk", "shrunk_fitted", "market"}
+    # The market columns are also Model B features: Model B learns them, the
+    # blend leans on it, and the calibrated model beats the raw base models.
+    assert mr["w_a"] < 0.5
+    assert mr["brier"]["calibrated"] < mr["brier"]["model_a"]
+    assert ensemble.metrics["markets"]["over_2.5"]["vs_market"] is None
+
+    target = pd.DataFrame([{"date": "2099-01-01", "home_team": "Lea_Team0", "away_team": "Lea_Team1"}])
+    b = ensemble.predict_model_b(df, target)
+    a = model_a_flat(*simulate_joint_score_distribution(1.4, 1.1, model_a.home_dispersion, model_a.away_dispersion, n_sims=2000))
+    market = {"match_result": np.array([0.9, 0.06, 0.04])}
+    plain = ensemble.combine(a, {k: v[0] for k, v in b.items()})
+    shrunk = ensemble.combine(a, {k: v[0] for k, v in b.items()}, market)
+    assert shrunk["calibrated"]["match_result"][0] > plain["calibrated"]["match_result"][0]
+    assert shrunk["calibrated"]["match_result"].sum() == pytest.approx(1.0)
+    assert np.allclose(shrunk["calibrated"]["btts"], plain["calibrated"]["btts"])  # no BTTS price -> untouched
+    assert {"calibrated_unshrunk", "market"} <= set(shrunk["raw"])

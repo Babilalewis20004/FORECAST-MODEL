@@ -312,6 +312,8 @@ python scripts\init_db.py              # creates tables (safe to re-run)
 python scripts\import_csv_to_postgres.py   # one-off: seeds Postgres from the root CSVs
 python scripts\migrate_add_markets.py  # adds the 1X2/O-U/BTTS columns (safe to re-run)
 python scripts\migrate_add_ensemble.py # adds ensemble/calibration columns (safe to re-run)
+python scripts\migrate_add_value.py    # adds bookmaker odds / value-bet columns (safe to re-run)
+python scripts\import_historical_odds.py  # Bet365 odds 2022/23+ into match_odds (model inputs; safe to re-run)
 
 uvicorn app.main:app --reload --port 8000
 ```
@@ -384,6 +386,68 @@ These numbers change with every retrain. To get the current ones, call
 `GET /api/predict/{fixture_id}` (`brier_scores`), or run
 `SELECT league, metrics->'markets' FROM model_runs;`.
 
+## Value bets and backtesting
+
+`backend/app/ml/value_engine.py` sits on top of the calibrated probabilities:
+
+- **Market probabilities:** bookmaker odds are de-margined with Shin's
+  method, which takes more margin off longshots than favourites (the
+  favourite-longshot bias). Returned as `market_probabilities`.
+- **Expected value:** `EV = p_model × odds − 1`, against the price actually
+  offered, not the fair price, because the margin is a real cost of the bet.
+- **Market shrinkage:** where a fixture has odds, the calibrated
+  probabilities are pulled toward the de-vigged market:
+  `p = (1 − w)·p_model + w·p_market`, with a fixed w = 0.70. Each retrain
+  also fits w per league for 1X2 and O/U 2.5 and records it in
+  `model_runs.metrics` (`vs_market.w_market_fitted`). Those fits aren't
+  served: on the 2025/26 backtest they did no better than 0.70 and swung
+  between 0.00 and 1.00. `USE_FITTED_SHRINKAGE` in `calibration.py` switches
+  them on. Fixtures without odds keep the model's probabilities.
+- **Market features:** Model B also takes the de-vigged opening prices
+  (`opening_prob_home/draw/away/over_2.5`) as inputs. Historical prices are
+  Bet365 from football-data.co.uk, stored in `match_odds`. For upcoming
+  fixtures it's the API-Football snapshot, so an odds refresh re-runs the
+  league's predictions.
+- **Value flag (guardrails):** `is_value_bet` when an outcome has EV ≥ 2.5%
+  *and* its probability edge over the de-vigged market is ≤ 7 points
+  (`MAX_EDGE_CAP`). Bigger gaps are overwhelmingly model error, not value.
+  `value_selection` is the highest-EV outcome that passes. `recommended_stake`
+  is its quarter-Kelly stake in units (1 unit = 1% of bankroll, capped at
+  5 units).
+
+Odds come from API-Football's `/odds` (Bet365 preferred to match the
+training data, then Pinnacle) and are stored on the prediction row
+(`bookmaker_odds`, `odds_fetched_at`). They are the latest pre-match
+snapshot, and only "closing" if the last refresh ran just before kickoff.
+The UI shows a green **+EV** badge with the stake on value fixtures.
+
+**Backtest** (`backend/scripts/run_backtest.py`): walk-forward out-of-sample
+predictions for a past season, against football-data.co.uk historical odds
+(API-Football drops odds about a week after a match):
+
+```powershell
+python scripts\run_backtest.py                      # 2025/26, shrinkage w=0.70, bet Bet365's opening price
+python scripts\run_backtest.py --shrinkage fitted   # per-league fitted weights (or: none, 0.5, ...)
+python scripts\run_backtest.py --price closing      # bet the closing price instead
+python scripts\run_backtest.py --refit-months 1     # retrain monthly instead of freezing at 1 July (slow)
+python scripts\run_backtest.py --staking flat --min-ev 0.05 --out bets.csv
+```
+
+Shrinkage and betting both use Bet365's *opening* price, the one that
+exists when a bet would be placed. The closing-market Brier is reported as
+the stricter benchmark. The report ends with a comparison of no shrinkage,
+w = 0.70 and fitted w, for EPL + La Liga and for all six leagues.
+
+The first run trains each domestic league on matches before 1 July of the
+season start (about 3 minutes per league) and caches the predictions under
+`downloaded_files/backtest/`. Later runs with different thresholds or staking
+are instant. It covers 1X2 and O/U 2.5 only: football-data has no BTTS odds,
+and there's no odds source for the international competitions. The report
+gives ROI, win rate, drawdown, a match-clustered bootstrap p-value and CI for
+ROI > 0, and model-vs-market Brier / log loss. That last comparison matters
+most: a model that can't beat the de-margined closing line on Brier has no
+durable edge, whatever one season's ROI says.
+
 ## Tests
 
 ```powershell
@@ -392,7 +456,7 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-24 tests, no database needed. They cover:
+45 tests, no database needed. They cover:
 - **Leakage:** rewriting later results can't change earlier features.
 - **Train/serve parity:** features built for an upcoming fixture match the
   training features for the same match.
@@ -407,6 +471,13 @@ python -m pytest
 - **Competitions:** every scraped competition maps to a trained model group,
   knockout results use the 90-minute score, and in-progress seasons are
   re-fetched.
+- **Value layer:** Shin de-margining (sums to 1, shades longshots), EV and
+  capped fractional Kelly, API-Football odds parsing, and the backtest engine
+  finding a planted edge (significant) but not noise (not significant).
+- **Market shrinkage and guardrails:** the shrinkage formula and missing-odds
+  passthrough, the fitted weight leaning toward whichever source is less
+  noisy, market features passing through the feature frame, shrinkage
+  applied at serving time, and the edge cap and 2.5% EV threshold.
 
 ## Manual refresh
 
@@ -416,6 +487,11 @@ python -m pytest
 | Scrape fixtures only | `POST /api/refresh/scrape` `{"include_stats": false}` |
 | Scrape + backfill shots/corners/cards/xG | `POST /api/refresh/scrape` `{"include_stats": true}` |
 | Retrain only (uses whatever's already in Postgres) | `POST /api/refresh/retrain` `{"leagues": [...]}` (omit for all) |
+| Skip the bookmaker-odds fetch (on by default for scrape and full) | add `"include_odds": false` |
+
+The odds fetch costs one request per predicted fixture kicking off in the
+next 3 days (`ODDS_DAYS_AHEAD`), nearest first, and stops at the daily
+budget guard.
 
 Jobs run one at a time in the background. Run the stats backfill on its own
 and repeat it daily until nothing is left to fetch, because of the 100

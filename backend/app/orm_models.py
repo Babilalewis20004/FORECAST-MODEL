@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import BigInteger, Date, DateTime, Float, Integer, String, UniqueConstraint, func
+from sqlalchemy import BigInteger, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -31,6 +31,25 @@ class Match(Base):
     away_cards: Mapped[float | None] = mapped_column(Float, nullable=True)
     home_xg: Mapped[float | None] = mapped_column(Float, nullable=True)
     away_xg: Mapped[float | None] = mapped_column(Float, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class MatchOdds(Base):
+    """Historical bookmaker odds for a finished match (football-data.co.uk,
+    via scripts/import_historical_odds.py). Flat outcome keys as in
+    value_engine: home_win / draw / away_win / over_2.5 / under_2.5.
+    `opening` (the pre-closing snapshot) feeds Model B's market features and
+    the shrinkage fit; `closing` is kept for backtests and closing-line value."""
+
+    __tablename__ = "match_odds"
+    __table_args__ = (UniqueConstraint("match_id", "bookmaker", name="ux_match_odds_match_bookmaker"),)
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    match_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("matches.id", ondelete="CASCADE"), nullable=False, index=True)
+    bookmaker: Mapped[str] = mapped_column(String, nullable=False)
+    source: Mapped[str] = mapped_column(String, nullable=False)
+    opening: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    closing: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
@@ -78,6 +97,19 @@ class Prediction(Base):
     # Null for predictions made before the ensemble shipped (Model A only).
     raw_probabilities: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     ensemble_weights: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # Value layer (app/ml/value_engine.py). bookmaker_odds is the latest
+    # pre-match snapshot from API-Football, flat outcome keys (home_win,
+    # over_2.5, btts_yes, ...) -- it's only "closing" if the last odds refresh
+    # ran just before kickoff. The value fields are re-derived from it and the
+    # market columns above whenever either changes. All null until odds are
+    # fetched (they're only published ~2 weeks before a fixture).
+    bookmaker_odds: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    odds_bookmaker: Mapped[str | None] = mapped_column(String, nullable=True)
+    odds_fetched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    expected_value: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    is_value_bet: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    value_selection: Mapped[str | None] = mapped_column(String, nullable=True)
+    recommended_stake: Mapped[float | None] = mapped_column(Float, nullable=True)
 
 
 class ModelRun(Base):

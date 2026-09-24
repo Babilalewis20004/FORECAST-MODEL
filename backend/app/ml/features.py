@@ -11,7 +11,8 @@ strictly-before, a target can never see its own result or anything later
 the same date would have had, with no separate "prediction-time" rebuild.
 
 Model A (football_goal_range_model.py) keeps its own feature set; this
-module only feeds Model B.
+module only feeds Model B. MARKET_FEATURES are the exception to "state from
+completed matches": bookmaker prices passed in per target row.
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from app.ml.calibration import shin_implied_probabilities
 from app.ml.football_goal_range_model import GOAL_RANGES, OU_LINES
 
 WINDOWS = (5, 10)
@@ -48,11 +50,34 @@ _TEAM_FEATURES = (
     [f"{c}_r{w}" for c in _STAT_COLS for w in WINDOWS]
     + ["conv_r10", "elo", "rest_days", "n_matches"]
 )
+# De-vigged (Shin) pre-match market probabilities. Unlike everything above
+# they aren't derived from match history: they arrive as columns on the
+# matches/targets frames (historical: match_odds' opening price; upcoming:
+# the latest API-Football snapshot), NaN where no odds exist -- XGBoost
+# routes missing values natively. Pre-kickoff information, so no leakage.
+MARKET_FEATURES = ["opening_prob_home", "opening_prob_draw", "opening_prob_away", "opening_prob_over_2.5"]
+
 FEATURE_COLUMNS: list[str] = (
     [f"h_{f}" for f in _TEAM_FEATURES]
     + [f"a_{f}" for f in _TEAM_FEATURES]
     + ["elo_diff", "h2h_n", "h2h_gd", "h2h_total", "h2h_btts"]
+    + MARKET_FEATURES
 )
+
+
+def market_features_from_odds(odds: dict | None) -> dict[str, float]:
+    """MARKET_FEATURES from flat odds (home_win/draw/away_win/over_2.5/
+    under_2.5); NaN for any book that isn't completely priced."""
+    out = {c: np.nan for c in MARKET_FEATURES}
+    if not odds:
+        return out
+    mr = [odds.get(k) for k in ("home_win", "draw", "away_win")]
+    if all(v and v > 1.0 for v in mr):
+        out["opening_prob_home"], out["opening_prob_draw"], out["opening_prob_away"] = shin_implied_probabilities(mr)
+    ou = [odds.get("over_2.5"), odds.get("under_2.5")]
+    if all(v and v > 1.0 for v in ou):
+        out["opening_prob_over_2.5"] = float(shin_implied_probabilities(ou)[0])
+    return out
 
 
 def _to_ns(s: pd.Series) -> pd.Series:
@@ -200,18 +225,23 @@ def build_feature_frame(matches: pd.DataFrame, targets: pd.DataFrame) -> pd.Data
     )
     t = t.join(h2h_feats, on="_tid")
     t["elo_diff"] = t["h_elo"] - t["a_elo"]
+    for col in MARKET_FEATURES:
+        if col not in t.columns:
+            t[col] = np.nan
     # Stable dtype regardless of whether any target lacked history (a column
     # with no NaNs would otherwise come out int64 in one call, float64 in another).
     t[FEATURE_COLUMNS] = t[FEATURE_COLUMNS].astype("float64")
 
-    return t.drop(columns=["_tid"])[list(targets.columns) + FEATURE_COLUMNS]
+    # dict.fromkeys: market columns may already be among targets' own columns.
+    return t.drop(columns=["_tid"])[list(dict.fromkeys(list(targets.columns) + FEATURE_COLUMNS))]
 
 
 def build_training_frame(matches: pd.DataFrame) -> pd.DataFrame:
     """Every completed match with its pre-match features plus outcome labels
     for each market Model B (and the ensemble evaluation) needs."""
     history = _prepare_matches(matches)
-    targets = history[["date", "home_team", "away_team", "home_goals", "away_goals"]]
+    market = [c for c in MARKET_FEATURES if c in history.columns]
+    targets = history[["date", "home_team", "away_team", "home_goals", "away_goals", *market]]
     frame = build_feature_frame(history, targets)
 
     hg, ag = frame["home_goals"], frame["away_goals"]

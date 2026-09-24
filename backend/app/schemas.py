@@ -5,6 +5,7 @@ from datetime import date, datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.ml.football_goal_range_model import probabilities_to_odds
+from app.ml.value_engine import market_probabilities
 
 # Goal-range labels use hyphens ("1-3") in the model/CSV output, but hyphens
 # aren't valid Postgres/Python identifiers, so DB columns and ORM/ORM-derived
@@ -53,6 +54,22 @@ class PredictionOut(BaseModel):
     calibrated_probabilities: dict | None = None
     ensemble_weights: dict[str, float | None] | None = None
     brier_scores: dict[str, dict[str, float | None]] | None = None
+    # Value layer -- all null until bookmaker odds have been fetched. Flat
+    # outcome keys (home_win, over_2.5, btts_yes, ...).
+    #   bookmaker_odds: latest pre-match snapshot (odds_bookmaker, odds_fetched_at)
+    #   market_probabilities: bookmaker_odds de-margined with Shin's method
+    #   expected_value: p_model * odds - 1 per outcome (+0.052 = 5.2% edge)
+    #   is_value_bet / value_selection: best outcome with EV >= 3%, if any
+    #   recommended_stake: quarter-Kelly stake for value_selection, in units
+    #     (1 unit = 1% of bankroll)
+    bookmaker_odds: dict[str, float] | None = None
+    odds_bookmaker: str | None = None
+    odds_fetched_at: datetime | None = None
+    market_probabilities: dict[str, float] | None = None
+    expected_value: dict[str, float] | None = None
+    is_value_bet: bool | None = None
+    value_selection: str | None = None
+    recommended_stake: float | None = None
 
     @staticmethod
     def from_orm_row(row, league_metrics: dict | None = None) -> "PredictionOut":
@@ -81,6 +98,14 @@ class PredictionOut(BaseModel):
             calibrated_probabilities=calibrated,
             ensemble_weights=row.ensemble_weights,
             brier_scores=brier_scores_from_metrics(league_metrics) if row.raw_probabilities else None,
+            bookmaker_odds=row.bookmaker_odds,
+            odds_bookmaker=row.odds_bookmaker,
+            odds_fetched_at=row.odds_fetched_at,
+            market_probabilities=market_probabilities(row.bookmaker_odds) if row.bookmaker_odds else None,
+            expected_value=row.expected_value,
+            is_value_bet=row.is_value_bet,
+            value_selection=row.value_selection,
+            recommended_stake=row.recommended_stake,
         )
 
 
@@ -123,6 +148,9 @@ class MatchOut(BaseModel):
 class RefreshRequest(BaseModel):
     leagues: list[str] | None = Field(default=None, description="Subset of leagues; omit for all")
     include_stats: bool = False
+    # Bookmaker odds for predicted fixtures in the next ODDS_DAYS_AHEAD days
+    # (one API request per fixture) -- feeds the value-bet fields.
+    include_odds: bool = True
 
 
 class JobOut(BaseModel):

@@ -46,6 +46,10 @@ export interface RawProbabilities {
   model_a: MarketSet;
   model_b?: MarketSet;
   blended: MarketSet;
+  // Present when the fixture had odds: calibrated probabilities before
+  // shrinkage toward the de-vigged market, and that market.
+  calibrated_unshrunk?: MarketSet;
+  market?: MarketSet;
 }
 
 // Test-split Brier score for a market, per source. Lower is better;
@@ -79,6 +83,17 @@ export interface Prediction {
   calibrated_probabilities: MarketSet | null;
   ensemble_weights: Record<string, number | null> | null;
   brier_scores: Record<string, BrierScores> | null;
+  // Value layer -- null until bookmaker odds have been fetched for the
+  // fixture. Flat outcome keys: home_win, draw, away_win, over_2.5,
+  // under_2.5, btts_yes, btts_no, ...
+  bookmaker_odds: Record<string, number> | null;
+  odds_bookmaker: string | null;
+  odds_fetched_at: string | null;
+  market_probabilities: Record<string, number> | null;
+  expected_value: Record<string, number> | null; // 0.052 = +5.2% EV
+  is_value_bet: boolean | null;
+  value_selection: string | null;
+  recommended_stake: number | null; // quarter-Kelly, units (1 unit = 1% of bankroll)
 }
 
 export interface Fixture {

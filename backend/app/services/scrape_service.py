@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import time
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -15,7 +16,10 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.db import SessionLocal
-from app.orm_models import Match, UpcomingFixture
+from app.ml.football_goal_range_model import OU_LINES
+from app.orm_models import Match, Prediction, UpcomingFixture
+from app.services.model_service import ModelNotTrainedError, generate_predictions, model_group
+from app.services.odds_history import current_season_start, sync_match_odds
 
 BASE_URL = "https://v3.football.api-sports.io"
 ROOT = Path(__file__).resolve().parents[3]
@@ -64,6 +68,22 @@ STAT_MAP = {
     "Corner Kicks": "corners",
 }
 DAILY_SAFETY_MARGIN = 3
+
+# /odds -> value_engine outcome keys, per API-Football bet name.
+ODDS_MARKETS: dict[str, dict[str, str]] = {
+    "Match Winner": {"Home": "home_win", "Draw": "draw", "Away": "away_win"},
+    "Goals Over/Under": {
+        f"{side.capitalize()} {line}": f"{side}_{line}" for line in OU_LINES for side in ("over", "under")
+    },
+    "Both Teams Score": {"Yes": "btts_yes", "No": "btts_no"},
+}
+# Bet365 first: Model B's market features and the shrinkage weights were
+# fitted on Bet365's historical prices, so serving on the same book avoids
+# train/serve skew. Pinnacle (sharpest) is the fallback.
+PREFERRED_BOOKMAKERS = ("Bet365", "Pinnacle", "Marathonbet", "Betfair")
+# API-Football publishes pre-match odds roughly 1-14 days out; nearer
+# kickoff is closer to the closing price and costs fewer requests.
+ODDS_DAYS_AHEAD = 3
 
 
 class Budget:
@@ -295,8 +315,112 @@ def scrape_stats(job=None) -> dict:
         db.close()
 
 
-def run_scrape(leagues: list[str] | None, include_stats: bool, job=None) -> dict:
+def parse_odds(item: dict) -> tuple[str, dict[str, float]] | None:
+    """(bookmaker, flat odds) from one /odds response item: the first
+    PREFERRED_BOOKMAKERS entry that prices any market we model, else the
+    bookmaker pricing the most outcomes. Keys match value_engine.BOOKS."""
+    parsed = []
+    for bm in item.get("bookmakers", []):
+        odds: dict[str, float] = {}
+        for bet in bm.get("bets", []):
+            names = ODDS_MARKETS.get(bet.get("name"))
+            if names is None:
+                continue
+            for v in bet.get("values", []):
+                key = names.get(str(v.get("value")))
+                if key is not None:
+                    try:
+                        odds[key] = float(v["odd"])
+                    except (KeyError, TypeError, ValueError):
+                        continue
+        if odds:
+            parsed.append((bm.get("name", "unknown"), odds))
+    if not parsed:
+        return None
+    for name in PREFERRED_BOOKMAKERS:
+        for bm_name, odds in parsed:
+            if bm_name == name:
+                return bm_name, odds
+    return max(parsed, key=lambda p: len(p[1]))
+
+
+def scrape_odds(leagues: list[str] | None, job=None, days_ahead: int = ODDS_DAYS_AHEAD) -> dict:
+    """Latest pre-match odds for every predicted, not-started fixture in the
+    next `days_ahead` days, stored on its prediction row. One uncached
+    request per fixture (odds move), nearest kickoff first so the budget goes
+    where the odds are closest to closing. Odds are model inputs (Model B's
+    market features, shrinkage toward the market), so every affected model
+    group is then re-predicted, which also re-derives the value fields."""
+    session = _session()
+    budget = Budget()
+    db = SessionLocal()
+    today = date.today()
+    try:
+        q = (
+            db.query(Prediction, UpcomingFixture)
+            .join(UpcomingFixture, UpcomingFixture.fixture_id == Prediction.fixture_id)
+            .filter(UpcomingFixture.status == "NS")
+            .filter(UpcomingFixture.date >= today, UpcomingFixture.date <= today + timedelta(days=days_ahead))
+        )
+        if leagues:
+            q = q.filter(UpcomingFixture.league.in_(leagues))
+        targets = q.order_by(UpcomingFixture.date).all()
+
+        fetched = with_odds = 0
+        groups: set[str] = set()
+        for pred, fx in targets:
+            if budget.exhausted():
+                break
+            if job is not None:
+                job.detail = f"odds: {fetched}/{len(targets)} fixtures, {fx.home_team} vs {fx.away_team}"
+            try:
+                data = _get(session, budget, "odds", None, fixture=fx.fixture_id)
+            except (requests.HTTPError, RuntimeError):
+                continue
+            fetched += 1
+            parsed = parse_odds(data["response"][0]) if data.get("response") else None
+            if parsed is None:
+                continue
+            pred.odds_bookmaker, pred.bookmaker_odds = parsed
+            pred.odds_fetched_at = datetime.now(timezone.utc)
+            groups.add(model_group(fx.league))
+            with_odds += 1
+            if with_odds % 50 == 0:
+                db.commit()
+        db.commit()
+
+        for group in sorted(groups):
+            if job is not None:
+                job.detail = f"odds: re-predicting {group} with market inputs"
+            try:
+                generate_predictions(db, group)
+            except ModelNotTrainedError:
+                continue
+        n_value = (
+            db.query(Prediction)
+            .filter(Prediction.fixture_id.in_([fx.fixture_id for _, fx in targets]), Prediction.is_value_bet.is_(True))
+            .count()
+        ) if targets else 0
+        return {"fixtures_in_window": len(targets), "fetched": fetched, "with_odds": with_odds, "value_bets": n_value}
+    finally:
+        db.close()
+
+
+def run_scrape(leagues: list[str] | None, include_stats: bool, job=None, include_odds: bool = False) -> dict:
     result = {"fixtures": scrape_fixtures(leagues, job=job)}
+    # Historical odds for newly finished matches (model inputs at the next
+    # retrain) -- football-data.co.uk, not the API-Football budget.
+    if job is not None:
+        job.detail = "historical odds (football-data.co.uk)..."
+    db = SessionLocal()
+    try:
+        result["historical_odds"] = sync_match_odds(db, leagues, seasons=[current_season_start()])
+    except requests.RequestException as exc:
+        result["historical_odds"] = f"skipped: {exc}"
+    finally:
+        db.close()
     if include_stats:
         result["stats"] = scrape_stats(job=job)
+    if include_odds:
+        result["odds"] = scrape_odds(leagues, job=job)
     return result

@@ -2,6 +2,7 @@ import type { Fixture } from "../types";
 import { CalibrationTag } from "./CalibrationTag";
 import { GoalRangeChart } from "./GoalRangeChart";
 import { MarketsPanel } from "./MarketsPanel";
+import { ValueBadge } from "./ValueBadge";
 import "./FixtureCard.css";
 
 export function FixtureCard({ fixture }: { fixture: Fixture }) {
@@ -19,6 +20,7 @@ export function FixtureCard({ fixture }: { fixture: Fixture }) {
       </h3>
       {prediction ? (
         <>
+          <ValueBadge prediction={prediction} homeTeam={fixture.home_team} awayTeam={fixture.away_team} />
           <p className="fixture-card__lambdas">
             Expected goals: <strong>{prediction.lambda_home.toFixed(2)}</strong> :{" "}
             <strong>{prediction.lambda_away.toFixed(2)}</strong>
