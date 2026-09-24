@@ -308,7 +308,7 @@ def print_comparison(joined: pd.DataFrame, args, engine: BettingBacktestEngine) 
 
 # ---------------------------------------------------------------------------
 
-def main() -> None:
+def build_arg_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--season", default="2526", help="football-data season code, e.g. 2526 = 2025/26")
     ap.add_argument("--leagues", nargs="+", default=list(FD_LEAGUES), choices=list(FD_LEAGUES), metavar="LEAGUE")
@@ -330,7 +330,25 @@ def main() -> None:
     ap.add_argument("--n-boot", type=int, default=10_000)
     ap.add_argument("--no-compare", action="store_true", help="skip the shrinkage comparison table")
     ap.add_argument("--out", type=Path, default=None, help="write the placed bets to this CSV")
-    args = ap.parse_args()
+    return ap
+
+
+def run_backtest(**overrides) -> tuple:
+    """Programmatic entry point, e.g. for the Streamlit dashboard: same
+    defaults and pipeline as the CLI (see module docstring), but returns
+    (result, boot, meta) instead of printing a report. `overrides` takes any
+    CLI flag by its destination name (season=, leagues=, shrinkage=, ...).
+
+    Requires a reachable database (app.db.SessionLocal / DATABASE_URL) with
+    match history loaded, and network access the first time it runs for a
+    given season/refit schedule (to fetch football-data.co.uk odds and to
+    build the out-of-sample prediction cache under downloaded_files/backtest).
+    """
+    args = build_arg_parser().parse_args([])
+    for k, v in overrides.items():
+        if not hasattr(args, k):
+            raise TypeError(f"run_backtest() got an unexpected option: {k!r}")
+        setattr(args, k, v)
     if args.shrinkage not in ("none", "fitted"):
         args.shrinkage = f"{float(args.shrinkage):.2f}"
 
@@ -342,7 +360,7 @@ def main() -> None:
     odds = load_fd_odds(args.season, args.leagues)
     joined, unmatched = join_odds(preds.reset_index(drop=True), odds)
     if joined.empty:
-        sys.exit("No predictions could be matched to odds -- nothing to backtest.")
+        raise RuntimeError("No predictions could be matched to odds -- nothing to backtest.")
 
     engine = BettingBacktestEngine(
         min_ev=args.min_ev,
@@ -355,7 +373,7 @@ def main() -> None:
     result, boot = run_variant(joined, args.shrinkage, args, engine)
 
     windows = sorted({str(pd.Timestamp(d).date()) for d in preds["trained_before"]})
-    print_report(result, boot, {
+    meta = {
         "season_label": f"{y1}/{str(y1 + 1)[2:]}",
         "scope": ", ".join(args.leagues) if len(args.leagues) < len(FD_LEAGUES) else "all domestic leagues",
         "shrinkage": args.shrinkage,
@@ -365,9 +383,23 @@ def main() -> None:
         "unmatched": unmatched,
         "joined": len(joined),
         "windows": ", ".join(windows) if len(windows) <= 3 else f"{windows[0]} ... {windows[-1]} ({len(windows)} refits)",
-    })
+        "joined_df": joined,
+        "engine": engine,
+        "args": args,
+    }
+    return result, boot, meta
+
+
+def main() -> None:
+    args = build_arg_parser().parse_args()
+    try:
+        result, boot, meta = run_backtest(**vars(args))
+    except RuntimeError as exc:
+        sys.exit(str(exc))
+
+    print_report(result, boot, meta)
     if not args.no_compare:
-        print_comparison(joined, args, engine)
+        print_comparison(meta["joined_df"], meta["args"], meta["engine"])
     if args.out:
         result.bets.to_csv(args.out, index=False)
         print(f"Bets written to {args.out}")
