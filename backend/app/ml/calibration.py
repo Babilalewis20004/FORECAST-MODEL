@@ -11,6 +11,11 @@ Calibrate:  Platt scaling (sigmoid, the default) or isotonic regression,
             Platt is implemented directly -- a logistic regression on the
             logit of the probability, the same mapping CalibratedClassifierCV's
             method="sigmoid" fits internally.
+Shrink:     P_final = (1 - w) * P_calibrated + w * P_market, where P_market
+            is the bookmaker price de-vigged with Shin's method and w is a
+            fixed 0.70 (a per-market fit on the calibration split is
+            recorded as a diagnostic; USE_FITTED_SHRINKAGE serves it instead).
+            Applied only where a market price exists.
 Metrics:    log loss, Brier score, and expected calibration error (ECE).
 
 Binary markets take/return P(event) arrays of shape (n,); the 1X2 market
@@ -23,9 +28,10 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass
+from typing import Mapping, Sequence
 
 import numpy as np
-from scipy.optimize import minimize_scalar
+from scipy.optimize import brentq, minimize_scalar
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 
@@ -35,6 +41,13 @@ EPS = 1e-12
 DEFAULT_WEIGHTS = {"match_result": 0.45, "btts": 0.45, "over_under": 0.45, "goal_range": 0.80}
 WEIGHT_GRID = np.round(np.linspace(0.0, 1.0, 21), 2)
 MIN_FIT_SAMPLES = 50
+# Market shrinkage: the final probability's weight on the de-vigged market.
+DEFAULT_SHRINKAGE_WEIGHT = 0.70
+# Serve the fixed weight, not the per-league fitted one. On the 2025/26
+# out-of-sample backtest the fitted weights (fitted on a few hundred
+# pre-season matches, ranging 0.00-1.00) were no better than 0.70 and far
+# less stable, so they're kept only as a diagnostic in model_runs.metrics.
+USE_FITTED_SHRINKAGE = False
 
 
 # ---------------------------------------------------------------------------
@@ -248,14 +261,87 @@ def fit_blend_weight(p_a: np.ndarray, p_b: np.ndarray, y: np.ndarray, market: st
     return float(WEIGHT_GRID[int(np.argmin(losses))])
 
 
+# ---------------------------------------------------------------------------
+# Market de-vigging and shrinkage
+# ---------------------------------------------------------------------------
+
+def _shin(odds: np.ndarray) -> tuple[np.ndarray, float]:
+    pi = 1.0 / odds
+    booksum = pi.sum()
+    if booksum <= 1.0:
+        # No margin (or an arbitrage across books): nothing for Shin to remove.
+        return pi / booksum, 0.0
+
+    def probs(z: float) -> np.ndarray:
+        return (np.sqrt(z * z + 4.0 * (1.0 - z) * pi * pi / booksum) - z) / (2.0 * (1.0 - z))
+
+    # sum(probs(0)) = sqrt(booksum) > 1 and it falls monotonically in z.
+    z = brentq(lambda z: probs(z).sum() - 1.0, 0.0, 0.999, xtol=1e-12)
+    p = probs(z)
+    return p / p.sum(), float(z)
+
+
+def shin_implied_probabilities(decimal_odds: Sequence[float] | Mapping[str, float]):
+    """Fair (de-vigged) probabilities for one complete book of mutually
+    exclusive outcomes, via Shin's method: the overround is modelled as
+    protection against a fraction z of insider money, so longshots are
+    shaded more than favourites (the favourite-longshot bias). Returns the
+    same shape as the input: a dict for a dict, an array otherwise."""
+    if isinstance(decimal_odds, Mapping):
+        keys = list(decimal_odds)
+        p, _ = _shin(np.array([decimal_odds[k] for k in keys], dtype=float))
+        return {k: float(v) for k, v in zip(keys, p)}
+    odds = np.asarray(decimal_odds, dtype=float)
+    if odds.ndim != 1 or len(odds) < 2 or np.any(odds <= 1.0):
+        raise ValueError("need >= 2 decimal odds, all > 1.0")
+    return _shin(odds)[0]
+
+
+def shrink_to_market(p_model: np.ndarray, p_fair_market: np.ndarray, w: float = DEFAULT_SHRINKAGE_WEIGHT) -> np.ndarray:
+    """Bayesian shrinkage toward the de-vigged market: (1 - w) * p_model +
+    w * p_fair_market. The market is the prior (it is hard to beat), the
+    model the evidence; w is the prior's weight. Rows where the market is
+    missing (NaN) keep the model's probability."""
+    p_model = np.asarray(p_model, dtype=float)
+    p_mkt = np.asarray(p_fair_market, dtype=float)
+    shrunk = (1.0 - w) * p_model + w * p_mkt
+    missing = np.isnan(p_mkt) if p_mkt.ndim == 1 else np.isnan(p_mkt).any(axis=-1, keepdims=True)
+    return np.where(missing, p_model, shrunk)
+
+
+def fit_shrinkage_weight(p_model: np.ndarray, p_fair_market: np.ndarray, y: np.ndarray) -> float:
+    """w minimising log loss of the shrunk probabilities on the calibration
+    split (rows with a market price only); DEFAULT_SHRINKAGE_WEIGHT when
+    there are too few such rows to fit reliably."""
+    p_model = np.asarray(p_model, dtype=float)
+    p_mkt = np.asarray(p_fair_market, dtype=float)
+    y = np.asarray(y)
+    has = ~(np.isnan(p_mkt) if p_mkt.ndim == 1 else np.isnan(p_mkt).any(axis=1))
+    if has.sum() < MIN_FIT_SAMPLES:
+        return DEFAULT_SHRINKAGE_WEIGHT
+    loss = log_loss_multiclass if p_model.ndim == 2 else log_loss_binary
+    losses = [loss(shrink_to_market(p_model[has], p_mkt[has], w), y[has]) for w in WEIGHT_GRID]
+    return float(WEIGHT_GRID[int(np.argmin(losses))])
+
+
 @dataclass
 class MarketCalibration:
     """Everything needed to turn one market's raw Model A (+ Model B)
     probabilities into a final probability. w_a is None for Model-A-only
-    markets (goal ranges), which are calibrated but not blended."""
+    markets (goal ranges), which are calibrated but not blended. w_market is
+    the fitted shrinkage weight toward the de-vigged market (None for
+    ensembles saved before shrinkage). Shrinkage is applied only when a
+    market price exists, with DEFAULT_SHRINKAGE_WEIGHT unless
+    USE_FITTED_SHRINKAGE opts into w_market."""
 
     w_a: float | None
     calibrator: BinaryCalibrator | MulticlassCalibrator | TemperatureCalibrator | IdentityCalibrator
+    w_market: float | None = None
+
+    def shrinkage_weight(self) -> float:
+        if USE_FITTED_SHRINKAGE and self.w_market is not None:
+            return self.w_market
+        return DEFAULT_SHRINKAGE_WEIGHT
 
     def blended(self, p_a: np.ndarray, p_b: np.ndarray | None) -> np.ndarray:
         if self.w_a is None or p_b is None:

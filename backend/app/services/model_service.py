@@ -11,7 +11,8 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
 from app.db import SessionLocal
-from app.ml.ensemble import LeagueEnsemble, flat_from_prediction, nest, train_ensemble
+from app.ml.ensemble import LeagueEnsemble, flat_from_prediction, market_flat_from_odds, nest, train_ensemble
+from app.ml.features import market_features_from_odds
 from app.ml.football_goal_range_model import (
     GOALS_ONLY_LEAGUES,
     INTERNATIONAL_COMPETITIONS,
@@ -21,7 +22,12 @@ from app.ml.football_goal_range_model import (
     compute_team_state,
     predict_fixture_fast,
 )
-from app.orm_models import Match, ModelRun, Prediction, UpcomingFixture
+from app.ml.value_engine import assess_value, flat_model_probabilities
+from app.orm_models import Match, MatchOdds, ModelRun, Prediction, UpcomingFixture
+
+# Model B's market features and the shrinkage fit were trained on this
+# bookmaker's historical prices (see scripts/import_historical_odds.py).
+HISTORICAL_ODDS_BOOKMAKER = "bet365"
 from app.schemas import LABEL_TO_FIELD
 
 MODEL_STORE = Path(__file__).resolve().parents[1] / "ml" / "model_store"
@@ -103,12 +109,17 @@ def get_model(league: str) -> LeagueGoalModel:
 def _matches_df(db: Session, group: str) -> pd.DataFrame:
     """All finished matches of a model group, pooled across its competitions
     so a team's rolling form and Elo span every competition it plays in."""
-    rows = db.execute(select(Match).where(Match.league.in_(group_competitions(group)))).scalars().all()
+    rows = db.execute(
+        select(Match, MatchOdds.opening)
+        .outerjoin(MatchOdds, (MatchOdds.match_id == Match.id) & (MatchOdds.bookmaker == HISTORICAL_ODDS_BOOKMAKER))
+        .where(Match.league.in_(group_competitions(group)))
+    ).all()
     if not rows:
         return pd.DataFrame()
     df = pd.DataFrame(
         [
             {
+                **market_features_from_odds(opening),
                 "date": r.date,
                 "league": r.league,
                 "home_team": r.home_team,
@@ -126,7 +137,7 @@ def _matches_df(db: Session, group: str) -> pd.DataFrame:
                 "home_xg": r.home_xg,
                 "away_xg": r.away_xg,
             }
-            for r in rows
+            for r, opening in rows
         ]
     )
     df["date"] = pd.to_datetime(df["date"])
@@ -173,6 +184,16 @@ def train_league(db: Session, league: str) -> dict:
     return {"league": league, "n_matches": len(history), "trained_at": trained_at}
 
 
+def value_fields(markets: dict, odds: dict | None) -> dict:
+    """Prediction columns for the value layer, from nested market
+    probabilities (match_result / over_under / btts) and flat bookmaker odds.
+    All null without odds, so stale value flags never outlive their odds."""
+    if not odds:
+        return {"expected_value": None, "is_value_bet": None, "value_selection": None, "recommended_stake": None}
+    probs = flat_model_probabilities(markets.get("match_result"), markets.get("over_under"), markets.get("btts"))
+    return assess_value(probs, odds)
+
+
 def generate_predictions(db: Session, league: str) -> dict:
     model = get_model(league)
     ensemble = get_ensemble(league)
@@ -192,11 +213,31 @@ def generate_predictions(db: Session, league: str) -> dict:
     fixtures = [fx for fx in upcoming if fx.home_team in team_state and fx.away_team in team_state]
     n_failed = len(upcoming) - len(fixtures)
 
+    # Odds live on the prediction row (fetched by scrape_service.scrape_odds)
+    # and outlive a retrain. They feed Model B's market features and the
+    # shrinkage toward the market, and value is re-assessed against them.
+    stored_odds = dict(
+        db.execute(
+            select(Prediction.fixture_id, Prediction.bookmaker_odds).where(
+                Prediction.fixture_id.in_([fx.fixture_id for fx in fixtures]),
+                Prediction.bookmaker_odds.isnot(None),
+            )
+        ).all()
+    ) if fixtures else {}
+
     # Model B scores every fixture in one batch.
     b_probs = None
     if ensemble is not None and fixtures:
         targets = pd.DataFrame(
-            [{"date": fx.date, "home_team": fx.home_team, "away_team": fx.away_team} for fx in fixtures]
+            [
+                {
+                    "date": fx.date,
+                    "home_team": fx.home_team,
+                    "away_team": fx.away_team,
+                    **market_features_from_odds(stored_odds.get(fx.fixture_id)),
+                }
+                for fx in fixtures
+            ]
         )
         b_probs = ensemble.predict_model_b(history, targets)
 
@@ -211,7 +252,11 @@ def generate_predictions(db: Session, league: str) -> dict:
 
         a_flat = flat_from_prediction(result)
         if ensemble is not None:
-            combined = ensemble.combine(a_flat, {m: v[i] for m, v in b_probs.items()})
+            combined = ensemble.combine(
+                a_flat,
+                {m: v[i] for m, v in b_probs.items()},
+                market_flat_from_odds(stored_odds.get(fx.fixture_id)),
+            )
             final, raw, weights = nest(combined["calibrated"]), combined["raw"], combined["weights"]
         else:
             final, raw, weights = nest(a_flat), None, None
@@ -229,6 +274,7 @@ def generate_predictions(db: Session, league: str) -> dict:
             "btts": final["btts"],
             "raw_probabilities": raw,
             "ensemble_weights": weights,
+            **value_fields(final, stored_odds.get(fx.fixture_id)),
         }
         stmt = pg_insert(Prediction).values(**values)
         update_cols = {k: getattr(stmt.excluded, k) for k in values if k != "fixture_id"}

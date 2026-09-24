@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from app.schemas import JobOut, RefreshRequest
 from app.services.job_manager import Job, job_manager
 from app.services.model_service import retrain_leagues
-from app.services.scrape_service import run_scrape
+from app.services.scrape_service import run_scrape, scrape_odds
 
 router = APIRouter(prefix="/api/refresh", tags=["refresh"])
 
@@ -31,7 +31,7 @@ async def _start(job_type: str, fn) -> JobOut:
 @router.post("/scrape", response_model=JobOut)
 async def refresh_scrape(body: RefreshRequest) -> JobOut:
     def _run(job: Job) -> None:
-        result = run_scrape(body.leagues, body.include_stats, job=job)
+        result = run_scrape(body.leagues, body.include_stats, job=job, include_odds=body.include_odds)
         job.detail = f"done: {result}"
 
     return await _start("scrape", _run)
@@ -54,7 +54,10 @@ async def refresh_full(body: RefreshRequest) -> JobOut:
         scrape_result = run_scrape(body.leagues, body.include_stats, job=job)
         job.detail = "training models..."
         retrain_result = retrain_leagues(body.leagues)
-        job.detail = f"done: scrape={scrape_result} retrain={retrain_result}"
+        # After the retrain, so fixtures new in this scrape have a prediction
+        # to hang their odds on.
+        odds_result = scrape_odds(body.leagues, job=job) if body.include_odds else None
+        job.detail = f"done: scrape={scrape_result} retrain={retrain_result} odds={odds_result}"
 
     return await _start("full", _run)
 

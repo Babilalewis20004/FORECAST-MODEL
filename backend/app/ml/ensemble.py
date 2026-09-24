@@ -3,7 +3,9 @@ Ensemble orchestration: Extract features -> Model A + Model B -> Blend -> Calibr
 
 Training (train_ensemble), per league, on a chronological split of history:
   train (oldest 70%)   -> fit Model A and Model B
-  calibration (15%)    -> fit per-market blend weight w_A and calibrator
+  calibration (15%)    -> fit per-market blend weight w_A and calibrator, then
+                          the shrinkage weight toward the de-vigged market
+                          (markets with historical odds: 1X2, O/U 2.5)
   test (newest 15%)    -> report Brier / log loss / ECE (never used to fit anything)
 then refit both base models on 100% of history for serving, reusing the
 calibration-split weights and calibrators (standard practice: the most
@@ -23,6 +25,7 @@ import numpy as np
 import pandas as pd
 
 from app.ml.calibration import (
+    DEFAULT_SHRINKAGE_WEIGHT,
     BinaryCalibrator,
     IdentityCalibrator,
     MarketCalibration,
@@ -31,8 +34,10 @@ from app.ml.calibration import (
     evaluate,
     fit_blend_weight,
     fit_calibrator_or_identity,
+    fit_shrinkage_weight,
+    shrink_to_market,
 )
-from app.ml.features import FEATURE_COLUMNS, build_feature_frame, build_training_frame
+from app.ml.features import FEATURE_COLUMNS, MARKET_FEATURES, build_feature_frame, build_training_frame
 from app.ml.football_goal_range_model import (
     GOAL_RANGES,
     OU_LINES,
@@ -45,6 +50,7 @@ from app.ml.football_goal_range_model import (
     simulate_joint_score_distribution,
 )
 from app.ml.gbdt_models import RESULT_CLASSES, GBDTMarketModels
+from app.ml.value_engine import market_probabilities
 
 TRAIN_FRAC = 0.70
 CALIBRATION_FRAC = 0.15  # the remaining 0.15 is the test split
@@ -135,9 +141,11 @@ class LeagueEnsemble:
         frame = build_feature_frame(history, targets[["date", "home_team", "away_team"]])
         return self.model_b.predict_proba(frame)
 
-    def combine(self, a_flat: dict, b_flat: dict | None) -> dict:
-        """One fixture: raw Model A/B + blended + calibrated probabilities."""
-        blended, calibrated = {}, {}
+    def combine(self, a_flat: dict, b_flat: dict | None, market_flat: dict | None = None) -> dict:
+        """One fixture: raw Model A/B + blended + calibrated probabilities,
+        the calibrated ones shrunk toward the de-vigged market for every
+        market with a price in market_flat (market_flat_from_odds)."""
+        blended, calibrated, unshrunk = {}, {}, {}
         for market, cal in self.calibrations.items():
             p_a = np.atleast_1d(a_flat[market])[None, ...] if market == "match_result" else np.atleast_1d(a_flat[market])
             p_b = None
@@ -146,10 +154,48 @@ class LeagueEnsemble:
             raw, cal_p = cal.apply(p_a, p_b)
             blended[market] = raw[0]
             calibrated[market] = cal_p[0]
+            if market_flat and market in market_flat:
+                unshrunk[market] = cal_p[0]
+                p_mkt = np.atleast_1d(market_flat[market])[None, ...] if market == "match_result" else np.atleast_1d(market_flat[market])
+                calibrated[market] = shrink_to_market(cal_p, p_mkt, cal.shrinkage_weight())[0]
         raw = {"model_a": nest(a_flat), "blended": nest(blended)}
         if b_flat is not None:
             raw["model_b"] = nest(b_flat)
+        if unshrunk:
+            raw["calibrated_unshrunk"] = nest(unshrunk)
+            raw["market"] = nest({m: market_flat[m] for m in unshrunk})
         return {"raw": raw, "calibrated": calibrated, "weights": self.weights()}
+
+
+def market_flat_from_odds(odds: dict | None) -> dict:
+    """Flat market-key (match_result / btts / over_{line}) de-vigged
+    probabilities from flat bookmaker odds, complete books only."""
+    if not odds:
+        return {}
+    fair = market_probabilities(odds)
+    flat: dict = {}
+    if all(c in fair for c in RESULT_CLASSES):
+        flat["match_result"] = np.array([fair[c] for c in RESULT_CLASSES])
+    if "btts_yes" in fair:
+        flat["btts"] = fair["btts_yes"]
+    for line in OU_LINES:
+        if f"over_{line}" in fair:
+            flat[f"over_{line}"] = fair[f"over_{line}"]
+    return flat
+
+
+def market_flat_from_frame(frame: pd.DataFrame) -> dict[str, np.ndarray]:
+    """The same, batched, from MARKET_FEATURES columns (NaN = no price)."""
+    if not set(MARKET_FEATURES) <= set(frame.columns):
+        return {}
+    return {
+        "match_result": frame[["opening_prob_home", "opening_prob_draw", "opening_prob_away"]].to_numpy(dtype=float),
+        "over_2.5": frame["opening_prob_over_2.5"].to_numpy(dtype=float),
+    }
+
+
+def _has_market(p_mkt: np.ndarray) -> np.ndarray:
+    return ~(np.isnan(p_mkt).any(axis=1) if p_mkt.ndim == 2 else np.isnan(p_mkt))
 
 
 # ---------------------------------------------------------------------------
@@ -215,6 +261,8 @@ def train_ensemble(
     a_test = _model_a_holdout_flat(model_a_val, history, test, validation_sims)
     b_cal = model_b_val.predict_proba(cal)
     b_test = model_b_val.predict_proba(test)
+    m_cal = market_flat_from_frame(cal)
+    m_test = market_flat_from_frame(test)
 
     calibrations: dict[str, MarketCalibration] = {}
     market_metrics: dict[str, dict] = {}
@@ -239,7 +287,30 @@ def train_ensemble(
         mc = MarketCalibration(w_a=w_a, calibrator=calibrator)
         calibrations[market] = mc
 
+        # Shrinkage weight toward the de-vigged market, on calibration rows
+        # that have odds (markets without historical odds keep the default).
+        vs_market = None
+        if market in m_cal:
+            mc.w_market = fit_shrinkage_weight(calibrator.transform(blended_cal), m_cal[market], y_cal)
+
         blended_test, calibrated_test = mc.apply(a_test[market], b_test.get(market))
+        if market in m_test:
+            has = _has_market(m_test[market])
+            if has.sum() > 0:
+                sources = {
+                    "calibrated": calibrated_test[has],
+                    # "shrunk" = the weight actually served; "shrunk_fitted" = diagnostic.
+                    "shrunk": shrink_to_market(calibrated_test[has], m_test[market][has], mc.shrinkage_weight()),
+                    "shrunk_fitted": shrink_to_market(calibrated_test[has], m_test[market][has], mc.w_market),
+                    "market": m_test[market][has],
+                }
+                scored_m = {src: evaluate(p, y_test[has]) for src, p in sources.items()}
+                vs_market = {
+                    "n": int(has.sum()),
+                    "w_market": mc.shrinkage_weight(),
+                    "w_market_fitted": mc.w_market,
+                    **{metric: _round_metrics({s: v[metric] for s, v in scored_m.items()}) for metric in ("brier", "log_loss")},
+                }
         baseline = base_rate_prediction(y_train, len(y_test), 3 if is_multiclass else None)
         scored = {
             "model_a": evaluate(a_test[market], y_test),
@@ -255,6 +326,8 @@ def train_ensemble(
                 metric: _round_metrics({src: (s[metric] if s else None) for src, s in scored.items()})
                 for metric in ("brier", "log_loss", "ece")
             },
+            # Test rows with odds only: calibrated vs. shrunk vs. market itself.
+            "vs_market": vs_market,
         }
 
     metrics = {

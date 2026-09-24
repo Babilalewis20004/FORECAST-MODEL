@@ -33,6 +33,39 @@
   color: var(--text-secondary);
 }
 
+.value-badge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--success);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.value-badge__ev {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--success);
+  color: #fff;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.value-badge__pick {
+  font-weight: 600;
+}
+
+.value-badge__stake {
+  margin-left: auto;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
 .fixture-card__no-prediction {
   font-size: 13px;
   color: var(--text-muted);
