@@ -9,13 +9,6 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# libgomp1: xgboost's and scikit-learn's OpenMP-parallel code needs it at
-# runtime on Debian slim images (they don't vendor it like their wheels do
-# on some platforms).
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends libgomp1 \
-    && rm -rf /var/lib/apt/lists/*
-
 # Installed before the rest of the source so this layer only rebuilds when a
 # dependency actually changes.
 COPY requirements.txt ./requirements.txt
