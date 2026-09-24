@@ -143,7 +143,10 @@ def bootstrap_roi_test(
     profits = np.asarray(profits, dtype=float)
     stakes = np.asarray(stakes, dtype=float)
     if len(profits) == 0 or stakes.sum() <= 0:
-        return {"roi": None, "p_value": None, "ci_low": None, "ci_high": None, "n_boot": n_boot}
+        return {
+            "roi": None, "p_value": None, "ci_low": None, "ci_high": None,
+            "n_boot": n_boot, "boot_rois": np.array([]),
+        }
     roi = profits.sum() / stakes.sum()
     null_profits = profits - roi * stakes
 
@@ -170,6 +173,7 @@ def bootstrap_roi_test(
         "ci_low": float(np.percentile(boot_roi, 2.5)),
         "ci_high": float(np.percentile(boot_roi, 97.5)),
         "n_boot": n_boot,
+        "boot_rois": boot_roi,
     }
 
 
