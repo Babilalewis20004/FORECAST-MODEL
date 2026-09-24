@@ -287,10 +287,46 @@ served.
 
 ## Quickstart
 
-Prerequisites: Python 3.10+, Node 18+, Docker Desktop running.
+Prerequisites: Docker Desktop running. Two ways to run this:
+
+- **Docker Compose** -- Postgres, backend, frontend and the evaluation
+  dashboard, all containerized. Fewer moving parts, but a rebuild is needed
+  after most backend/dependency changes.
+- **Native** -- Postgres via Docker, backend and frontend run directly on
+  your machine (`--reload`/Vite HMR). Needs Python 3.10+ and Node 18+.
+
+### Docker Compose (all services)
 
 ```powershell
-docker compose up -d   # Postgres, from the project root
+copy backend\.env.example backend\.env   # then set API_FOOTBALL_KEY in it
+docker compose up -d --build
+```
+
+One-off DB setup, run once against the freshly created database (safe to
+re-run):
+
+```powershell
+docker compose exec backend python scripts/init_db.py
+docker compose exec backend python scripts/import_csv_to_postgres.py
+docker compose exec backend python scripts/migrate_add_markets.py
+docker compose exec backend python scripts/migrate_add_ensemble.py
+docker compose exec backend python scripts/migrate_add_value.py
+docker compose exec backend python scripts/import_historical_odds.py
+```
+
+Then open http://localhost:5173 (frontend), http://localhost:8000/docs
+(backend API), and http://localhost:8501 (evaluation dashboard, see
+`app.py`). The `backend` and `dashboard` services point `DATABASE_URL` at
+the `db` service directly (`db:5432`), not the host-side 5433 mapping used
+below.
+
+### Native
+
+Prerequisites: Python 3.10+, Node 18+, Docker Desktop running (for Postgres
+only).
+
+```powershell
+docker compose up -d db   # Postgres only, from the project root
 ```
 
 Then follow **Backend setup** and **Frontend setup** in separate terminals

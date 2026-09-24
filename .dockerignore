@@ -1,0 +1,23 @@
+# Secrets -- never baked into an image, only injected via env_file/environment
+.env
+backend/.env
+
+# VCS / editor / agent state
+.git
+.claude/
+
+# Python
+__pycache__/
+**/__pycache__/
+*.pyc
+venv/
+backend/venv/
+backend/.venv/
+backend/app/ml/model_store/*.joblib
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Large/derived data -- volume-mounted at runtime instead (see docker-compose.yml)
+downloaded_files/

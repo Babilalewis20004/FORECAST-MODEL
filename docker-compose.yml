@@ -19,5 +19,65 @@ services:
       timeout: 5s
       retries: 10
 
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    # backend/.env must exist (copy backend/.env.example -> backend/.env)
+    # before `docker compose up` -- compose fails to start otherwise.
+    env_file:
+      - backend/.env
+    environment:
+      # Service-name DNS on the compose network, not the host-side 5433
+      # mapping above.
+      DATABASE_URL: postgresql+psycopg2://predict:predict@db:5432/predict_model
+      CORS_ORIGINS: http://localhost:5173
+    ports:
+      - "8000:8000"
+    volumes:
+      # Trained models and the out-of-sample prediction cache are large,
+      # slow to rebuild, and gitignored -- mounted rather than baked into
+      # the image so they persist across rebuilds.
+      - ./backend/app/ml/model_store:/app/backend/app/ml/model_store
+      - ./downloaded_files:/app/downloaded_files
+    depends_on:
+      db:
+        condition: service_healthy
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    working_dir: /app
+    command: streamlit run app.py --server.port=8501 --server.address=0.0.0.0
+    restart: unless-stopped
+    env_file:
+      - backend/.env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://predict:predict@db:5432/predict_model
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./backend/app/ml/model_store:/app/backend/app/ml/model_store
+      - ./downloaded_files:/app/downloaded_files
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
+    environment:
+      # Points the dev-server proxy at the backend container instead of the
+      # frontend container's own localhost (see vite.config.ts).
+      VITE_API_PROXY_TARGET: http://backend:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
 volumes:
   predict_model_pgdata:
