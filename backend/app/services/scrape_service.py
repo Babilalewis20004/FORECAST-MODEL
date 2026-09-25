@@ -169,6 +169,7 @@ def _fetch_league_season(session: requests.Session, budget: Budget, league_name:
                 "away_team": teams["away"]["name"],
                 "home_goals": goals["home"],
                 "away_goals": goals["away"],
+                "referee": fx.get("referee"),
             }
         )
     return rows
@@ -185,6 +186,7 @@ def _upsert_matches(db: Session, rows: list[dict]) -> int:
             "away_team": r["away_team"],
             "home_goals": int(r["home_goals"]),
             "away_goals": int(r["away_goals"]),
+            "referee": r.get("referee"),
         }
         stmt = pg_insert(Match).values(**values)
         stmt = stmt.on_conflict_do_update(
@@ -193,6 +195,7 @@ def _upsert_matches(db: Session, rows: list[dict]) -> int:
                 "fixture_id": stmt.excluded.fixture_id,
                 "home_goals": stmt.excluded.home_goals,
                 "away_goals": stmt.excluded.away_goals,
+                "referee": stmt.excluded.referee,
             },
         )
         db.execute(stmt)
@@ -210,6 +213,7 @@ def _upsert_upcoming(db: Session, rows: list[dict]) -> int:
             "home_team": r["home_team"],
             "away_team": r["away_team"],
             "status": r["status"],
+            "referee": r.get("referee"),
         }
         stmt = pg_insert(UpcomingFixture).values(**values)
         stmt = stmt.on_conflict_do_update(
@@ -217,6 +221,7 @@ def _upsert_upcoming(db: Session, rows: list[dict]) -> int:
             set_={
                 "date": stmt.excluded.date,
                 "status": stmt.excluded.status,
+                "referee": stmt.excluded.referee,
             },
         )
         db.execute(stmt)
@@ -271,6 +276,8 @@ def _fetch_fixture_stats(session: requests.Session, budget: Budget, fixture_id: 
         out[f"{side}_cards"] = float(yellow) + float(red)
         xg = values.get("expected_goals")
         out[f"{side}_xg"] = float(xg) if xg is not None else None
+        poss = values.get("Ball Possession")
+        out[f"{side}_possession"] = float(poss.rstrip("%")) if isinstance(poss, str) and poss.rstrip("%") else None
     return out
 
 
@@ -278,7 +285,11 @@ def scrape_stats(job=None) -> dict:
     session = _session()
     budget = Budget()
     db = SessionLocal()
-    stat_cols = [f"{side}_{suffix}" for side in ("home", "away") for suffix in ("shots", "shots_on_target", "corners", "cards", "xg")]
+    stat_cols = [
+        f"{side}_{suffix}"
+        for side in ("home", "away")
+        for suffix in ("shots", "shots_on_target", "corners", "cards", "xg", "possession")
+    ]
 
     try:
         needs_stats = (
@@ -289,6 +300,8 @@ def scrape_stats(job=None) -> dict:
                 | (Match.away_shots.is_(None))
                 | (Match.home_xg.is_(None))
                 | (Match.away_xg.is_(None))
+                | (Match.home_possession.is_(None))
+                | (Match.away_possession.is_(None))
             )
             .all()
         )

@@ -51,6 +51,8 @@ from typing import Optional
 import xgboost as xgb
 from scipy.stats import nbinom, norm
 
+from app.ml.rolling_utils import trailing_match_counts
+
 
 # ---------------------------------------------------------------------------
 # Config
@@ -105,6 +107,10 @@ OU_LINES: tuple[float, ...] = (1.5, 2.5, 3.5)
 MAX_GOALS_SIDE = 10  # cap per-side goals when building the distribution
 N_SIMULATIONS = 20000
 
+CONGESTION_WINDOW_DAYS = 14  # fixture pile-up: matches played in the trailing N days
+REFEREE_WINDOW = 20  # matches, all-competition, same referee
+MIN_REFEREE_PERIODS = 3
+
 
 # ---------------------------------------------------------------------------
 # 1. Feature engineering
@@ -142,6 +148,8 @@ def _rolling_team_stats(df: pd.DataFrame, window: int) -> pd.DataFrame:
         ("corners_against", "away_corners", "home_corners"),
         ("cards_for", "home_cards", "away_cards"),
         ("cards_against", "away_cards", "home_cards"),
+        ("poss_for", "home_possession", "away_possession"),
+        ("poss_against", "away_possession", "home_possession"),
     ]
     for out_col, home_src, away_src in optional_cols:
         if home_src in df.columns:
@@ -158,6 +166,13 @@ def _rolling_team_stats(df: pd.DataFrame, window: int) -> pd.DataFrame:
     )
     rolled.columns = [f"roll_{c}" for c in rolled.columns]
     long_df = pd.concat([long_df[["date", "team", "is_home"]], rolled], axis=1)
+
+    # Fixture congestion: matches played in the trailing CONGESTION_WINDOW_DAYS,
+    # shift(1) so a row only sees pile-up strictly before this match.
+    long_df["congestion14"] = long_df.groupby("team")["date"].transform(
+        lambda s: pd.Series(trailing_match_counts(s, CONGESTION_WINDOW_DAYS), index=s.index)
+    )
+    long_df["congestion14"] = long_df.groupby("team")["congestion14"].shift(1).fillna(0.0)
 
     # Split back into home/away lookups keyed by (date, team)
     home_feats = long_df.add_prefix("h_")
@@ -220,6 +235,33 @@ def _elo_ratings(df: pd.DataFrame, k: float = 20.0, base: float = 1500.0) -> pd.
     return out.sort_index()
 
 
+def _add_referee_tendency(df: pd.DataFrame) -> pd.DataFrame:
+    """ref_avg_goals / ref_btts_rate: rolling (shift(1), no leakage) average of
+    total goals and BTTS rate in this referee's past REFEREE_WINDOW matches,
+    across every competition they've officiated. NaN until a referee has
+    MIN_REFEREE_PERIODS matches, or if the referee is unknown -- XGBoost
+    handles missing values natively, same as xG/shots."""
+    if "referee" not in df.columns:
+        df["ref_avg_goals"] = np.nan
+        df["ref_btts_rate"] = np.nan
+        return df
+
+    df = df.sort_values("date").reset_index(drop=True)
+    ref = pd.DataFrame({
+        "referee": df["referee"].where(df["referee"].astype(str).str.strip() != ""),
+        "date": df["date"],
+        "total_goals": df["home_goals"] + df["away_goals"],
+        "btts": ((df["home_goals"] > 0) & (df["away_goals"] > 0)).astype(float),
+    })
+    sorted_ref = ref.sort_values(["referee", "date"], kind="mergesort")
+    rolled = sorted_ref.groupby("referee")[["total_goals", "btts"]].transform(
+        lambda s: s.shift(1).rolling(REFEREE_WINDOW, min_periods=MIN_REFEREE_PERIODS).mean()
+    )
+    df["ref_avg_goals"] = rolled["total_goals"].reindex(df.index)
+    df["ref_btts_rate"] = rolled["btts"].reindex(df.index)
+    return df
+
+
 def build_features(df: pd.DataFrame, league_tier: str) -> pd.DataFrame:
     """
     league_tier: 'rich' or 'lower' — controls rolling window length and
@@ -229,6 +271,7 @@ def build_features(df: pd.DataFrame, league_tier: str) -> pd.DataFrame:
     df = _rolling_team_stats(df, window=window)
     df = _elo_ratings(df)
     df["elo_diff"] = df["home_elo"] - df["away_elo"]
+    df = _add_referee_tendency(df)
     return df
 
 
@@ -264,6 +307,8 @@ def compute_team_state(df: pd.DataFrame, league_tier: str) -> dict[str, dict[str
         ("corners_against", "away_corners", "home_corners"),
         ("cards_for", "home_cards", "away_cards"),
         ("cards_against", "away_cards", "home_cards"),
+        ("poss_for", "home_possession", "away_possession"),
+        ("poss_against", "away_possession", "home_possession"),
     ]
     for out_col, home_src, away_src in optional_cols:
         if home_src in df.columns:
@@ -280,6 +325,8 @@ def compute_team_state(df: pd.DataFrame, league_tier: str) -> dict[str, dict[str
         means = tail[stat_cols].mean()
         means = means.where(counts >= 3)  # mirrors rolling(..., min_periods=3)
         state[team] = {f"roll_{c}": means[c] for c in stat_cols}
+        sorted_dates = group["date"].sort_values()
+        state[team]["congestion14"] = float(trailing_match_counts(sorted_dates, CONGESTION_WINDOW_DAYS)[-1])
 
     # Final Elo rating per team after all matches in df -- same recurrence as
     # _elo_ratings, just keeping the end-of-loop ratings dict instead of the
@@ -305,7 +352,37 @@ def compute_team_state(df: pd.DataFrame, league_tier: str) -> dict[str, dict[str
     return state
 
 
-def fixture_feature_row(model: "LeagueGoalModel", team_state: dict, home_team: str, away_team: str) -> dict:
+def compute_referee_state(df: pd.DataFrame, window: int = REFEREE_WINDOW) -> dict[str, dict[str, float]]:
+    """Per-referee snapshot (avg total goals, BTTS rate over their last
+    `window` matches in df) as of the end of df -- the compute_team_state
+    counterpart for referees, used by predict_fixture_fast. Empty dict if
+    `df` has no referee column or no known referees."""
+    if "referee" not in df.columns:
+        return {}
+    d = df[df["referee"].notna() & (df["referee"].astype(str).str.strip() != "")]
+    if d.empty:
+        return {}
+
+    state: dict[str, dict[str, float]] = {}
+    for ref, group in d.groupby("referee", sort=False):
+        tail = group.tail(window)
+        if len(tail) < MIN_REFEREE_PERIODS:
+            continue
+        state[ref] = {
+            "ref_avg_goals": float((tail["home_goals"] + tail["away_goals"]).mean()),
+            "ref_btts_rate": float(((tail["home_goals"] > 0) & (tail["away_goals"] > 0)).mean()),
+        }
+    return state
+
+
+def fixture_feature_row(
+    model: "LeagueGoalModel",
+    team_state: dict,
+    home_team: str,
+    away_team: str,
+    referee_state: dict | None = None,
+    referee: str | None = None,
+) -> dict:
     """Builds one model.feature_cols-aligned row from precomputed team state
     (see compute_team_state) -- the fast counterpart to
     prepare_fixture_features for batch prediction over many fixtures."""
@@ -322,6 +399,12 @@ def fixture_feature_row(model: "LeagueGoalModel", team_state: dict, home_team: s
     row["home_elo"] = home_s.get("elo", 1500.0)
     row["away_elo"] = away_s.get("elo", 1500.0)
     row["elo_diff"] = row["home_elo"] - row["away_elo"]
+    row["h_congestion14"] = home_s.get("congestion14", 0.0)
+    row["a_congestion14"] = away_s.get("congestion14", 0.0)
+
+    ref_s = (referee_state or {}).get(referee, {}) if referee else {}
+    row["ref_avg_goals"] = ref_s.get("ref_avg_goals", np.nan)
+    row["ref_btts_rate"] = ref_s.get("ref_btts_rate", np.nan)
     return row
 
 
@@ -351,7 +434,8 @@ class LeagueGoalModel:
         """
         feats = build_features(df, self.tier)
         candidate_cols = [c for c in feats.columns if c.startswith(("h_roll_", "a_roll_"))]
-        candidate_cols += ["home_elo", "away_elo", "elo_diff"]
+        candidate_cols += ["home_elo", "away_elo", "elo_diff", "h_congestion14", "a_congestion14"]
+        candidate_cols += [c for c in ("ref_avg_goals", "ref_btts_rate") if c in feats.columns]
         # keep only columns with enough non-null coverage (handles missing xG etc.)
         self.feature_cols = [
             c for c in candidate_cols
@@ -580,12 +664,21 @@ def probabilities_to_odds(probs: dict[str, float]) -> dict[str, float | None]:
 # 4. End-to-end predict for a single fixture
 # ---------------------------------------------------------------------------
 
-def predict_fixture_fast(model: LeagueGoalModel, team_state: dict, home_team: str, away_team: str) -> dict:
+def predict_fixture_fast(
+    model: LeagueGoalModel,
+    team_state: dict,
+    home_team: str,
+    away_team: str,
+    referee_state: dict | None = None,
+    referee: str | None = None,
+) -> dict:
     """Fast counterpart to predict_fixture(model, prepare_fixture_features(...))
     for batch use: takes team state precomputed once per league (see
     compute_team_state) instead of rebuilding rolling/elo features from the
-    full match history for every single fixture."""
-    row = fixture_feature_row(model, team_state, home_team, away_team)
+    full match history for every single fixture. referee_state (see
+    compute_referee_state) + the fixture's own referee are optional -- NaN
+    referee features when either is omitted (e.g. no referee assigned yet)."""
+    row = fixture_feature_row(model, team_state, home_team, away_team, referee_state, referee)
     row_df = pd.DataFrame([row], columns=model.feature_cols)
     return predict_fixture(model, row_df)
 

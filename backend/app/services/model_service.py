@@ -19,6 +19,7 @@ from app.ml.football_goal_range_model import (
     INTERNATIONAL_GROUP,
     XG_RICH_LEAGUES,
     LeagueGoalModel,
+    compute_referee_state,
     compute_team_state,
     predict_fixture_fast,
 )
@@ -136,6 +137,9 @@ def _matches_df(db: Session, group: str) -> pd.DataFrame:
                 "away_cards": r.away_cards,
                 "home_xg": r.home_xg,
                 "away_xg": r.away_xg,
+                "home_possession": r.home_possession,
+                "away_possession": r.away_possession,
+                "referee": r.referee,
             }
             for r, opening in rows
         ]
@@ -210,6 +214,7 @@ def generate_predictions(db: Session, league: str) -> dict:
     # per-fixture rebuild was previously the dominant cost of a retrain:
     # several minutes for a single mid-size league).
     team_state = compute_team_state(history, league_tier(league))
+    referee_state = compute_referee_state(history)
     fixtures = [fx for fx in upcoming if fx.home_team in team_state and fx.away_team in team_state]
     n_failed = len(upcoming) - len(fixtures)
 
@@ -234,17 +239,18 @@ def generate_predictions(db: Session, league: str) -> dict:
                     "date": fx.date,
                     "home_team": fx.home_team,
                     "away_team": fx.away_team,
+                    "referee": fx.referee,
                     **market_features_from_odds(stored_odds.get(fx.fixture_id)),
                 }
                 for fx in fixtures
             ]
         )
-        b_probs = ensemble.predict_model_b(history, targets)
+        b_probs = ensemble.predict_model_b(history, targets, model_a=model)
 
     n_ok = 0
     for i, fx in enumerate(fixtures):
         try:
-            result = predict_fixture_fast(model, team_state, fx.home_team, fx.away_team)
+            result = predict_fixture_fast(model, team_state, fx.home_team, fx.away_team, referee_state, fx.referee)
         except (ValueError, IndexError):
             n_failed += 1
             continue
@@ -314,4 +320,5 @@ def predict_single(db: Session, fixture_id: int) -> dict | None:
     model = get_model(group)
     history = _matches_df(db, group)
     team_state = compute_team_state(history, league_tier(group))
-    return predict_fixture_fast(model, team_state, fx.home_team, fx.away_team)
+    referee_state = compute_referee_state(history)
+    return predict_fixture_fast(model, team_state, fx.home_team, fx.away_team, referee_state, fx.referee)
