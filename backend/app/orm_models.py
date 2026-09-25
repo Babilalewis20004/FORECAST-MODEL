@@ -31,6 +31,9 @@ class Match(Base):
     away_cards: Mapped[float | None] = mapped_column(Float, nullable=True)
     home_xg: Mapped[float | None] = mapped_column(Float, nullable=True)
     away_xg: Mapped[float | None] = mapped_column(Float, nullable=True)
+    home_possession: Mapped[float | None] = mapped_column(Float, nullable=True)
+    away_possession: Mapped[float | None] = mapped_column(Float, nullable=True)
+    referee: Mapped[str | None] = mapped_column(String, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
@@ -63,6 +66,7 @@ class UpcomingFixture(Base):
     home_team: Mapped[str] = mapped_column(String, nullable=False)
     away_team: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
+    referee: Mapped[str | None] = mapped_column(String, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 

@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import KFold
 
 from app.ml.calibration import (
     DEFAULT_SHRINKAGE_WEIGHT,
@@ -55,10 +56,16 @@ from app.ml.value_engine import market_probabilities
 TRAIN_FRAC = 0.70
 CALIBRATION_FRAC = 0.15  # the remaining 0.15 is the test split
 VALIDATION_SIMS = 5000  # Model A sims per validation match (serving uses the full 20k)
+CROSS_FIT_FOLDS = 5  # out-of-fold stacking folds (see _cross_fitted_stack)
 
 BLENDED_MARKETS = ["match_result", "btts"] + [f"over_{line}" for line in OU_LINES]
 RANGE_MARKETS = [f"range_{label}" for label in GOAL_RANGES]
 ALL_MARKETS = BLENDED_MARKETS + RANGE_MARKETS
+
+# Model A's own base BTTS/Over-2.5 rates, stacked as extra Model B input
+# features on top of FEATURE_COLUMNS (true stacking) -- in addition to, not
+# instead of, the post-hoc blend/calibration/shrinkage in combine() below.
+STACK_FEATURES = ["p_btts_base_a", "p_over_25_base_a"]
 
 
 def _label_col(market: str) -> str:
@@ -136,9 +143,14 @@ class LeagueEnsemble:
     def weights(self) -> dict[str, float | None]:
         return {m: c.w_a for m, c in self.calibrations.items()}
 
-    def predict_model_b(self, history: pd.DataFrame, targets: pd.DataFrame) -> dict[str, np.ndarray]:
-        """Model B probabilities for a batch of targets (date, home_team, away_team)."""
+    def predict_model_b(
+        self, history: pd.DataFrame, targets: pd.DataFrame, model_a: LeagueGoalModel | None = None
+    ) -> dict[str, np.ndarray]:
+        """Model B probabilities for a batch of targets (date, home_team,
+        away_team). model_a, when given, supplies STACK_FEATURES for the
+        batch (see attach_stack_features); omitted, those columns are NaN."""
         frame = build_feature_frame(history, targets[["date", "home_team", "away_team"]])
+        frame = attach_stack_features(frame, history, model_a)
         return self.model_b.predict_proba(frame)
 
     def combine(self, a_flat: dict, b_flat: dict | None, market_flat: dict | None = None) -> dict:
@@ -229,6 +241,73 @@ def _model_a_holdout_flat(
     return {m: np.array([r[m] for r in per_row]) for m in ALL_MARKETS}
 
 
+def attach_stack_features(
+    frame: pd.DataFrame, history: pd.DataFrame, model_a: LeagueGoalModel | None, n_sims: int = VALIDATION_SIMS
+) -> pd.DataFrame:
+    """Appends STACK_FEATURES (Model A's own base BTTS/Over-2.5 rates) as
+    extra Model B input columns -- true stacking, on top of (not instead of)
+    the post-hoc blend in combine(). NaN -- handled natively by XGBoost --
+    when model_a isn't available, e.g. legacy callers/tests that score Model
+    B standalone.
+
+    Only safe when `frame`'s rows were genuinely NOT used to fit `model_a`
+    (e.g. serving-time predictions for brand-new fixtures, or the cal/test
+    splits scored against a model_a fit only on train). For rows that *were*
+    part of model_a's own training data, use _cross_fitted_stack instead --
+    predicting a row with the same model_a it was fit on gives an
+    artificially sharp, in-sample probability that Model B then overfits to,
+    and meets a noisier, genuinely out-of-sample version of at serving
+    time (see train_ensemble)."""
+    out = frame.copy()
+    if model_a is None or model_a.home_model is None:
+        out["p_btts_base_a"] = np.nan
+        out["p_over_25_base_a"] = np.nan
+        return out
+    flat = _model_a_holdout_flat(model_a, history, frame, n_sims)
+    out["p_btts_base_a"] = flat["btts"]
+    out["p_over_25_base_a"] = flat["over_2.5"]
+    return out
+
+
+def _cross_fitted_stack(
+    league: str,
+    tier: str,
+    full_history: pd.DataFrame,
+    fit_history: pd.DataFrame,
+    target: pd.DataFrame,
+    n_sims: int,
+    n_folds: int = CROSS_FIT_FOLDS,
+    seed: int = 42,
+) -> pd.DataFrame:
+    """Out-of-fold STACK_FEATURES for every row of `target` (a frame built
+    from fit_history, i.e. every row here was/will be part of some Model A's
+    own training data). Each fold refits a fresh Model A on fit_history minus
+    that fold's matches and predicts only the held-out fold, so Model B is
+    always trained on the same out-of-sample-quality Model A signal it will
+    see at serving time -- never the artificially sharp in-sample version a
+    single fit-then-predict-on-the-same-rows would produce (see
+    attach_stack_features)."""
+    target = target.reset_index(drop=True)
+    out = target.copy()
+    out["p_btts_base_a"] = np.nan
+    out["p_over_25_base_a"] = np.nan
+
+    key_cols = ["date", "home_team", "away_team"]
+    target_keys = pd.MultiIndex.from_frame(target[key_cols])
+    fit_history_keys = pd.MultiIndex.from_frame(fit_history[key_cols])
+
+    kf = KFold(n_splits=n_folds, shuffle=True, random_state=seed)
+    for _, holdout_idx in kf.split(target):
+        holdout_keys = set(target_keys[holdout_idx])
+        fold_history = fit_history[~fit_history_keys.isin(holdout_keys)]
+        fold_model_a = LeagueGoalModel(league=league, tier=tier)
+        fold_model_a.fit(fold_history, test_size=0.0)
+        flat = _model_a_holdout_flat(fold_model_a, full_history, target.iloc[holdout_idx], n_sims)
+        out.loc[holdout_idx, "p_btts_base_a"] = flat["btts"]
+        out.loc[holdout_idx, "p_over_25_base_a"] = flat["over_2.5"]
+    return out
+
+
 def _round_metrics(d: dict) -> dict:
     return {k: (round(float(v), 5) if v is not None else None) for k, v in d.items()}
 
@@ -253,14 +332,24 @@ def train_ensemble(
     test = frame[frame["date"] >= cut_test].reset_index(drop=True)
 
     # Base models on the train split only.
+    train_history = history[history["date"] < cut_cal]
     model_a_val = LeagueGoalModel(league=league, tier=tier)
-    model_a_val.fit(history[history["date"] < cut_cal], test_size=0.0)
-    model_b_val = GBDTMarketModels(feature_cols=FEATURE_COLUMNS).fit(train)
+    model_a_val.fit(train_history, test_size=0.0)
+    # Model A's own base rates on the *train* rows, out-of-fold (see
+    # _cross_fitted_stack) -- predicting them with model_a_val itself (fit on
+    # these same rows) would be in-sample and Model B would overfit to it.
+    train_stack = _cross_fitted_stack(league, tier, history, train_history, train, validation_sims)
+    model_b_val = GBDTMarketModels(feature_cols=FEATURE_COLUMNS + STACK_FEATURES).fit(train_stack)
 
     a_cal = _model_a_holdout_flat(model_a_val, history, cal, validation_sims)
     a_test = _model_a_holdout_flat(model_a_val, history, test, validation_sims)
-    b_cal = model_b_val.predict_proba(cal)
-    b_test = model_b_val.predict_proba(test)
+    # Reuse a_cal/a_test (already computed) for the stack columns rather than
+    # running Model A's simulation a second time via attach_stack_features.
+    cal_stack, test_stack = cal.copy(), test.copy()
+    cal_stack["p_btts_base_a"], cal_stack["p_over_25_base_a"] = a_cal["btts"], a_cal["over_2.5"]
+    test_stack["p_btts_base_a"], test_stack["p_over_25_base_a"] = a_test["btts"], a_test["over_2.5"]
+    b_cal = model_b_val.predict_proba(cal_stack)
+    b_test = model_b_val.predict_proba(test_stack)
     m_cal = market_flat_from_frame(cal)
     m_test = market_flat_from_frame(test)
 
@@ -342,7 +431,11 @@ def train_ensemble(
     # Serving models: refit on 100% of history.
     model_a = LeagueGoalModel(league=league, tier=tier)
     model_a.fit(history, test_size=0.0)
-    model_b = GBDTMarketModels(feature_cols=FEATURE_COLUMNS).fit(frame)
+    # Same out-of-fold requirement as train_stack above -- model_a here is
+    # fit on all of `frame`'s rows, so a plain attach_stack_features(frame,
+    # history, model_a, ...) would be 100% in-sample.
+    frame_stack = _cross_fitted_stack(league, tier, history, history, frame, validation_sims)
+    model_b = GBDTMarketModels(feature_cols=FEATURE_COLUMNS + STACK_FEATURES).fit(frame_stack)
 
     ensemble = LeagueEnsemble(
         league=league,

@@ -22,11 +22,15 @@ import pandas as pd
 
 from app.ml.calibration import shin_implied_probabilities
 from app.ml.football_goal_range_model import GOAL_RANGES, OU_LINES
+from app.ml.rolling_utils import trailing_match_counts
 
 WINDOWS = (5, 10)
 MIN_PERIODS = 3  # observations needed before a rolling mean is trusted
 H2H_WINDOW = 6
 REST_DAYS_CAP = 30  # beyond this it's off-season/international-break noise
+CONGESTION_WINDOW_DAYS = 14  # fixture pile-up: matches played in the trailing N days
+REFEREE_WINDOW = 20  # matches, all-competition, same referee
+MIN_REFEREE_PERIODS = 3
 
 ELO_BASE = 1500.0
 ELO_K = 20.0
@@ -42,13 +46,17 @@ _STAT_SOURCES = [
     ("shots_for", "home_shots", "away_shots"),
     ("shots_against", "away_shots", "home_shots"),
     ("sot_for", "home_shots_on_target", "away_shots_on_target"),
+    ("poss_for", "home_possession", "away_possession"),
 ]
 _STAT_COLS = [c for c, _, _ in _STAT_SOURCES]
-_OPTIONAL_SOURCES = ["home_xg", "away_xg", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target"]
+_OPTIONAL_SOURCES = [
+    "home_xg", "away_xg", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target",
+    "home_possession", "away_possession",
+]
 
 _TEAM_FEATURES = (
     [f"{c}_r{w}" for c in _STAT_COLS for w in WINDOWS]
-    + ["conv_r10", "elo", "rest_days", "n_matches"]
+    + ["conv_r10", "elo", "rest_days", "n_matches", "congestion14"]
 )
 # De-vigged (Shin) pre-match market probabilities. Unlike everything above
 # they aren't derived from match history: they arrive as columns on the
@@ -60,7 +68,7 @@ MARKET_FEATURES = ["opening_prob_home", "opening_prob_draw", "opening_prob_away"
 FEATURE_COLUMNS: list[str] = (
     [f"h_{f}" for f in _TEAM_FEATURES]
     + [f"a_{f}" for f in _TEAM_FEATURES]
-    + ["elo_diff", "h2h_n", "h2h_gd", "h2h_total", "h2h_btts"]
+    + ["elo_diff", "h2h_n", "h2h_gd", "h2h_total", "h2h_btts", "ref_avg_goals", "ref_btts_rate"]
     + MARKET_FEATURES
 )
 
@@ -92,6 +100,8 @@ def _prepare_matches(matches: pd.DataFrame) -> pd.DataFrame:
         if col not in df.columns:
             df[col] = np.nan
         df[col] = pd.to_numeric(df[col], errors="coerce")
+    if "referee" not in df.columns:
+        df["referee"] = None
     df["home_goals"] = df["home_goals"].astype(float)
     df["away_goals"] = df["away_goals"].astype(float)
     return df.sort_values("date", kind="mergesort").reset_index(drop=True)
@@ -142,6 +152,11 @@ def _team_state(df: pd.DataFrame) -> pd.DataFrame:
         for w in WINDOWS:
             out[f"{col}_r{w}"] = g[col].transform(lambda s, w=w: s.rolling(w, min_periods=MIN_PERIODS).mean())
 
+    # Fixture congestion: matches played in the trailing CONGESTION_WINDOW_DAYS,
+    # including this one -- consistent with every other column in `out`
+    # representing state *going into the team's next game*.
+    out["congestion14"] = g["date"].transform(lambda s: pd.Series(trailing_match_counts(s, CONGESTION_WINDOW_DAYS), index=s.index))
+
     goals_sum = g["_goals_w_shots"].transform(lambda s: s.rolling(10, min_periods=MIN_PERIODS).sum())
     shots_sum = g["shots_for"].transform(lambda s: s.rolling(10, min_periods=MIN_PERIODS).sum())
     out["conv_r10"] = goals_sum / shots_sum.replace(0, np.nan)
@@ -174,6 +189,32 @@ def _h2h_state(df: pd.DataFrame) -> pd.DataFrame:
     return out.sort_values("date", kind="mergesort").reset_index(drop=True)
 
 
+def _referee_state(df: pd.DataFrame) -> pd.DataFrame:
+    """One row per completed match with a known referee: rolling
+    REFEREE_WINDOW-match average of that referee's total goals and BTTS rate
+    (across every competition they've officiated), *including* this match --
+    same "state going into the next game" convention as _team_state/_h2h_state,
+    relying on the target join's allow_exact_matches=False for leak safety."""
+    empty = pd.DataFrame(columns=["referee", "date", "ref_avg_goals", "ref_btts_rate"])
+    if "referee" not in df.columns:
+        return empty
+    d = df[df["referee"].notna() & (df["referee"].astype(str).str.strip() != "")]
+    if d.empty:
+        return empty
+
+    ref = pd.DataFrame({
+        "referee": d["referee"].to_numpy(),
+        "date": d["date"].to_numpy(),
+        "total_goals": (d["home_goals"] + d["away_goals"]).to_numpy(),
+        "btts": ((d["home_goals"] > 0) & (d["away_goals"] > 0)).astype(float).to_numpy(),
+    }).sort_values(["referee", "date"], kind="mergesort")
+
+    g = ref.groupby("referee", sort=False)
+    ref["ref_avg_goals"] = g["total_goals"].transform(lambda s: s.rolling(REFEREE_WINDOW, min_periods=MIN_REFEREE_PERIODS).mean())
+    ref["ref_btts_rate"] = g["btts"].transform(lambda s: s.rolling(REFEREE_WINDOW, min_periods=MIN_REFEREE_PERIODS).mean())
+    return ref[["referee", "date", "ref_avg_goals", "ref_btts_rate"]].sort_values("date", kind="mergesort").reset_index(drop=True)
+
+
 def build_feature_frame(matches: pd.DataFrame, targets: pd.DataFrame) -> pd.DataFrame:
     """
     Features for arbitrary target rows (date, home_team, away_team), computed
@@ -203,6 +244,7 @@ def build_feature_frame(matches: pd.DataFrame, targets: pd.DataFrame) -> pd.Data
         side_feats = merged[state_cols].copy()
         side_feats["rest_days"] = (merged["date"] - merged["last_match_date"]).dt.days.clip(upper=REST_DAYS_CAP)
         side_feats["n_matches"] = side_feats["n_matches"].fillna(0)
+        side_feats["congestion14"] = side_feats["congestion14"].fillna(0)
         side_feats["elo"] = side_feats["elo"].fillna(ELO_BASE)
         side_feats = side_feats.drop(columns=["last_match_date"]).add_prefix(f"{side}_")
         t = t.join(side_feats, on="_tid")
@@ -224,6 +266,18 @@ def build_feature_frame(matches: pd.DataFrame, targets: pd.DataFrame) -> pd.Data
         index=h2h_merged.index,
     )
     t = t.join(h2h_feats, on="_tid")
+
+    ref_state = _referee_state(history)
+    if not ref_state.empty and "referee" in t.columns:
+        ref_left = t[["_tid", "date", "referee"]].sort_values("date", kind="mergesort")
+        ref_merged = pd.merge_asof(
+            ref_left, ref_state, on="date", by="referee", allow_exact_matches=False, direction="backward"
+        ).set_index("_tid")
+        t = t.join(ref_merged[["ref_avg_goals", "ref_btts_rate"]], on="_tid")
+    else:
+        t["ref_avg_goals"] = np.nan
+        t["ref_btts_rate"] = np.nan
+
     t["elo_diff"] = t["h_elo"] - t["a_elo"]
     for col in MARKET_FEATURES:
         if col not in t.columns:
@@ -241,7 +295,7 @@ def build_training_frame(matches: pd.DataFrame) -> pd.DataFrame:
     for each market Model B (and the ensemble evaluation) needs."""
     history = _prepare_matches(matches)
     market = [c for c in MARKET_FEATURES if c in history.columns]
-    targets = history[["date", "home_team", "away_team", "home_goals", "away_goals", *market]]
+    targets = history[["date", "home_team", "away_team", "home_goals", "away_goals", "referee", *market]]
     frame = build_feature_frame(history, targets)
 
     hg, ag = frame["home_goals"], frame["away_goals"]
