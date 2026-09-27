@@ -100,6 +100,11 @@ class Prediction(Base):
     match_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     over_under: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     btts: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # Top-N most likely exact scorelines ("2-1": 0.11, ...), Model A only --
+    # see football_goal_range_model.correct_score_probabilities. Not a
+    # complete distribution (doesn't sum to 1); display-only, for the
+    # correct-score market card.
+    correct_score: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     # Ensemble provenance. When present, the market columns above hold the
     # final *calibrated* probabilities, and raw_probabilities holds the
     # pre-calibration Model A / Model B / blended values they came from.

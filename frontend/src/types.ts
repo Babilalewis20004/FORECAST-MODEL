@@ -73,9 +73,13 @@ export interface Prediction {
   match_result: MatchResult | null;
   over_under: OverUnder | null;
   btts: Btts | null;
+  // Top-N most likely exact scorelines ("2-1": 0.11, ...), Model A only --
+  // doesn't sum to 1, display-only. Keyed "home-away".
+  correct_score: Record<string, number> | null;
   match_result_odds: MatchResultOdds | null;
   over_under_odds: OverUnderOdds | null;
   btts_odds: BttsOdds | null;
+  correct_score_odds: Record<string, number | null> | null;
   // Ensemble provenance -- null on Model-A-only predictions made before the
   // ensemble shipped. brier_scores is per league (keyed by market, e.g.
   // "match_result", "btts", "over_2.5"), not per fixture.
@@ -104,6 +108,18 @@ export interface Fixture {
   away_team: string;
   status: string;
   prediction: Prediction | null;
+}
+
+// A finished match (backend's MatchOut) -- used for "last 5 form", fetched
+// via GET /api/matches?team=<name>&limit=5.
+export interface RecentMatch {
+  fixture_id: number | null;
+  date: string;
+  league: string;
+  home_team: string;
+  away_team: string;
+  home_goals: number;
+  away_goals: number;
 }
 
 export interface Job {

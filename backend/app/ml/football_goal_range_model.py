@@ -641,6 +641,30 @@ def btts_probabilities(home_goals_samples: np.ndarray, away_goals_samples: np.nd
     return {"yes": yes, "no": 1.0 - yes}
 
 
+def correct_score_probabilities(
+    home_goals_samples: np.ndarray, away_goals_samples: np.ndarray, max_goals: int = 6, top_n: int = 10
+) -> dict[str, float]:
+    """The `top_n` most likely exact scorelines within a 0..max_goals grid
+    (any sample with either side above max_goals is dropped, not bucketed --
+    at max_goals=6 that's a vanishingly small tail with no realistic chance
+    of making the top N anyway), keyed "h-a", from the same joint score draw
+    predict_fixture already produces. Not exhaustive: these top_n
+    probabilities don't sum to 1 and are for display only -- callers that
+    need a full-coverage probability should use match_result/goal_range_
+    probabilities/over_under_probabilities instead."""
+    n = len(home_goals_samples)
+    in_range = (home_goals_samples <= max_goals) & (away_goals_samples <= max_goals)
+    h, a = home_goals_samples[in_range].astype(int), away_goals_samples[in_range].astype(int)
+    counts = np.bincount(h * (max_goals + 1) + a, minlength=(max_goals + 1) ** 2)
+    probs = counts / n
+    entries = [
+        (f"{hg}-{ag}", float(probs[hg * (max_goals + 1) + ag]))
+        for hg in range(max_goals + 1)
+        for ag in range(max_goals + 1)
+    ]
+    return dict(sorted(entries, key=lambda kv: kv[1], reverse=True)[:top_n])
+
+
 def decimal_odds(probability: float) -> float | None:
     """Fair (no-margin/no-vig) decimal odds for a probability: 1/p. This is
     the "true" odds implied by the model, not what a bookmaker would price
@@ -697,6 +721,10 @@ def predict_fixture(
     match_result = match_result_probabilities(home_samples, away_samples)
     over_under = over_under_probabilities(total_samples)
     btts = btts_probabilities(home_samples, away_samples)
+    # Model A only (like lambda_home/away) -- not part of the ensemble's
+    # flat-key blend/shrinkage, since a per-scoreline joint distribution
+    # doesn't fit that framework the way the other markets do.
+    correct_score = correct_score_probabilities(home_samples, away_samples)
 
     return {
         "lambda_home": round(lam_h, 2),
@@ -706,6 +734,7 @@ def predict_fixture(
         "match_result": match_result,
         "over_under": over_under,
         "btts": btts,
+        "correct_score": correct_score,
         # Fair (no-margin) decimal odds -- 1/probability -- for every market
         # above, same keys as their probability counterparts.
         "odds": {
@@ -713,6 +742,7 @@ def predict_fixture(
             "match_result": probabilities_to_odds(match_result),
             "over_under": probabilities_to_odds(over_under),
             "btts": probabilities_to_odds(btts),
+            "correct_score": probabilities_to_odds(correct_score),
         },
     }
 

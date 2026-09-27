@@ -278,6 +278,7 @@ def generate_predictions(db: Session, league: str) -> dict:
             "match_result": final["match_result"],
             "over_under": final["over_under"],
             "btts": final["btts"],
+            "correct_score": result["correct_score"],
             "raw_probabilities": raw,
             "ensemble_weights": weights,
             **value_fields(final, stored_odds.get(fx.fixture_id)),

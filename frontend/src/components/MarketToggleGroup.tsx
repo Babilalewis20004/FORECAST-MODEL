@@ -1,0 +1,42 @@
+export interface ToggleOption {
+  key: string;
+  label: string;
+  prob: number; // 0..1
+  odds?: number | null;
+}
+
+interface Props {
+  title: string;
+  options: ToggleOption[];
+  selected: string | null;
+  onSelect: (key: string) => void;
+}
+
+// A mutually-exclusive set of tappable picks (1X2 / BTTS / one Over-Under
+// line) -- tapping the selected option again clears it. Pure UI state (no
+// bet is placed); it just highlights a pick the way the goal-range chart
+// already highlights this fixture's own numbers.
+export function MarketToggleGroup({ title, options, selected, onSelect }: Props) {
+  return (
+    <div className="market">
+      <div className="market__title">{title}</div>
+      <div className="market-toggles" style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}>
+        {options.map((opt) => {
+          const isSelected = selected === opt.key;
+          return (
+            <button
+              key={opt.key}
+              type="button"
+              className={`market-toggle${isSelected ? " market-toggle--selected" : ""}`}
+              onClick={() => onSelect(opt.key)}
+            >
+              <span className="market-toggle__label">{opt.label}</span>
+              <span className="market-toggle__odds">{opt.odds != null ? opt.odds.toFixed(2) : "—"}</span>
+              <span className="market-toggle__pct">{Math.round(opt.prob * 100)}%</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

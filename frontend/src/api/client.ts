@@ -1,4 +1,4 @@
-import type { Fixture, Job, League } from "../types";
+import type { Fixture, Job, League, RecentMatch } from "../types";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, init);
@@ -19,6 +19,15 @@ export function getUpcomingFixtures(params: { league?: string; start?: string; e
   if (params.start) qs.set("start", params.start);
   if (params.end) qs.set("end", params.end);
   return request(`/api/fixtures/upcoming?${qs.toString()}`);
+}
+
+// Last-5-form data: the existing /api/matches endpoint already supports
+// filtering by team and ordering by date desc -- no new backend endpoint
+// needed. `matches` only ever contains finished fixtures, so this is always
+// "results up to now", never a future leak for an upcoming fixture.
+export function getRecentMatches(team: string, limit = 5): Promise<RecentMatch[]> {
+  const qs = new URLSearchParams({ team, limit: String(limit) });
+  return request(`/api/matches?${qs.toString()}`);
 }
 
 export function postRefresh(kind: "scrape" | "retrain" | "full", body: { leagues?: string[]; include_stats?: boolean }): Promise<Job> {
