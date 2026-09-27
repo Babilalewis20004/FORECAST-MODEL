@@ -61,7 +61,7 @@ from app.ml.rolling_utils import trailing_match_counts
 # Leagues you said you want covered, split by data-richness tier.
 # xG-rich tier: full shot-quality features.
 # goals-only tier: fall back to goals/shots/cards rolling features.
-XG_RICH_LEAGUES = {"Premier League", "La Liga", "EFL Championship"}
+XG_RICH_LEAGUES = {"Premier League", "La Liga", "EFL Championship", "Bundesliga", "Serie A", "Ligue 1"}
 GOALS_ONLY_LEAGUES = {"League One", "League Two", "Scottish Premiership"}
 
 # National-team competitions. Each is far too small to train on alone (the

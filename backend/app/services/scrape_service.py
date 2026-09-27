@@ -29,6 +29,9 @@ CACHE_DIR = ROOT / "downloaded_files" / "api_football_cache"
 LEAGUES: dict[str, int] = {
     "Premier League": 39,
     "La Liga": 140,
+    "Bundesliga": 78,
+    "Serie A": 135,
+    "Ligue 1": 61,
     "EFL Championship": 40,
     "League One": 41,
     "League Two": 42,

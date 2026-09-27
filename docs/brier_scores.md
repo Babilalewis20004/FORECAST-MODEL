@@ -8,7 +8,7 @@ base models before blending (Model B is `—` for the 8 goal-range markets,
 which only Model A predicts); **Baseline** is always predicting the
 league's historical base rate.
 
-This is a snapshot as of the trained_at timestamps below — retraining a
+This is a snapshot as of the trained_at timestamps below -- retraining a
 league updates its `ModelRun` row, so these numbers will drift. To
 regenerate, query `ModelRun` directly:
 
@@ -21,22 +21,42 @@ for r in db.query(ModelRun).order_by(ModelRun.league).all():
     print(r.league, r.trained_at, r.metrics["markets"])
 ```
 
-## Match result — summary across leagues
+## Match result -- summary across leagues
 
 | League | Calibrated | vs. baseline | Trained |
 |---|---|---|---|
-| International | 0.574 | 0.634 | 2026-09-25 |
 | Scottish Premiership | 0.564 | 0.637 | 2026-09-27 |
+| International | 0.574 | 0.634 | 2026-09-25 |
+| Serie A | 0.582 | 0.653 | 2026-09-27 |
 | La Liga | 0.589 | 0.631 | 2026-09-25 |
-| League Two | 0.632 | 0.644 | 2026-09-25 |
 | League One | 0.621 | 0.657 | 2026-09-25 |
+| League Two | 0.632 | 0.644 | 2026-09-25 |
+| Ligue 1 | 0.635 | 0.657 | 2026-09-27 |
+| Bundesliga | 0.636 | 0.649 | 2026-09-27 |
 | Premier League | 0.648 | 0.675 | 2026-09-25 |
 | EFL Championship | 0.651 | 0.663 | 2026-09-25 |
 
-Every trained league beats its baseline on `match_result`; Scottish
-Premiership and La Liga show the largest edge.
+Every trained league beats its baseline on `match_result`.
 
 ## Full breakdown, per league
+
+### Bundesliga (1,268 matches, trained 2026-09-27)
+
+| Market | Calibrated | Model A | Model B | Baseline |
+|---|---|---|---|---|
+| match_result | 0.636 | 0.612 | 0.668 | 0.649 |
+| btts | 0.233 | 0.254 | 0.253 | 0.232 |
+| over_1.5 | 0.131 | 0.158 | 0.140 | 0.131 |
+| over_2.5 | 0.224 | 0.269 | 0.243 | 0.228 |
+| over_3.5 | 0.244 | 0.283 | 0.249 | 0.250 |
+| range_1-3 | 0.254 | 0.272 | — | 0.251 |
+| range_1-4 | 0.214 | 0.212 | — | 0.199 |
+| range_2-3 | 0.239 | 0.247 | — | 0.241 |
+| range_2-4 | 0.237 | 0.248 | — | 0.238 |
+| range_2-5 | 0.193 | 0.206 | — | 0.190 |
+| range_2-6 | 0.155 | 0.175 | — | 0.152 |
+| range_3-5 | 0.248 | 0.270 | — | 0.250 |
+| range_3-6 | 0.234 | 0.272 | — | 0.238 |
 
 ### EFL Championship (2,323 matches, trained 2026-09-25)
 
@@ -128,6 +148,24 @@ Premiership and La Liga show the largest edge.
 | range_3-5 | 0.249 | 0.255 | — | 0.249 |
 | range_3-6 | 0.250 | 0.260 | — | 0.250 |
 
+### Ligue 1 (1,348 matches, trained 2026-09-27)
+
+| Market | Calibrated | Model A | Model B | Baseline |
+|---|---|---|---|---|
+| match_result | 0.635 | 0.640 | 0.656 | 0.657 |
+| btts | 0.248 | 0.264 | 0.258 | 0.248 |
+| over_1.5 | 0.180 | 0.197 | 0.193 | 0.180 |
+| over_2.5 | 0.244 | 0.259 | 0.258 | 0.247 |
+| over_3.5 | 0.221 | 0.221 | 0.229 | 0.221 |
+| range_1-3 | 0.242 | 0.247 | — | 0.248 |
+| range_1-4 | 0.184 | 0.187 | — | 0.183 |
+| range_2-3 | 0.248 | 0.249 | — | 0.248 |
+| range_2-4 | 0.240 | 0.244 | — | 0.235 |
+| range_2-5 | 0.214 | 0.225 | — | 0.210 |
+| range_2-6 | 0.203 | 0.217 | — | 0.200 |
+| range_3-5 | 0.252 | 0.261 | — | 0.250 |
+| range_3-6 | 0.253 | 0.262 | — | 0.250 |
+
 ### Premier League (1,570 matches, trained 2026-09-25)
 
 | Market | Calibrated | Model A | Model B | Baseline |
@@ -164,13 +202,32 @@ Premiership and La Liga show the largest edge.
 | range_3-5 | 0.247 | 0.249 | — | 0.250 |
 | range_3-6 | 0.245 | 0.254 | — | 0.250 |
 
+### Serie A (1,571 matches, trained 2026-09-27)
+
+| Market | Calibrated | Model A | Model B | Baseline |
+|---|---|---|---|---|
+| match_result | 0.582 | 0.583 | 0.595 | 0.653 |
+| btts | 0.250 | 0.255 | 0.267 | 0.251 |
+| over_1.5 | 0.196 | 0.198 | 0.203 | 0.198 |
+| over_2.5 | 0.252 | 0.266 | 0.270 | 0.250 |
+| over_3.5 | 0.176 | 0.174 | 0.181 | 0.179 |
+| range_1-3 | 0.216 | 0.212 | — | 0.214 |
+| range_1-4 | 0.177 | 0.171 | — | 0.173 |
+| range_2-3 | 0.254 | 0.250 | — | 0.250 |
+| range_2-4 | 0.246 | 0.242 | — | 0.245 |
+| range_2-5 | 0.213 | 0.216 | — | 0.214 |
+| range_2-6 | 0.204 | 0.208 | — | 0.206 |
+| range_3-5 | 0.250 | 0.264 | — | 0.249 |
+| range_3-6 | 0.251 | 0.268 | — | 0.250 |
+
 ## Notes
 
 - `match_result` shows the biggest, most consistent calibration gain over
   baseline across every league.
-- Scottish Premiership's `btts` / `over_X.5` / goal-range markets are the
-  one case where calibrated is *worse* than baseline -- smallest training
-  set (978 matches) of the seven, so noisier test-split estimates there.
-- `range_2-3` / `range_3-5` / `range_3-6` barely beat baseline anywhere --
-  these ranges sit close to the marginal goal distribution regardless of
-  team strength, so there's little signal left for the model to extract.
+- Bundesliga, Serie A, and Ligue 1 were added after verifying their
+  API-Football stats coverage (shots/xG/possession) matched the existing
+  xG-rich leagues -- see `XG_RICH_LEAGUES` in `football_goal_range_model.py`.
+- Leagues with smaller training sets (Scottish Premiership at 978 matches,
+  Bundesliga/Ligue 1/Serie A around 1,300-1,600) tend to show noisier
+  calibrated-vs-baseline gaps on the smaller binary/goal-range markets than
+  the larger leagues (International at 4,278, EFL Championship at 2,323).
