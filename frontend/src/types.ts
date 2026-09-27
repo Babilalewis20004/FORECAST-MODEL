@@ -122,6 +122,11 @@ export interface RecentMatch {
   away_goals: number;
 }
 
+export interface LogEntry {
+  at: string;
+  message: string;
+}
+
 export interface Job {
   job_id: string;
   type: "scrape" | "retrain" | "full";
@@ -130,4 +135,8 @@ export interface Job {
   finished_at: string | null;
   detail: string | null;
   error: string | null;
+  // Approximate expected log.length at completion -- for a progress bar,
+  // not exact. null until the job has actually started running.
+  total_steps: number | null;
+  log: LogEntry[];
 }

@@ -12,6 +12,12 @@ _MAX_HISTORY = 20
 
 
 @dataclass
+class LogEntry:
+    at: datetime
+    message: str
+
+
+@dataclass
 class Job:
     job_id: str
     type: str
@@ -20,6 +26,20 @@ class Job:
     finished_at: datetime | None = None
     detail: str | None = None
     error: str | None = None
+    # Estimated number of log_line() calls this job will make (see
+    # routers/refresh.py's _estimate_*_steps) -- an approximation the
+    # frontend divides len(log) by for a progress %, not an exact count.
+    total_steps: int | None = None
+    log: list[LogEntry] = field(default_factory=list)
+
+    def log_line(self, message: str) -> None:
+        """Record one discrete, user-visible milestone (one line in the
+        frontend's console box, and what its progress bar counts). Also
+        updates `detail`, the coarser current-phase label. High-frequency,
+        non-milestone progress (per-fixture, not per-league) should assign
+        `.detail` directly instead, so it doesn't flood the console."""
+        self.detail = message
+        self.log.append(LogEntry(at=_now(), message=message))
 
 
 class JobManager:
