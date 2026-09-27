@@ -13,6 +13,7 @@
   --series-3: #1baf7a;
   --success: #0ca30c;
   --critical: #d03b3b;
+  --accent: #c98a00;
   --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
@@ -32,6 +33,7 @@
     --series-3: #199e70;
     --success: #0ca30c;
     --critical: #e66767;
+    --accent: #e0a530;
   }
 }
 
@@ -50,6 +52,7 @@
   --series-3: #199e70;
   --success: #0ca30c;
   --critical: #e66767;
+  --accent: #e0a530;
 }
 
 * {

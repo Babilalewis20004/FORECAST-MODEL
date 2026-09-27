@@ -34,6 +34,10 @@ class PredictionOut(BaseModel):
     match_result: dict[str, float] | None = None
     over_under: dict[str, float] | None = None
     btts: dict[str, float] | None = None
+    # Top-N most likely exact scorelines ("2-1": 0.11, ...), Model A only --
+    # see football_goal_range_model.correct_score_probabilities. Doesn't sum
+    # to 1 (display-only, not a complete distribution).
+    correct_score: dict[str, float] | None = None
     # Decimal odds (1/probability, no bookmaker margin) -- computed from the
     # probabilities above at response time rather than stored, since they're
     # a pure derived value with no new information. Same keys as their
@@ -42,6 +46,7 @@ class PredictionOut(BaseModel):
     match_result_odds: dict[str, float | None] | None = None
     over_under_odds: dict[str, float | None] | None = None
     btts_odds: dict[str, float | None] | None = None
+    correct_score_odds: dict[str, float | None] | None = None
     # Ensemble provenance -- all null for predictions made before the
     # ensemble shipped (Model A only, uncalibrated) until the next retrain.
     #   raw_probabilities: {"model_a": {...}, "model_b": {...}, "blended": {...}}
@@ -90,10 +95,12 @@ class PredictionOut(BaseModel):
             match_result=row.match_result,
             over_under=row.over_under,
             btts=row.btts,
+            correct_score=row.correct_score,
             range_odds=probabilities_to_odds(range_probabilities),
             match_result_odds=probabilities_to_odds(row.match_result) if row.match_result else None,
             over_under_odds=probabilities_to_odds(row.over_under) if row.over_under else None,
             btts_odds=probabilities_to_odds(row.btts) if row.btts else None,
+            correct_score_odds=probabilities_to_odds(row.correct_score) if row.correct_score else None,
             raw_probabilities=row.raw_probabilities,
             calibrated_probabilities=calibrated,
             ensemble_weights=row.ensemble_weights,

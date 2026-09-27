@@ -1,7 +1,9 @@
 import type { Fixture } from "../types";
 import { CalibrationTag } from "./CalibrationTag";
+import { CorrectScoreGrid } from "./CorrectScoreGrid";
 import { GoalRangeChart } from "./GoalRangeChart";
 import { MarketsPanel } from "./MarketsPanel";
+import { TeamForm } from "./TeamForm";
 import { ValueBadge } from "./ValueBadge";
 import "./FixtureCard.css";
 
@@ -38,6 +40,13 @@ export function FixtureCard({ fixture }: { fixture: Fixture }) {
               awayTeam={fixture.away_team}
             />
           )}
+          <CorrectScoreGrid
+            correctScore={prediction.correct_score}
+            correctScoreOdds={prediction.correct_score_odds}
+            homeTeam={fixture.home_team}
+            awayTeam={fixture.away_team}
+          />
+          <TeamForm homeTeam={fixture.home_team} awayTeam={fixture.away_team} />
           <CalibrationTag prediction={prediction} />
         </>
       ) : (
