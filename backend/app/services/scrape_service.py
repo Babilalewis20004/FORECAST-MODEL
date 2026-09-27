@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import time
 from datetime import date, datetime, timedelta, timezone
+from itertools import groupby
 from pathlib import Path
 
 import requests
@@ -253,19 +254,22 @@ def scrape_fixtures(leagues: list[str] | None, job=None) -> dict:
     summary = {}
     try:
         for league_name, league_id in targets.items():
-            n_finished = n_upcoming = 0
+            if job is not None:
+                job.detail = f"Scraping {league_name} fixtures..."
+            n_finished = n_upcoming = n_rows = 0
             for season in LEAGUE_SEASONS.get(league_name, SEASONS):
-                if job is not None:
-                    job.detail = f"fetching {league_name} {season}-{season + 1}..."
                 try:
                     rows = _fetch_league_season(session, budget, league_name, league_id, season)
                 except RuntimeError:
                     continue
+                n_rows += len(rows)
                 n_finished += _upsert_matches(db, rows)
                 n_upcoming += _upsert_upcoming(db, rows)
                 if budget.exhausted():
                     break
             summary[league_name] = {"matches_upserted": n_finished, "upcoming_upserted": n_upcoming}
+            if job is not None:
+                job.log_line(f"Scraping {league_name} fixtures… {n_rows} matches")
             if budget.exhausted():
                 break
     finally:
@@ -318,25 +322,35 @@ def scrape_stats(job=None) -> dict:
                 | (Match.home_possession.is_(None))
                 | (Match.away_possession.is_(None))
             )
+            .order_by(Match.league)
             .all()
         )
         fetched = 0
-        for m in needs_stats:
+        # Grouped by league so progress reads as one clean line per league
+        # ("Backfilling Premier League match stats… done") instead of one
+        # line per fixture -- the per-fixture fetch loop underneath is
+        # unchanged, only what's surfaced to job.log_line() is coarser.
+        for league_name, group in groupby(needs_stats, key=lambda m: m.league):
+            if job is not None:
+                job.detail = f"Backfilling {league_name} match stats..."
             if budget.exhausted():
                 break
+            for m in group:
+                if budget.exhausted():
+                    break
+                try:
+                    stats = _fetch_fixture_stats(session, budget, int(m.fixture_id), m.home_team)
+                except requests.HTTPError:
+                    continue
+                if stats is None:
+                    continue
+                for c, v in stats.items():
+                    setattr(m, c, v)
+                fetched += 1
+                if fetched % 200 == 0:
+                    db.commit()
             if job is not None:
-                job.detail = f"stats backfill: {fetched} fetched, fixture {m.fixture_id}"
-            try:
-                stats = _fetch_fixture_stats(session, budget, int(m.fixture_id), m.home_team)
-            except requests.HTTPError:
-                continue
-            if stats is None:
-                continue
-            for c, v in stats.items():
-                setattr(m, c, v)
-            fetched += 1
-            if fetched % 200 == 0:
-                db.commit()
+                job.log_line(f"Backfilling {league_name} match stats… done")
         db.commit()
         return {"matches_needing_stats": len(needs_stats), "fetched": fetched, "stat_cols": stat_cols}
     finally:
@@ -414,7 +428,10 @@ def scrape_odds(leagues: list[str] | None, job=None, days_ahead: int = ODDS_DAYS
             if budget.exhausted():
                 break
             if job is not None:
-                job.detail = f"odds: {fetched}/{len(targets)} fixtures, {fx.home_team} vs {fx.away_team}"
+                # Per-fixture -- too fine-grained for the console (could be
+                # hundreds of lines), so this only updates the coarse
+                # current-phase label, not job.log.
+                job.detail = f"Fetching odds… {fetched}/{len(targets)} fixtures, {fx.home_team} vs {fx.away_team}"
             try:
                 data = _get(session, budget, "odds", None, fixture=fx.fixture_id)
             except (requests.HTTPError, RuntimeError):
@@ -438,14 +455,18 @@ def scrape_odds(leagues: list[str] | None, job=None, days_ahead: int = ODDS_DAYS
             if with_odds % 50 == 0:
                 db.commit()
         db.commit()
+        if job is not None:
+            job.log_line(f"Fetching odds… {with_odds}/{len(targets)} fixtures updated")
 
         for group in sorted(groups):
             if job is not None:
-                job.detail = f"odds: re-predicting {group} with market inputs"
+                job.detail = f"Re-predicting {group} with market inputs..."
             try:
                 generate_predictions(db, group)
             except ModelNotTrainedError:
                 continue
+            if job is not None:
+                job.log_line(f"Re-predicting {group} with market inputs… done")
         n_value = (
             db.query(Prediction)
             .filter(Prediction.fixture_id.in_([fx.fixture_id for _, fx in targets]), Prediction.is_value_bet.is_(True))
@@ -461,7 +482,7 @@ def run_scrape(leagues: list[str] | None, include_stats: bool, job=None, include
     # Historical odds for newly finished matches (model inputs at the next
     # retrain) -- football-data.co.uk, not the API-Football budget.
     if job is not None:
-        job.detail = "historical odds (football-data.co.uk)..."
+        job.detail = "Syncing historical odds (football-data.co.uk)..."
     db = SessionLocal()
     try:
         result["historical_odds"] = sync_match_odds(db, leagues, seasons=[current_season_start()])
@@ -469,6 +490,8 @@ def run_scrape(leagues: list[str] | None, include_stats: bool, job=None, include
         result["historical_odds"] = f"skipped: {exc}"
     finally:
         db.close()
+    if job is not None:
+        job.log_line("Syncing historical odds (football-data.co.uk)… done")
     if include_stats:
         result["stats"] = scrape_stats(job=job)
     if include_odds:

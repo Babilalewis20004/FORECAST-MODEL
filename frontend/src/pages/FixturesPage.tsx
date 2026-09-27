@@ -52,6 +52,9 @@ export function FixturesPage() {
       <h1 style={{ fontSize: 24, marginBottom: 16 }}>Predict Model</h1>
 
       <RefreshPanel
+        leagues={leagues}
+        league={league}
+        onLeagueChange={setLeague}
         onJobFinished={() => {
           loadLeagues();
           loadFixtures();

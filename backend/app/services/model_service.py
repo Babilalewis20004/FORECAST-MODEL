@@ -148,11 +148,13 @@ def _matches_df(db: Session, group: str) -> pd.DataFrame:
     return df
 
 
-def train_league(db: Session, league: str) -> dict:
+def train_league(db: Session, league: str, job=None) -> dict:
     history = _matches_df(db, league)
     if history.empty:
         raise ValueError(f"No matches in DB for league '{league}' -- run a scrape first.")
 
+    if job is not None:
+        job.detail = f"Training — {league}..."
     tier = league_tier(league)
     # Model A (refit on full history) + Model B + per-market blend weights and
     # calibrators, with test-split metrics -- see app/ml/ensemble.py.
@@ -184,6 +186,15 @@ def train_league(db: Session, league: str) -> dict:
     )
     db.execute(stmt)
     db.commit()
+
+    if job is not None:
+        # match_result's calibrated Brier score on the held-out test split
+        # (see ensemble.py's market_metrics) -- this pipeline reports Brier/
+        # log-loss for probability calibration, not RMSE (there's no
+        # goal-count regression metric surfaced anywhere else either).
+        brier = ensemble.metrics.get("markets", {}).get("match_result", {}).get("brier", {}).get("calibrated")
+        brier_str = f"{brier:.3f}" if brier is not None else "n/a"
+        job.log_line(f"Training — {league}… Brier {brier_str}")
 
     return {"league": league, "n_matches": len(history), "trained_at": trained_at}
 
@@ -293,7 +304,7 @@ def generate_predictions(db: Session, league: str) -> dict:
     return {"league": league, "predicted": n_ok, "skipped": n_failed}
 
 
-def retrain_leagues(leagues: list[str] | None) -> dict:
+def retrain_leagues(leagues: list[str] | None, job=None) -> dict:
     """Entry point for the background job -- opens its own DB session since
     it runs outside the request lifecycle (see job_manager)."""
     # Competitions map to their model group; asking for two international
@@ -303,7 +314,7 @@ def retrain_leagues(leagues: list[str] | None) -> dict:
     results = []
     try:
         for league in targets:
-            train_result = train_league(db, league)
+            train_result = train_league(db, league, job=job)
             predict_result = generate_predictions(db, league)
             results.append({**train_result, **predict_result})
         return {"leagues": results}

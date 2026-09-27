@@ -160,6 +160,11 @@ class RefreshRequest(BaseModel):
     include_odds: bool = True
 
 
+class LogEntryOut(BaseModel):
+    at: datetime
+    message: str
+
+
 class JobOut(BaseModel):
     job_id: str
     type: str
@@ -168,3 +173,8 @@ class JobOut(BaseModel):
     finished_at: datetime | None = None
     detail: str | None = None
     error: str | None = None
+    # Approximate expected len(log) at completion (see refresh.py's
+    # _scrape_total_steps/_retrain_total_steps) -- the frontend's progress
+    # bar is len(log)/total_steps, not a fixed timer.
+    total_steps: int | None = None
+    log: list[LogEntryOut] = []
