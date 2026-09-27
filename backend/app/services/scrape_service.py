@@ -81,6 +81,10 @@ ODDS_MARKETS: dict[str, dict[str, str]] = {
 # fitted on Bet365's historical prices, so serving on the same book avoids
 # train/serve skew. Pinnacle (sharpest) is the fallback.
 PREFERRED_BOOKMAKERS = ("Bet365", "Pinnacle", "Marathonbet", "Betfair")
+# The books Phase 2's CLV tracking treats as "sharp" -- closing lines are
+# only ever captured from these, regardless of which book a bet was "placed"
+# at, since a soft book's closing price is a poor benchmark for fair value.
+SHARP_BOOKMAKERS = ("Pinnacle", "Bet365")
 # API-Football publishes pre-match odds roughly 1-14 days out; nearer
 # kickoff is closer to the closing price and costs fewer requests.
 ODDS_DAYS_AHEAD = 3
@@ -144,6 +148,14 @@ def _season_complete(cache_file: Path) -> bool:
     return all(item["fixture"]["status"]["short"] in SETTLED_STATUSES for item in data["response"])
 
 
+def _parse_kickoff(date_str: str) -> datetime:
+    """API-Football's fixture date, e.g. "2024-05-19T15:00:00+00:00" (or a
+    "Z" suffix) -- the full instant, unlike the day-only `date` column."""
+    if date_str.endswith("Z"):
+        date_str = date_str[:-1] + "+00:00"
+    return datetime.fromisoformat(date_str)
+
+
 def _fetch_league_season(session: requests.Session, budget: Budget, league_name: str, league_id: int, season: int) -> list[dict]:
     cache_file = CACHE_DIR / f"fixtures_{league_id}_{season}.json"
     if not _season_complete(cache_file):
@@ -163,6 +175,7 @@ def _fetch_league_season(session: requests.Session, budget: Budget, league_name:
             {
                 "fixture_id": fx["id"],
                 "date": fx["date"][:10],
+                "kickoff_time": _parse_kickoff(fx["date"]),
                 "status": fx["status"]["short"],
                 "league": league_name,
                 "home_team": teams["home"]["name"],
@@ -209,6 +222,7 @@ def _upsert_upcoming(db: Session, rows: list[dict]) -> int:
         values = {
             "fixture_id": r["fixture_id"],
             "date": r["date"],
+            "kickoff_time": r.get("kickoff_time"),
             "league": r["league"],
             "home_team": r["home_team"],
             "away_team": r["away_team"],
@@ -220,6 +234,7 @@ def _upsert_upcoming(db: Session, rows: list[dict]) -> int:
             index_elements=[UpcomingFixture.fixture_id],
             set_={
                 "date": stmt.excluded.date,
+                "kickoff_time": stmt.excluded.kickoff_time,
                 "status": stmt.excluded.status,
                 "referee": stmt.excluded.referee,
             },
@@ -328,10 +343,15 @@ def scrape_stats(job=None) -> dict:
         db.close()
 
 
-def parse_odds(item: dict) -> tuple[str, dict[str, float]] | None:
-    """(bookmaker, flat odds) from one /odds response item: the first
-    PREFERRED_BOOKMAKERS entry that prices any market we model, else the
-    bookmaker pricing the most outcomes. Keys match value_engine.BOOKS."""
+def parse_odds(item: dict) -> tuple[str, dict[str, float], dict[str, dict[str, float]]] | None:
+    """(best bookmaker, its flat odds, sharp-book odds) from one /odds
+    response item. "best" is the first PREFERRED_BOOKMAKERS entry that prices
+    any market we model, else the bookmaker pricing the most outcomes --
+    unchanged from before Phase 2, still what's served for Model B's market
+    features. sharp_odds maps any of SHARP_BOOKMAKERS (Pinnacle, Bet365)
+    present in this fixture to their own flat odds, independent of which book
+    is "best" -- CLV's closing line is always measured against a sharp book,
+    regardless of where the bet was placed. Keys match value_engine.BOOKS."""
     parsed = []
     for bm in item.get("bookmakers", []):
         odds: dict[str, float] = {}
@@ -350,11 +370,14 @@ def parse_odds(item: dict) -> tuple[str, dict[str, float]] | None:
             parsed.append((bm.get("name", "unknown"), odds))
     if not parsed:
         return None
+
+    sharp_odds = {name: odds for name, odds in parsed if name in SHARP_BOOKMAKERS}
     for name in PREFERRED_BOOKMAKERS:
         for bm_name, odds in parsed:
             if bm_name == name:
-                return bm_name, odds
-    return max(parsed, key=lambda p: len(p[1]))
+                return bm_name, odds, sharp_odds
+    best_name, best_odds = max(parsed, key=lambda p: len(p[1]))
+    return best_name, best_odds, sharp_odds
 
 
 def scrape_odds(leagues: list[str] | None, job=None, days_ahead: int = ODDS_DAYS_AHEAD) -> dict:
@@ -364,6 +387,12 @@ def scrape_odds(leagues: list[str] | None, job=None, days_ahead: int = ODDS_DAYS
     where the odds are closest to closing. Odds are model inputs (Model B's
     market features, shrinkage toward the market), so every affected model
     group is then re-predicted, which also re-derives the value fields."""
+    # Deferred: odds_service imports Budget/_session/_get/parse_odds/
+    # SHARP_BOOKMAKERS from this module at load time, so importing it back
+    # here at module scope would be circular. By call time both modules are
+    # already fully loaded, so this is just a normal, cheap cached import.
+    from app.services.odds_service import capture_placed_snapshot
+
     session = _session()
     budget = Budget()
     db = SessionLocal()
@@ -394,8 +423,16 @@ def scrape_odds(leagues: list[str] | None, job=None, days_ahead: int = ODDS_DAYS
             parsed = parse_odds(data["response"][0]) if data.get("response") else None
             if parsed is None:
                 continue
-            pred.odds_bookmaker, pred.bookmaker_odds = parsed
+            bm_name, best_odds, _sharp_odds = parsed
+            pred.odds_bookmaker, pred.bookmaker_odds = bm_name, best_odds
             pred.odds_fetched_at = datetime.now(timezone.utc)
+            # Freeze this fixture/market/selection's price the first time the
+            # *current* model probabilities + these odds flag it as a value
+            # bet -- generate_predictions() below will shortly re-derive
+            # is_value_bet from the same odds anyway, so this just captures
+            # the moment first, before it can be overwritten by a later odds
+            # move or retrain.
+            capture_placed_snapshot(db, pred, bm_name, best_odds)
             groups.add(model_group(fx.league))
             with_odds += 1
             if with_odds % 50 == 0:

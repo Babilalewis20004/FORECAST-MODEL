@@ -88,6 +88,22 @@ def market_probabilities(odds: Mapping[str, float]) -> dict[str, float]:
     return {k: round(v, 5) for k, v in fair.items()}
 
 
+def calculate_clv(bet_odds: float, closing_odds: Mapping[str, float], selection: str) -> float | None:
+    """Closing-line value: `bet_odds` priced against the sharp closing line's
+    Shin no-vig fair probability for `selection` (via market_probabilities,
+    same de-vigging as everywhere else in this module). None if `selection`'s
+    book isn't complete in `closing_odds` (Shin needs every outcome).
+
+    clv = bet_odds * fair_prob - 1, equivalently bet_odds / fair_closing_odds
+    - 1: positive means the price taken beat the fair value at close, the
+    standard proxy for genuine long-run edge independent of the bet's result.
+    Same convention BettingBacktestEngine already uses for backtest CLV."""
+    fair = market_probabilities(closing_odds)
+    if selection not in fair:
+        return None
+    return round(bet_odds * fair[selection] - 1.0, 5)
+
+
 def assess_value(
     model_probs: Mapping[str, float],
     odds: Mapping[str, float],
