@@ -37,7 +37,10 @@ if str(_BACKEND_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_BACKEND_SCRIPTS))
 
 import run_backtest  # noqa: E402 -- after the sys.path shim above
+from app.db import SessionLocal  # noqa: E402
 from app.ml.value_engine import BacktestResult, bootstrap_roi_test  # noqa: E402
+from app.orm_models import BetTracking  # noqa: E402
+from sqlalchemy.exc import SQLAlchemyError  # noqa: E402
 
 # Validated categorical/diverging steps (blue <-> red poles, gray reference ink).
 BLUE, ORANGE, RED, MUTED = "#2a78d6", "#eb6834", "#e34948", "#898781"
@@ -165,6 +168,44 @@ def load_backtest() -> tuple[BacktestResult, dict]:
 
 
 # ---------------------------------------------------------------------------
+# Live CLV (Phase 2): bet_tracking, written by odds_service, read directly
+# from the same Postgres the backend API uses -- not part of the backtest
+# replay above. Short TTL since poll_closing_lines() fills rows in
+# continuously as fixtures approach kickoff.
+# ---------------------------------------------------------------------------
+
+@st.cache_data(ttl=60, show_spinner=False)
+def load_live_bet_tracking() -> pd.DataFrame:
+    try:
+        db = SessionLocal()
+    except SQLAlchemyError:
+        return pd.DataFrame()
+    try:
+        rows = db.query(BetTracking).filter(BetTracking.clv_percentage.isnot(None)).all()
+    except SQLAlchemyError:
+        # e.g. the migration hasn't been run yet -- treat as "no live data".
+        return pd.DataFrame()
+    finally:
+        db.close()
+    return pd.DataFrame([
+        {
+            "fixture_id": r.fixture_id,
+            "market": r.market,
+            "selection": r.selection,
+            "bookmaker": r.bookmaker,
+            "is_sharp_book": r.is_sharp_book,
+            "odds_placed_time": r.odds_placed_time,
+            "odds_placed_value": r.odds_placed_value,
+            "ev_at_placement": r.ev_at_placement,
+            "closing_bookmaker": r.closing_bookmaker,
+            "closing_odds_value": r.closing_odds_value,
+            "clv_percentage": r.clv_percentage,
+        }
+        for r in rows
+    ])
+
+
+# ---------------------------------------------------------------------------
 # Cached filtering (keyed on hashable widget values, not the 50k-row frame)
 # ---------------------------------------------------------------------------
 
@@ -280,6 +321,8 @@ if bets.empty:
     st.warning("No bets match the current filters.")
     st.stop()
 
+live_bets = load_live_bet_tracking()  # Phase 2 live CLV, unfiltered by the sidebar (separate data source)
+
 unfiltered = set(leagues) == set(LEAGUES) and set(markets) == set(MARKETS) and (start, end) == (min_date, max_date)
 summary = result.summary if unfiltered else summarize(bets)
 boot = full_bootstrap if unfiltered else filtered_bootstrap(leagues, markets, start, end)
@@ -303,6 +346,13 @@ with tabs[0]:
     row2[1].metric("Avg odds", f"{summary['avg_odds']:.2f}")
     row2[2].metric("Avg EV", f"{summary['avg_ev']:+.2%}")
     row2[3].metric("Max drawdown", f"-{summary['max_drawdown']:,.1f}u")
+
+    row3 = st.columns(4)
+    avg_clv_live = live_bets["clv_percentage"].mean() if not live_bets.empty else None
+    row3[0].metric(
+        "Avg CLV % (live)", f"{avg_clv_live:+.2%}" if avg_clv_live is not None else "—",
+        help="Live, in-flight value bets tracked via bet_tracking -- distinct from this page's backtest KPIs above.",
+    )
 
     eq = daily_equity(leagues, markets, start, end, bankroll)
     log_scale = st.toggle("Log scale", value=False, help="Bankroll on a log axis, so equal % moves look equal.")
@@ -456,6 +506,30 @@ with tabs[4]:
             fig.add_hline(y=0, line=dict(color=MUTED, width=1))
             show(styled(fig, 520, title="EV at bet time vs closing-line value", xaxis_title="EV",
                         yaxis_title="CLV", xaxis_tickformat=".0%", yaxis_tickformat=".0%"))
+
+    st.divider()
+    st.subheader("Live CLV (in-flight value bets)")
+    st.caption("From bet_tracking, not the backtest above: odds_service.capture_placed_snapshot() freezes the "
+               "price when a value bet is first flagged, poll_closing_lines() fills in the sharp-book closing "
+               "line near kickoff and this table's clv_percentage.")
+    if live_bets.empty:
+        st.info("No live bets with a captured closing line yet.")
+    else:
+        lc = st.columns(3)
+        lc[0].metric("Avg CLV % (live)", f"{live_bets['clv_percentage'].mean():+.2%}")
+        lc[1].metric("Bets tracked", f"{len(live_bets):,}")
+        lc[2].metric("Beating close", f"{(live_bets['clv_percentage'] > 0).mean():.1%}")
+
+        fig = go.Figure(go.Scattergl(
+            x=live_bets["ev_at_placement"], y=live_bets["clv_percentage"], mode="markers",
+            marker=dict(color=BLUE, size=7, opacity=0.6),
+            customdata=live_bets[["market", "selection", "bookmaker"]],
+            hovertemplate="EV: %{x:.2%}<br>CLV: %{y:.2%}<br>%{customdata[0]} / %{customdata[1]} @ "
+                          "%{customdata[2]}<extra></extra>",
+        ))
+        fig.add_hline(y=0, line=dict(color=MUTED, width=1))
+        show(styled(fig, 420, title="Live: EV at placement vs closing-line value", xaxis_title="EV at placement",
+                    yaxis_title="CLV", xaxis_tickformat=".0%", yaxis_tickformat=".0%", showlegend=False))
 
 # --- Tab 6: Bet explorer ---------------------------------------------------------------
 with tabs[5]:

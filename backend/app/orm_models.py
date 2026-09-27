@@ -62,6 +62,11 @@ class UpcomingFixture(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     fixture_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    # Full kickoff instant -- `date` above is truncated to a day. Nullable:
+    # existing rows predate this column and backfill on their next scrape.
+    # Needed by odds_service.poll_closing_lines() to find fixtures inside its
+    # 10-15-minute-before-kickoff closing-line window.
+    kickoff_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     league: Mapped[str] = mapped_column(String, nullable=False, index=True)
     home_team: Mapped[str] = mapped_column(String, nullable=False)
     away_team: Mapped[str] = mapped_column(String, nullable=False)
@@ -114,6 +119,35 @@ class Prediction(Base):
     is_value_bet: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     value_selection: Mapped[str | None] = mapped_column(String, nullable=True)
     recommended_stake: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+
+class BetTracking(Base):
+    """Live closing-line-value tracking (Phase 2). One row per (fixture,
+    market, selection) the value engine first flags as a value bet --
+    odds_placed_* freezes the price at that moment (later flags on the same
+    key, from odds moving or a retrain, don't overwrite it). closing_* is
+    filled in by odds_service.poll_closing_lines() from a sharp book
+    (Pinnacle/Bet365) in the 10-15 minutes before kickoff, and clv_percentage
+    is calculate_clv()'s Shin no-vig CLV of the placed price against it."""
+
+    __tablename__ = "bet_tracking"
+    __table_args__ = (
+        UniqueConstraint("fixture_id", "market", "selection", name="ux_bet_tracking_fixture_market_selection"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    fixture_id: Mapped[int] = mapped_column(BigInteger, nullable=False, index=True)
+    market: Mapped[str] = mapped_column(String, nullable=False)
+    selection: Mapped[str] = mapped_column(String, nullable=False)
+    bookmaker: Mapped[str] = mapped_column(String, nullable=False)
+    is_sharp_book: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    odds_placed_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    odds_placed_value: Mapped[float] = mapped_column(Float, nullable=False)
+    ev_at_placement: Mapped[float] = mapped_column(Float, nullable=False)
+    closing_bookmaker: Mapped[str | None] = mapped_column(String, nullable=True)
+    closing_odds_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    closing_captured_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    clv_percentage: Mapped[float | None] = mapped_column(Float, nullable=True)
 
 
 class ModelRun(Base):

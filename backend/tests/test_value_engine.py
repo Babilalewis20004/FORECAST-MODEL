@@ -99,9 +99,10 @@ def test_assess_value_needs_complete_book_for_edge_check():
                 {"value": "Over 4.5", "odd": "5.0"}]},
             {"name": "Corners", "values": [{"value": "Over 9.5", "odd": "1.9"}]}]},
     ]}
-    bookmaker, odds = parse_odds(item)
+    bookmaker, odds, sharp_odds = parse_odds(item)
     assert bookmaker == "Pinnacle"
     assert odds == {"home_win": 2.05, "draw": 3.40, "away_win": 3.90, "over_2.5": 1.95, "under_2.5": 1.93}
+    assert sharp_odds == {"Pinnacle": odds}
 
 
 def _synthetic_rows(n_matches: int, edge: float, seed: int = 0) -> pd.DataFrame:
