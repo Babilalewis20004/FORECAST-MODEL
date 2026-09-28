@@ -38,6 +38,9 @@ FD_LEAGUES = {
     "Ligue 1": "F1",
     "Primeira Liga": "P1",
     "Eredivisie": "N1",
+    "Süper Lig": "T1",
+    "Jupiler Pro League": "B1",
+    "Super League 1": "G1",
     # Liga Profesional Argentina: not covered by football-data.co.uk (Europe-only)
     # -- sync_match_odds() silently skips leagues not in this dict.
 }

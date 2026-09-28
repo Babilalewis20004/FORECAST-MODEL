@@ -63,13 +63,17 @@ from app.ml.rolling_utils import trailing_match_counts
 # goals-only tier: fall back to goals/shots/cards rolling features.
 XG_RICH_LEAGUES = {
     "Premier League", "La Liga", "EFL Championship", "Bundesliga", "Serie A", "Ligue 1",
-    "Primeira Liga", "Eredivisie",
+    "Primeira Liga", "Eredivisie", "Süper Lig", "Jupiler Pro League",
 }
-# Liga Profesional Argentina: added to LEAGUES alongside the above, but its
-# xG coverage (~32% overall, and inconsistent year to year -- 99.7% in 2024
-# vs 50% in 2025) is well below every xG-rich league's, so it's kept here
-# rather than overclaiming shot-quality signal that isn't reliably there.
-GOALS_ONLY_LEAGUES = {"League One", "League Two", "Scottish Premiership", "Liga Profesional Argentina"}
+# Liga Profesional Argentina: xG coverage (~32% overall, and inconsistent
+# year to year -- 99.7% in 2024 vs 50% in 2025) is well below every xG-rich
+# league's. Super League 1 (Greece): xG coverage never exceeds ~30% in any
+# season checked (2023/2024/2025 alike) -- not a ramp-up like every xG-rich
+# league shows, just a persistent near-absence. Both kept here rather than
+# overclaiming shot-quality signal that isn't reliably there.
+GOALS_ONLY_LEAGUES = {
+    "League One", "League Two", "Scottish Premiership", "Liga Profesional Argentina", "Super League 1",
+}
 
 # National-team competitions. Each is far too small to train on alone (the
 # Gulf Cup is ~30 matches over five years), and a national team's form carries
