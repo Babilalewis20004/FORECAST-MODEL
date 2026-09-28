@@ -287,15 +287,29 @@ served.
 
 ## Quickstart
 
-Prerequisites: Docker Desktop running. Two ways to run this:
+Prerequisites: a native Postgres install running on your machine (port
+5432) -- **not** something Docker Compose provisions for you. Earlier
+versions ran Postgres as a Docker container with a named volume, but that
+volume was found to not survive a Docker Desktop restart/reset (its
+internal WSL2 storage got wiped); a native install is completely outside
+Docker's lifecycle, so it doesn't have that failure mode.
 
-- **Docker Compose** -- Postgres, backend, frontend and the evaluation
-  dashboard, all containerized. Fewer moving parts, but a rebuild is needed
-  after most backend/dependency changes.
-- **Native** -- Postgres via Docker, backend and frontend run directly on
-  your machine (`--reload`/Vite HMR). Needs Python 3.10+ and Node 18+.
+One-time setup, in `psql` or any Postgres client:
 
-### Docker Compose (all services)
+```sql
+CREATE ROLE predict WITH LOGIN PASSWORD 'predict';
+CREATE DATABASE predict_model OWNER predict;
+```
+
+Two ways to run the app itself:
+
+- **Docker Compose** -- backend, frontend and the evaluation dashboard
+  containerized; Postgres stays native. Fewer moving parts, but a rebuild
+  is needed after most backend/dependency changes.
+- **Native** -- backend and frontend also run directly on your machine
+  (`--reload`/Vite HMR). Needs Python 3.10+ and Node 18+.
+
+### Docker Compose (backend/frontend/dashboard)
 
 ```powershell
 copy backend\.env.example backend\.env   # then set API_FOOTBALL_KEY in it
@@ -316,20 +330,16 @@ docker compose exec backend python scripts/import_historical_odds.py
 
 Then open http://localhost:5173 (frontend), http://localhost:8000/docs
 (backend API), and http://localhost:8501 (evaluation dashboard, see
-`app.py`). The `backend` and `dashboard` services point `DATABASE_URL` at
-the `db` service directly (`db:5432`), not the host-side 5433 mapping used
-below.
+`app.py`). The `backend` and `dashboard` services reach your native
+Postgres via `host.docker.internal:5432`, Docker Desktop's DNS name for
+the host machine.
 
 ### Native
 
-Prerequisites: Python 3.10+, Node 18+, Docker Desktop running (for Postgres
-only).
+Prerequisites: Python 3.10+, Node 18+, the native Postgres role/database
+from above already created.
 
-```powershell
-docker compose up -d db   # Postgres only, from the project root
-```
-
-Then follow **Backend setup** and **Frontend setup** in separate terminals
+Follow **Backend setup** and **Frontend setup** in separate terminals
 (both need to stay running), and open http://localhost:5173.
 
 ### Backend setup
@@ -340,9 +350,8 @@ python -m venv venv
 venv\Scripts\Activate.ps1              # bash/WSL: source venv/Scripts/activate
 pip install -r requirements.txt
 
-copy .env.example .env                 # then edit .env:
-#   API_FOOTBALL_KEY=...                 free key at api-football.com
-#   DATABASE_URL=...                     defaults to host port 5433 (see note below)
+copy .env.example .env                 # then set API_FOOTBALL_KEY in it
+#   DATABASE_URL already points at localhost:5432 (the native Postgres above)
 
 python scripts\init_db.py              # creates tables (safe to re-run)
 python scripts\import_csv_to_postgres.py   # one-off: seeds Postgres from the root CSVs
@@ -357,10 +366,6 @@ uvicorn app.main:app --reload --port 8000
 Check it's running: http://localhost:8000/api/health should return
 `{"status": "ok"}`, and http://localhost:8000/docs has the interactive
 (Swagger) API reference.
-
-> **Port note:** `docker-compose.yml` maps Postgres to host port **5433**,
-> not 5432, and `.env.example` already points there. If you don't have
-> another Postgres running locally, you can change both back to 5432.
 
 ### Frontend setup
 
