@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getLeagues, getMatches, getUpcomingFixtures } from "../api/client";
+import { getLeagues, getMatches, getUpcomingFixtures, postShareTelegram } from "../api/client";
 import { DateRangeFilter, type DateRange } from "../components/DateRangeFilter";
 import { FixtureList } from "../components/FixtureList";
 import { LeagueSelector } from "../components/LeagueSelector";
@@ -59,6 +59,8 @@ export function FixturesPage() {
   const [truncated, setTruncated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const [shareResult, setShareResult] = useState<string | null>(null);
   // loadFixtures is called from two places (the [league, dateRange] effect
   // below and RefreshPanel's onJobFinished) -- if an older call's request
   // resolves after a newer one, it must not be allowed to clobber the newer
@@ -109,6 +111,31 @@ export function FixturesPage() {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       if (id === requestIdRef.current) setLoading(false);
+    }
+  }
+
+  // Shares exactly the range/league currently selected -- same params
+  // loadFixtures() sends, so what gets published always matches what's on
+  // screen. Not tied to requestIdRef -- this doesn't affect the fixture
+  // list, just its own inline result message.
+  async function shareToTelegram() {
+    setSharing(true);
+    setShareResult(null);
+    try {
+      const res = await postShareTelegram({
+        league: league ?? undefined,
+        start: dateRange.start ?? undefined,
+        end: dateRange.end ?? undefined,
+      });
+      setShareResult(
+        res.sent
+          ? `Sent ${res.fixtures} fixture${res.fixtures === 1 ? "" : "s"} to Telegram (${res.messages} message${res.messages === 1 ? "" : "s"}).`
+          : (res.detail ?? "Nothing to share."),
+      );
+    } catch (e) {
+      setShareResult(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSharing(false);
     }
   }
 
@@ -176,6 +203,29 @@ export function FixturesPage() {
       </div>
 
       <DateRangeFilter value={dateRange} onChange={setDateRange} />
+
+      <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <button
+          type="button"
+          onClick={shareToTelegram}
+          disabled={sharing}
+          style={{
+            padding: "6px 14px",
+            borderRadius: 999,
+            border: "1px solid var(--border)",
+            background: "var(--surface-1)",
+            color: "var(--text-primary)",
+            fontSize: 13,
+            fontWeight: 600,
+            fontFamily: "inherit",
+            cursor: sharing ? "default" : "pointer",
+            opacity: sharing ? 0.7 : 1,
+          }}
+        >
+          {sharing ? "Sending…" : "Share to Telegram"}
+        </button>
+        {shareResult && <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{shareResult}</span>}
+      </div>
 
       {error && <p style={{ color: "var(--critical)" }}>{error}</p>}
       {!error &&

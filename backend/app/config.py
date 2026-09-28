@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg2://predict:predict@localhost:5432/predict_model"
     api_football_key: str | None = None
     cors_origins: str = "http://localhost:5173"
+    telegram_bot_token: str | None = None
+    telegram_chat_id: str | None = None
 
     @property
     def cors_origin_list(self) -> list[str]:

@@ -432,6 +432,32 @@ Both the button and the CLI scripts read `DATABASE_URL` from
 `backend/.env` (via `app.config`), so they work the same whether Postgres
 is local or on another host.
 
+## Sharing to Telegram
+
+The **Share to Telegram** button (next to the date-range filter) publishes
+every fixture/prediction currently in view -- whatever league/date range is
+selected -- as a text digest to a Telegram chat or channel, via a bot. The
+app runs on localhost, so a share *link* wouldn't be openable by anyone
+else; the bot pushes the content out instead.
+
+One-time setup:
+
+1. Message [@BotFather](https://t.me/BotFather) in Telegram, `/newbot`,
+   follow the prompts -- you get a bot token back.
+2. Get the numeric chat/channel ID: message your new bot directly, then
+   visit `https://api.telegram.org/bot<token>/getUpdates` in a browser and
+   read `"chat":{"id": ...}` from the JSON. For a channel, add the bot as
+   an admin instead and use the channel's ID (starts with `-100`).
+3. Set both in `backend/.env`:
+   ```
+   TELEGRAM_BOT_TOKEN=your-bot-token-here
+   TELEGRAM_CHAT_ID=your-chat-id-here
+   ```
+   Rebuild/restart the backend for the new values to take effect.
+
+Without these set, the button returns a clear "not configured" error
+instead of failing silently.
+
 ## Latest evaluation
 
 Brier skill score on each league's test split, from the retrain on

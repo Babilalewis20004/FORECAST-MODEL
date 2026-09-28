@@ -27,6 +27,7 @@ from sklearn.model_selection import KFold
 
 from app.ml.calibration import (
     DEFAULT_SHRINKAGE_WEIGHT,
+    MIN_FIT_SAMPLES,
     BinaryCalibrator,
     IdentityCalibrator,
     MarketCalibration,
@@ -366,11 +367,15 @@ def train_ensemble(
             a_cal[market], b_cal.get(market)
         )
         # 1X2: temperature scaling, kept only if it beats the raw blend
-        # out-of-fold. Binary markets: Platt unconditionally -- on held-out
-        # data the same gate discarded Platt where it helped.
+        # out-of-fold. Binary markets: Platt unconditionally (not OOF-gated
+        # the same way -- on held-out data that gate discarded Platt where
+        # it helped), but still skipped below MIN_FIT_SAMPLES calibration
+        # rows, same floor every other fit in this module already respects.
         calibrator = (
             fit_calibrator_or_identity(TemperatureCalibrator(), blended_cal, y_cal)
             if is_multiclass
+            else IdentityCalibrator()
+            if len(y_cal) < MIN_FIT_SAMPLES
             else BinaryCalibrator(calibration_method).fit(blended_cal, y_cal)
         )
         mc = MarketCalibration(w_a=w_a, calibrator=calibrator)
