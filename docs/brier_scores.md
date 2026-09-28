@@ -29,12 +29,15 @@ for r in db.query(ModelRun).order_by(ModelRun.league).all():
 | International | 0.574 | 0.634 | 2026-09-25 |
 | Serie A | 0.582 | 0.653 | 2026-09-27 |
 | La Liga | 0.589 | 0.631 | 2026-09-25 |
+| Primeira Liga | 0.596 | 0.663 | 2026-09-28 |
+| Eredivisie | 0.606 | 0.661 | 2026-09-27 |
 | League One | 0.621 | 0.657 | 2026-09-25 |
 | League Two | 0.632 | 0.644 | 2026-09-25 |
 | Ligue 1 | 0.635 | 0.657 | 2026-09-27 |
 | Bundesliga | 0.636 | 0.649 | 2026-09-27 |
 | Premier League | 0.648 | 0.675 | 2026-09-25 |
 | EFL Championship | 0.651 | 0.663 | 2026-09-25 |
+| Liga Profesional Argentina | 0.652 | 0.658 | 2026-09-27 |
 
 Every trained league beats its baseline on `match_result`.
 
@@ -75,6 +78,24 @@ Every trained league beats its baseline on `match_result`.
 | range_2-6 | 0.177 | 0.188 | — | 0.180 |
 | range_3-5 | 0.250 | 0.263 | — | 0.254 |
 | range_3-6 | 0.251 | 0.262 | — | 0.254 |
+
+### Eredivisie (1,338 matches, trained 2026-09-27)
+
+| Market | Calibrated | Model A | Model B | Baseline |
+|---|---|---|---|---|
+| match_result | 0.606 | 0.608 | 0.633 | 0.661 |
+| btts | 0.229 | 0.268 | 0.255 | 0.238 |
+| over_1.5 | 0.102 | 0.125 | 0.111 | 0.106 |
+| over_2.5 | 0.229 | 0.267 | 0.250 | 0.230 |
+| over_3.5 | 0.250 | 0.282 | 0.263 | 0.249 |
+| range_1-3 | 0.257 | 0.272 | — | 0.252 |
+| range_1-4 | 0.212 | 0.211 | — | 0.203 |
+| range_2-3 | 0.245 | 0.245 | — | 0.247 |
+| range_2-4 | 0.221 | 0.225 | — | 0.228 |
+| range_2-5 | 0.163 | 0.176 | — | 0.165 |
+| range_2-6 | 0.126 | 0.145 | — | 0.129 |
+| range_3-5 | 0.251 | 0.274 | — | 0.249 |
+| range_3-6 | 0.240 | 0.271 | — | 0.239 |
 
 ### International (4,278 matches, trained 2026-09-25)
 
@@ -148,6 +169,24 @@ Every trained league beats its baseline on `match_result`.
 | range_3-5 | 0.249 | 0.255 | — | 0.249 |
 | range_3-6 | 0.250 | 0.260 | — | 0.250 |
 
+### Liga Profesional Argentina (2,252 matches, trained 2026-09-27)
+
+| Market | Calibrated | Model A | Model B | Baseline |
+|---|---|---|---|---|
+| match_result | 0.652 | 0.667 | 0.675 | 0.658 |
+| btts | 0.251 | 0.268 | 0.258 | 0.249 |
+| over_1.5 | 0.232 | 0.241 | 0.230 | 0.228 |
+| over_2.5 | 0.234 | 0.246 | 0.243 | 0.233 |
+| over_3.5 | 0.137 | 0.137 | 0.141 | 0.135 |
+| range_1-3 | 0.206 | 0.207 | — | 0.206 |
+| range_1-4 | 0.154 | 0.154 | — | 0.152 |
+| range_2-3 | 0.255 | 0.256 | — | 0.250 |
+| range_2-4 | 0.245 | 0.253 | — | 0.242 |
+| range_2-5 | 0.235 | 0.242 | — | 0.233 |
+| range_2-6 | 0.233 | 0.240 | — | 0.231 |
+| range_3-5 | 0.230 | 0.238 | — | 0.229 |
+| range_3-6 | 0.231 | 0.239 | — | 0.230 |
+
 ### Ligue 1 (1,348 matches, trained 2026-09-27)
 
 | Market | Calibrated | Model A | Model B | Baseline |
@@ -183,6 +222,24 @@ Every trained league beats its baseline on `match_result`.
 | range_2-6 | 0.193 | 0.196 | — | 0.193 |
 | range_3-5 | 0.250 | 0.263 | — | 0.250 |
 | range_3-6 | 0.250 | 0.264 | — | 0.252 |
+
+### Primeira Liga (1,294 matches, trained 2026-09-28)
+
+| Market | Calibrated | Model A | Model B | Baseline |
+|---|---|---|---|---|
+| match_result | 0.596 | 0.587 | 0.638 | 0.663 |
+| btts | 0.252 | 0.291 | 0.259 | 0.251 |
+| over_1.5 | 0.197 | 0.208 | 0.206 | 0.196 |
+| over_2.5 | 0.241 | 0.262 | 0.246 | 0.250 |
+| over_3.5 | 0.214 | 0.231 | 0.223 | 0.216 |
+| range_1-3 | 0.243 | 0.248 | — | 0.241 |
+| range_1-4 | 0.141 | 0.143 | — | 0.141 |
+| range_2-3 | 0.248 | 0.246 | — | 0.244 |
+| range_2-4 | 0.235 | 0.239 | — | 0.233 |
+| range_2-5 | 0.204 | 0.216 | — | 0.207 |
+| range_2-6 | 0.197 | 0.209 | — | 0.199 |
+| range_3-5 | 0.240 | 0.264 | — | 0.253 |
+| range_3-6 | 0.237 | 0.261 | — | 0.251 |
 
 ### Scottish Premiership (978 matches, trained 2026-09-27)
 
@@ -224,10 +281,17 @@ Every trained league beats its baseline on `match_result`.
 
 - `match_result` shows the biggest, most consistent calibration gain over
   baseline across every league.
-- Bundesliga, Serie A, and Ligue 1 were added after verifying their
-  API-Football stats coverage (shots/xG/possession) matched the existing
-  xG-rich leagues -- see `XG_RICH_LEAGUES` in `football_goal_range_model.py`.
+- Bundesliga, Serie A, Ligue 1, Primeira Liga, and Eredivisie were all added
+  after verifying their API-Football stats coverage (shots/xG/possession)
+  matched the existing xG-rich leagues -- see `XG_RICH_LEAGUES` in
+  `football_goal_range_model.py`.
+- Liga Profesional Argentina was added to `GOALS_ONLY_LEAGUES` instead,
+  despite otherwise-full match coverage: its xG data is patchy and
+  inconsistent year to year (0% in 2022, 99.7% in 2024, back down to 50% in
+  2025) in a way none of the xG-rich leagues are, so it doesn't get the
+  shot-quality feature set.
 - Leagues with smaller training sets (Scottish Premiership at 978 matches,
-  Bundesliga/Ligue 1/Serie A around 1,300-1,600) tend to show noisier
-  calibrated-vs-baseline gaps on the smaller binary/goal-range markets than
-  the larger leagues (International at 4,278, EFL Championship at 2,323).
+  Bundesliga/Ligue 1/Serie A/Primeira Liga/Eredivisie/Argentina roughly
+  1,300-2,300) tend to show noisier calibrated-vs-baseline gaps on the
+  smaller binary/goal-range markets than the larger leagues (International
+  at 4,278, EFL Championship at 2,323).
