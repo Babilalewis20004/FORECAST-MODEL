@@ -9,6 +9,13 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# postgresql-client (pg_dump/pg_restore) for the "Backup database" button /
+# scripts/backup_db.py + restore_db.py. python:3.12-slim's Debian release
+# (trixie) ships postgresql-client 17 by default, matching the native
+# Postgres 17 the app connects to -- no need for the external PGDG repo.
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
 # Installed before the rest of the source so this layer only rebuilds when a
 # dependency actually changes.
 COPY requirements.txt ./requirements.txt

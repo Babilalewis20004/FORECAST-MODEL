@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { getJobStatus, postRefresh } from "../api/client";
+import { getJobStatus, postBackup, postRefresh } from "../api/client";
 import type { Job, League } from "../types";
-import { ChevronIcon, CpuIcon, DownloadIcon, LayersIcon, RefreshIcon } from "./icons";
+import { ArchiveIcon, ChevronIcon, CpuIcon, DownloadIcon, LayersIcon, RefreshIcon } from "./icons";
 import { LeagueSelector } from "./LeagueSelector";
 import "./RefreshPanel.css";
 
 const POLL_MS = 1000;
 
-// The four buttons in this panel, keyed independently of the API's job
+// The five buttons in this panel, keyed independently of the API's job
 // "type" -- "Scrape fixtures only" and "Scrape + stats backfill" are both
 // type="scrape" server-side (they only differ by include_stats), so they
 // need their own last-run tracking here rather than one shared by type.
-const ACTION_KEYS = ["full", "scrape", "scrape_stats", "retrain"] as const;
+const ACTION_KEYS = ["full", "scrape", "scrape_stats", "retrain", "backup"] as const;
 type ActionKey = (typeof ACTION_KEYS)[number];
 
 const STORAGE_PREFIX = "predict-model:last-run:";
@@ -113,6 +113,21 @@ export function RefreshPanel({ leagues, league, onLeagueChange, onJobFinished }:
     }
   }
 
+  // Not scoped by league (dumps the whole database) and hits a different
+  // endpoint than trigger()'s scrape/retrain/full, so it's its own function
+  // rather than another `kind` in trigger().
+  async function triggerBackup() {
+    setError(null);
+    try {
+      const started = await postBackup();
+      setActionKey("backup");
+      setJob(started);
+      pollUntilDone(started.job_id, "backup");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
   const busy = job?.status === "running" || job?.status === "queued";
   const pct = job?.total_steps ? Math.min(100, Math.round((job.log.length / job.total_steps) * 100)) : busy ? 0 : null;
 
@@ -155,6 +170,12 @@ export function RefreshPanel({ leagues, league, onLeagueChange, onJobFinished }:
                 <CpuIcon /> Retrain only
               </button>
               <LastRun iso={lastRun.retrain} />
+            </div>
+            <div>
+              <button className="refresh-panel__stage-btn" onClick={triggerBackup} disabled={busy}>
+                <ArchiveIcon /> Backup database
+              </button>
+              <LastRun iso={lastRun.backup} />
             </div>
           </div>
         </div>

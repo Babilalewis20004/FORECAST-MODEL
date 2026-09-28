@@ -25,6 +25,12 @@ services:
       # the image so they persist across rebuilds.
       - ./backend/app/ml/model_store:/app/backend/app/ml/model_store
       - ./downloaded_files:/app/downloaded_files
+      # Without this, "Backup database" (POST /api/refresh/backup) writes
+      # its pg_dump into the container's own ephemeral filesystem -- gone on
+      # the next `docker compose up --build`, defeating the point of a
+      # backup. Mounted so dumps land on the host, same path scripts/backup_db.py
+      # and restore_db.py use when run natively.
+      - ./backend/backups:/app/backend/backups
 
   dashboard:
     build:

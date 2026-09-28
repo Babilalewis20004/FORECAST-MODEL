@@ -386,6 +386,52 @@ UI (or `POST /api/refresh/retrain`) to train the full ensemble. That takes
 about 3 minutes per league (about 6 minutes for the ~4k-match International
 model), about 25 minutes for everything.
 
+## Backup & recovery
+
+Postgres is a native host install (see Quickstart above) -- outside
+Docker's lifecycle, but also outside any container-level backup tooling.
+Nothing backs it up automatically; triggering it (from the UI or the CLI)
+is on you.
+
+**From the app** -- the **Advanced** section of the refresh panel has a
+**Backup database** button, next to Scrape/Retrain. It runs the same
+`pg_dump` logic as the CLI script below (`app/services/backup_service.py`,
+shared by both), streams progress in the same log console, and writes to
+`backend/backups/` (gitignored) -- mounted as a volume in
+`docker-compose.yml` so a dump taken through Docker Compose lands on the
+host, not inside the container's disposable filesystem.
+
+**From the CLI** -- same dump, custom `pg_dump` format (compressed,
+supports restoring a single table), for scripting or scheduling:
+
+```powershell
+cd backend
+python scripts\backup_db.py            # keeps the 14 most recent dumps by default
+python scripts\backup_db.py --keep 30  # or a different retention count
+```
+
+**Restore** -- from the newest backup, or a specific file. `--clean` drops
+existing tables first, so this is destructive; it requires `--yes`. CLI
+only -- there's no restore button in the UI:
+
+```powershell
+python scripts\restore_db.py --yes                       # newest backup in backend/backups/
+python scripts\restore_db.py backend\backups\predict_model_20260928_184948.dump --yes
+```
+
+**Scheduling** (optional) -- nothing runs a backup on a timer by default;
+it's a manual button/command. If you want it automatic later, a Windows
+Task Scheduler entry pointed at `backup_db.py` works:
+
+```powershell
+schtasks /create /tn "predict-model-backup" /sc daily /st 03:00 ^
+  /tr "C:\path\to\venv\Scripts\python.exe C:\path\to\backend\scripts\backup_db.py"
+```
+
+Both the button and the CLI scripts read `DATABASE_URL` from
+`backend/.env` (via `app.config`), so they work the same whether Postgres
+is local or on another host.
+
 ## Latest evaluation
 
 Brier skill score on each league's test split, from the retrain on

@@ -6,6 +6,7 @@ backend/.venv/
 __pycache__/
 *.pyc
 backend/app/ml/model_store/*.joblib
+backend/backups/
 downloaded_files/
 frontend/node_modules/
 frontend/dist/

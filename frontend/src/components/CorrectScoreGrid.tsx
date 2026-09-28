@@ -20,7 +20,7 @@ function parseScoreline(key: string): [number, number] {
 export function CorrectScoreGrid({ correctScore, correctScoreOdds, homeTeam, awayTeam }: Props) {
   const entries = correctScore ? Object.entries(correctScore).sort((a, b) => b[1] - a[1]) : [];
   const [selected, setSelected] = useState<string | null>(null);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   if (entries.length === 0) return null;
 

@@ -101,6 +101,7 @@ def list_matches(
     start: date | None = None,
     end: date | None = None,
     team: str | None = None,
+    with_predictions: bool = False,
     limit: int = Query(default=200, le=2000),
     offset: int = 0,
     db: Session = Depends(get_db),
@@ -114,4 +115,31 @@ def list_matches(
         q = q.filter(Match.date <= end)
     if team:
         q = q.filter((Match.home_team == team) | (Match.away_team == team))
-    return q.order_by(Match.date.desc()).offset(offset).limit(limit).all()
+    matches = q.order_by(Match.date.desc()).offset(offset).limit(limit).all()
+
+    if not with_predictions:
+        return matches
+
+    fixture_ids = [m.fixture_id for m in matches if m.fixture_id is not None]
+    preds = {
+        p.fixture_id: p
+        for p in db.query(Prediction).filter(Prediction.fixture_id.in_(fixture_ids)).all()
+    } if fixture_ids else {}
+    metrics = league_metrics(db)
+
+    out = []
+    for m in matches:
+        pred = preds.get(m.fixture_id) if m.fixture_id is not None else None
+        out.append(
+            MatchOut(
+                fixture_id=m.fixture_id,
+                date=m.date,
+                league=m.league,
+                home_team=m.home_team,
+                away_team=m.away_team,
+                home_goals=m.home_goals,
+                away_goals=m.away_goals,
+                prediction=PredictionOut.from_orm_row(pred, metrics.get(model_group(m.league))) if pred else None,
+            )
+        )
+    return out
