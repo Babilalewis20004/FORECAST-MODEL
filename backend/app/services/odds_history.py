@@ -4,7 +4,7 @@ seasons (model features, shrinkage fitting, backtests) come from here.
 
 The two sources spell teams differently ("Man City" / "Manchester City"),
 so rows are joined on league + date (+/-1 day) + final score first, then
-team-name similarity. Only the nine domestic leagues in FD_LEAGUES are
+team-name similarity. Only the domestic leagues in FD_LEAGUES are
 covered -- others are silently skipped by sync_match_odds.
 """
 
@@ -36,6 +36,10 @@ FD_LEAGUES = {
     "Bundesliga": "D1",
     "Serie A": "I1",
     "Ligue 1": "F1",
+    "Primeira Liga": "P1",
+    "Eredivisie": "N1",
+    # Liga Profesional Argentina: not covered by football-data.co.uk (Europe-only)
+    # -- sync_match_odds() silently skips leagues not in this dict.
 }
 
 # (price, bookmaker) -> football-data columns for home/draw/away, over/under
