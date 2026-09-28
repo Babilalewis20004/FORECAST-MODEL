@@ -10,12 +10,20 @@ import "./FixtureCard.css";
 export function FixtureCard({ fixture }: { fixture: Fixture }) {
   const prediction = fixture.prediction;
   const hasMarkets = prediction?.match_result && prediction?.over_under && prediction?.btts;
+  const isFinished = fixture.home_goals != null && fixture.away_goals != null;
 
   return (
     <article className="fixture-card">
       <header className="fixture-card__header">
         <span className="fixture-card__league">{fixture.league}</span>
-        <span className="fixture-card__date">{fixture.date}</span>
+        <span className="fixture-card__date-group">
+          {isFinished && (
+            <span className="fixture-card__final">
+              Final: {fixture.home_goals}–{fixture.away_goals}
+            </span>
+          )}
+          <span className="fixture-card__date">{fixture.date}</span>
+        </span>
       </header>
       <h3 className="fixture-card__teams">
         {fixture.home_team} <span className="fixture-card__vs">vs</span> {fixture.away_team}
@@ -50,7 +58,9 @@ export function FixtureCard({ fixture }: { fixture: Fixture }) {
           <CalibrationTag prediction={prediction} />
         </>
       ) : (
-        <p className="fixture-card__no-prediction">No prediction yet — trigger a retrain.</p>
+        <p className="fixture-card__no-prediction">
+          {isFinished ? "No prediction was recorded for this match." : "No prediction yet — trigger a retrain."}
+        </p>
       )}
     </article>
   );

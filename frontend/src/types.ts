@@ -108,10 +108,16 @@ export interface Fixture {
   away_team: string;
   status: string;
   prediction: Prediction | null;
+  // Populated when this row was normalized from a finished match (backend's
+  // MatchOut, via getMatches) rather than an upcoming fixture -- undefined
+  // for a genuine not-started fixture.
+  home_goals?: number | null;
+  away_goals?: number | null;
 }
 
 // A finished match (backend's MatchOut) -- used for "last 5 form", fetched
-// via GET /api/matches?team=<name>&limit=5.
+// via GET /api/matches?team=<name>&limit=5, and for the date-range filter's
+// past-looking presets via getMatches({ withPredictions: true }).
 export interface RecentMatch {
   fixture_id: number | null;
   date: string;
@@ -120,6 +126,9 @@ export interface RecentMatch {
   away_team: string;
   home_goals: number;
   away_goals: number;
+  // Only present when fetched with withPredictions: true -- undefined on the
+  // plain TeamForm lookups.
+  prediction?: Prediction | null;
 }
 
 export interface LogEntry {
@@ -129,7 +138,7 @@ export interface LogEntry {
 
 export interface Job {
   job_id: string;
-  type: "scrape" | "retrain" | "full";
+  type: "scrape" | "retrain" | "full" | "backup";
   status: "queued" | "running" | "success" | "failed";
   started_at: string | null;
   finished_at: string | null;

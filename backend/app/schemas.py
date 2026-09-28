@@ -150,6 +150,7 @@ class MatchOut(BaseModel):
     away_team: str
     home_goals: int
     away_goals: int
+    prediction: PredictionOut | None = None
 
 
 class RefreshRequest(BaseModel):

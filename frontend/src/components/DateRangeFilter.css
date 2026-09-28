@@ -1,0 +1,70 @@
+.date-range-filter {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 18px 16px;
+  margin-bottom: 16px;
+  background: var(--surface-1);
+}
+
+.date-range-filter__label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.date-range-filter__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.date-range-filter__preset {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.date-range-filter__preset:hover {
+  border-color: var(--text-muted);
+}
+
+.date-range-filter__preset--active {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface-1));
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.date-range-filter__inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.date-range-filter__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.date-range-filter__field input {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--page);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+}

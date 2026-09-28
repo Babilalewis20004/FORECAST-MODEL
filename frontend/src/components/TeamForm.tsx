@@ -97,12 +97,12 @@ interface Props {
   awayTeam: string;
 }
 
-// Collapsible, starts expanded. Each team's last 5 (via the existing
+// Collapsible, starts collapsed. Each team's last 5 (via the existing
 // /api/matches?team=... endpoint, not a new one) is fetched lazily by
 // TeamFormList once it scrolls near the viewport -- see the IntersectionObserver
 // there -- so a long fixture list doesn't fire hundreds of requests at once.
 export function TeamForm({ homeTeam, awayTeam }: Props) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="form-section">

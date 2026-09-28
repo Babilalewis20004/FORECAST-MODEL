@@ -30,12 +30,30 @@ export function getRecentMatches(team: string, limit = 5): Promise<RecentMatch[]
   return request(`/api/matches?${qs.toString()}`);
 }
 
+// Finished matches for the date-range filter's past-looking presets (Last 7/30
+// days, Whole dataset). Separate from getRecentMatches so that lightweight
+// team-form lookups don't pay for prediction joins they don't use.
+export function getMatches(params: { league?: string; start?: string; end?: string; withPredictions?: boolean }): Promise<RecentMatch[]> {
+  const qs = new URLSearchParams();
+  if (params.league) qs.set("league", params.league);
+  if (params.start) qs.set("start", params.start);
+  if (params.end) qs.set("end", params.end);
+  if (params.withPredictions) qs.set("with_predictions", "true");
+  return request(`/api/matches?${qs.toString()}`);
+}
+
 export function postRefresh(kind: "scrape" | "retrain" | "full", body: { leagues?: string[]; include_stats?: boolean }): Promise<Job> {
   return request(`/api/refresh/${kind}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
+}
+
+// Not scoped by league (it dumps the whole database), so it doesn't take a
+// body like postRefresh's scrape/retrain/full.
+export function postBackup(): Promise<Job> {
+  return request("/api/refresh/backup", { method: "POST" });
 }
 
 export function getJobStatus(jobId: string): Promise<Job> {
