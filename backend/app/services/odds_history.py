@@ -4,7 +4,8 @@ seasons (model features, shrinkage fitting, backtests) come from here.
 
 The two sources spell teams differently ("Man City" / "Manchester City"),
 so rows are joined on league + date (+/-1 day) + final score first, then
-team-name similarity. Only the six domestic leagues are covered.
+team-name similarity. Only the nine domestic leagues in FD_LEAGUES are
+covered -- others are silently skipped by sync_match_odds.
 """
 
 from __future__ import annotations
@@ -32,6 +33,9 @@ FD_LEAGUES = {
     "League Two": "E3",
     "La Liga": "SP1",
     "Scottish Premiership": "SC0",
+    "Bundesliga": "D1",
+    "Serie A": "I1",
+    "Ligue 1": "F1",
 }
 
 # (price, bookmaker) -> football-data columns for home/draw/away, over/under
