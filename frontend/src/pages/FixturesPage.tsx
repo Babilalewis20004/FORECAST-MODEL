@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getLeagues, getMatches, getUpcomingFixtures, postShareTelegram } from "../api/client";
+import { getLeagues, getMatches, getUpcomingFixtures, postShareTelegram, postShareTelegramCards } from "../api/client";
 import { DateRangeFilter, type DateRange } from "../components/DateRangeFilter";
 import { FixtureList } from "../components/FixtureList";
 import { LeagueSelector } from "../components/LeagueSelector";
@@ -61,6 +61,8 @@ export function FixturesPage() {
   const [error, setError] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
   const [shareResult, setShareResult] = useState<string | null>(null);
+  const [sharingCards, setSharingCards] = useState(false);
+  const [shareCardsResult, setShareCardsResult] = useState<string | null>(null);
   // loadFixtures is called from two places (the [league, dateRange] effect
   // below and RefreshPanel's onJobFinished) -- if an older call's request
   // resolves after a newer one, it must not be allowed to clobber the newer
@@ -136,6 +138,30 @@ export function FixturesPage() {
       setShareResult(e instanceof Error ? e.message : String(e));
     } finally {
       setSharing(false);
+    }
+  }
+
+  // Same params as shareToTelegram, independent loading/result state --
+  // alongside the text digest, not a replacement, so either can run
+  // without the other's state interfering.
+  async function shareCardsToTelegram() {
+    setSharingCards(true);
+    setShareCardsResult(null);
+    try {
+      const res = await postShareTelegramCards({
+        league: league ?? undefined,
+        start: dateRange.start ?? undefined,
+        end: dateRange.end ?? undefined,
+      });
+      setShareCardsResult(
+        res.sent
+          ? `Sent ${res.fixtures} card${res.fixtures === 1 ? "" : "s"} to Telegram (${res.albums} album${res.albums === 1 ? "" : "s"}).`
+          : (res.detail ?? "Nothing to share."),
+      );
+    } catch (e) {
+      setShareCardsResult(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSharingCards(false);
     }
   }
 
@@ -225,6 +251,29 @@ export function FixturesPage() {
           {sharing ? "Sending…" : "Share to Telegram"}
         </button>
         {shareResult && <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{shareResult}</span>}
+      </div>
+
+      <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <button
+          type="button"
+          onClick={shareCardsToTelegram}
+          disabled={sharingCards}
+          style={{
+            padding: "6px 14px",
+            borderRadius: 999,
+            border: "1px solid var(--border)",
+            background: "var(--surface-1)",
+            color: "var(--text-primary)",
+            fontSize: 13,
+            fontWeight: 600,
+            fontFamily: "inherit",
+            cursor: sharingCards ? "default" : "pointer",
+            opacity: sharingCards ? 0.7 : 1,
+          }}
+        >
+          {sharingCards ? "Sending…" : "Share Cards to Telegram"}
+        </button>
+        {shareCardsResult && <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{shareCardsResult}</span>}
       </div>
 
       {error && <p style={{ color: "var(--critical)" }}>{error}</p>}

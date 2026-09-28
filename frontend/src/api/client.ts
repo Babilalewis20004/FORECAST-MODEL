@@ -77,3 +77,20 @@ export function postShareTelegram(params: { league?: string; start?: string; end
   if (params.end) qs.set("end", params.end);
   return request(`/api/share/telegram?${qs.toString()}`, { method: "POST" });
 }
+
+export interface ShareCardsResult {
+  sent: boolean;
+  fixtures: number;
+  albums: number;
+  detail?: string;
+}
+
+// One image card per fixture, sent as Telegram albums -- alongside
+// postShareTelegram's text digest, not a replacement for it.
+export function postShareTelegramCards(params: { league?: string; start?: string; end?: string }): Promise<ShareCardsResult> {
+  const qs = new URLSearchParams();
+  if (params.league) qs.set("league", params.league);
+  if (params.start) qs.set("start", params.start);
+  if (params.end) qs.set("end", params.end);
+  return request(`/api/share/telegram/cards?${qs.toString()}`, { method: "POST" });
+}
