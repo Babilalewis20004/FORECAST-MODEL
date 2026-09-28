@@ -59,3 +59,21 @@ export function postBackup(): Promise<Job> {
 export function getJobStatus(jobId: string): Promise<Job> {
   return request(`/api/refresh/status/${jobId}`);
 }
+
+export interface ShareResult {
+  sent: boolean;
+  fixtures: number;
+  messages: number;
+  detail?: string;
+}
+
+// Publishes every fixture/prediction in the given range (same filters as
+// getUpcomingFixtures/getMatches) as a Telegram digest -- see
+// backend/app/routers/share.py.
+export function postShareTelegram(params: { league?: string; start?: string; end?: string }): Promise<ShareResult> {
+  const qs = new URLSearchParams();
+  if (params.league) qs.set("league", params.league);
+  if (params.start) qs.set("start", params.start);
+  if (params.end) qs.set("end", params.end);
+  return request(`/api/share/telegram?${qs.toString()}`, { method: "POST" });
+}
