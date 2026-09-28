@@ -1,24 +1,4 @@
 services:
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: predict
-      POSTGRES_PASSWORD: predict
-      POSTGRES_DB: predict_model
-    ports:
-      # host 5433 -> container 5432: a native Postgres install is already
-      # running on the host's 5432, so this app's container uses 5433 to
-      # avoid colliding with it.
-      - "5433:5432"
-    volumes:
-      - predict_model_pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U predict -d predict_model"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   backend:
     build:
       context: .
@@ -29,9 +9,13 @@ services:
     env_file:
       - backend/.env
     environment:
-      # Service-name DNS on the compose network, not the host-side 5433
-      # mapping above.
-      DATABASE_URL: postgresql+psycopg2://predict:predict@db:5432/predict_model
+      # The database lives in a native Postgres install on the host, not a
+      # container -- a Docker-managed named volume was found to not survive
+      # a Docker Desktop restart (its internal WSL2 storage got reset),
+      # while this host install is completely outside Docker's lifecycle.
+      # host.docker.internal is Docker Desktop's DNS name for the host
+      # machine, reachable from any container without extra config.
+      DATABASE_URL: postgresql+psycopg2://predict:predict@host.docker.internal:5432/predict_model
       CORS_ORIGINS: http://localhost:5173
     ports:
       - "8000:8000"
@@ -41,9 +25,6 @@ services:
       # the image so they persist across rebuilds.
       - ./backend/app/ml/model_store:/app/backend/app/ml/model_store
       - ./downloaded_files:/app/downloaded_files
-    depends_on:
-      db:
-        condition: service_healthy
 
   dashboard:
     build:
@@ -55,15 +36,12 @@ services:
     env_file:
       - backend/.env
     environment:
-      DATABASE_URL: postgresql+psycopg2://predict:predict@db:5432/predict_model
+      DATABASE_URL: postgresql+psycopg2://predict:predict@host.docker.internal:5432/predict_model
     ports:
       - "8501:8501"
     volumes:
       - ./backend/app/ml/model_store:/app/backend/app/ml/model_store
       - ./downloaded_files:/app/downloaded_files
-    depends_on:
-      db:
-        condition: service_healthy
 
   frontend:
     build:
@@ -78,6 +56,3 @@ services:
       - "5173:5173"
     depends_on:
       - backend
-
-volumes:
-  predict_model_pgdata:
