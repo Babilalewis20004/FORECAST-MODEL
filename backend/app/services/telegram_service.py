@@ -5,6 +5,7 @@ uses (see scrape_service.py's _get())."""
 
 from __future__ import annotations
 
+import json
 import time
 
 import requests
@@ -23,8 +24,10 @@ class TelegramNotConfigured(Exception):
 
 
 # Mirrors frontend/src/components/ValueBadge.tsx's selectionLabel() so the
-# digest reads the same way the UI does, not raw internal keys.
-def _selection_label(key: str, home_team: str, away_team: str) -> str:
+# digest reads the same way the UI does, not raw internal keys. Shared with
+# card_image_service.py (not module-private -- both the text digest and the
+# card images need the same label).
+def selection_label(key: str, home_team: str, away_team: str) -> str:
     if key == "home_win":
         return home_team
     if key == "away_win":
@@ -39,11 +42,11 @@ def _selection_label(key: str, home_team: str, away_team: str) -> str:
     return f"{'Over' if side == 'over' else 'Under'} {line}"
 
 
-def _pick_label(home_team: str, away_team: str, match_result: dict | None) -> str | None:
+def pick_label(home_team: str, away_team: str, match_result: dict | None) -> str | None:
     if not match_result:
         return None
     best = max(match_result, key=match_result.get)
-    label = _selection_label(best, home_team, away_team)
+    label = selection_label(best, home_team, away_team)
     return f"{label} ({match_result[best] * 100:.0f}%)"
 
 
@@ -60,7 +63,7 @@ def _fixture_block(item: FixtureOut | MatchOut) -> str:
         return "\n".join(lines)
 
     parts = []
-    pick = _pick_label(item.home_team, item.away_team, pred.match_result)
+    pick = pick_label(item.home_team, item.away_team, pred.match_result)
     if pick:
         parts.append(f"Pick: {pick}")
     if pred.over_under and pred.over_under.get("over_2.5") is not None:
@@ -75,7 +78,7 @@ def _fixture_block(item: FixtureOut | MatchOut) -> str:
         odds = (pred.bookmaker_odds or {}).get(pred.value_selection)
         ev_str = f" (+{ev * 100:.1f}% EV)" if ev is not None else ""
         odds_str = f" @ {odds:.2f}" if odds is not None else ""
-        selection = _selection_label(pred.value_selection, item.home_team, item.away_team)
+        selection = selection_label(pred.value_selection, item.home_team, item.away_team)
         lines.append(f"\U0001F4B0 Value: {selection}{odds_str}{ev_str}")
 
     return "\n".join(lines)
@@ -135,3 +138,21 @@ def send_digest(chunks: list[str]) -> int:
         if i < len(chunks) - 1:
             time.sleep(1)
     return len(chunks)
+
+
+def send_telegram_media_group(items: list[tuple[str, bytes, str]]) -> None:
+    """Sends up to 10 images as one Telegram album (sendMediaGroup).
+    `items` is (filename, png_bytes, caption) -- Telegram's multipart
+    convention: each InputMediaPhoto in `media` references
+    attach://<filename>, matched to a file part of the same name."""
+    if not settings.telegram_bot_token or not settings.telegram_chat_id:
+        raise TelegramNotConfigured("TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set in backend/.env")
+    media = [{"type": "photo", "media": f"attach://{name}", "caption": caption} for name, _, caption in items]
+    files = {name: (name, png_bytes, "image/png") for name, png_bytes, _ in items}
+    resp = requests.post(
+        f"{TELEGRAM_API}/bot{settings.telegram_bot_token}/sendMediaGroup",
+        data={"chat_id": settings.telegram_chat_id, "media": json.dumps(media)},
+        files=files,
+        timeout=30,
+    )
+    resp.raise_for_status()

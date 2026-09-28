@@ -13,7 +13,10 @@ WORKDIR /app
 # scripts/backup_db.py + restore_db.py. python:3.12-slim's Debian release
 # (trixie) ships postgresql-client 17 by default, matching the native
 # Postgres 17 the app connects to -- no need for the external PGDG repo.
-RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client \
+# fonts-dejavu-core: the base image has no fonts at all, and the "Share
+# Cards to Telegram" button (card_image_service.py) needs a real TrueType
+# font for Pillow -- DejaVu Sans/Sans-Bold, a small standard Debian package.
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
 # Installed before the rest of the source so this layer only rebuilds when a
