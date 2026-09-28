@@ -68,3 +68,13 @@ export function ChevronIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function ArchiveIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="2" y="3" width="20" height="5" rx="1" />
+      <path d="M4 8v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V8" />
+      <line x1="10" y1="12" x2="14" y2="12" />
+    </svg>
+  );
+}

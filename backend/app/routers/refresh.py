@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from app.schemas import JobOut, LogEntryOut, RefreshRequest
+from app.services.backup_service import run_backup
 from app.services.job_manager import Job, job_manager
 from app.services.model_service import ALL_MODEL_GROUPS, model_group, retrain_leagues
 from app.services.scrape_service import LEAGUES, run_scrape, scrape_odds
@@ -95,6 +96,16 @@ async def refresh_full(body: RefreshRequest) -> JobOut:
         job.detail = f"done: scrape={scrape_result} retrain={retrain_result} odds={odds_result}"
 
     return await _start("full", _run)
+
+
+@router.post("/backup", response_model=JobOut)
+async def refresh_backup() -> JobOut:
+    def _run(job: Job) -> None:
+        job.total_steps = 1
+        result = run_backup(job=job)  # BackupError propagates -- job_manager catches it into job.error
+        job.detail = f"done: {result['file']} ({result['size_mb']} MB)"
+
+    return await _start("backup", _run)
 
 
 @router.get("/status/{job_id}", response_model=JobOut)
