@@ -43,8 +43,11 @@ from app.ml.features import FEATURE_COLUMNS, MARKET_FEATURES, build_feature_fram
 from app.ml.football_goal_range_model import (
     GOAL_RANGES,
     OU_LINES,
+    EXTRA_MARKET_KEYS,
     LeagueGoalModel,
     btts_probabilities,
+    extra_flat_probabilities,
+    nest_extra,
     build_features as model_a_build_features,
     goal_range_probabilities,
     match_result_probabilities,
@@ -61,7 +64,10 @@ CROSS_FIT_FOLDS = 5  # out-of-fold stacking folds (see _cross_fitted_stack)
 
 BLENDED_MARKETS = ["match_result", "btts"] + [f"over_{line}" for line in OU_LINES]
 RANGE_MARKETS = [f"range_{label}" for label in GOAL_RANGES]
-ALL_MARKETS = BLENDED_MARKETS + RANGE_MARKETS
+# Derived markets (team totals, 1X2/O-U x BTTS, odd/even): Model A only,
+# calibrated per event like the goal ranges -- see extra_flat_masks.
+EXTRA_MARKETS = list(EXTRA_MARKET_KEYS)
+ALL_MARKETS = BLENDED_MARKETS + RANGE_MARKETS + EXTRA_MARKETS
 
 # Model A's own base BTTS/Over-2.5 rates, stacked as extra Model B input
 # features on top of FEATURE_COLUMNS (true stacking) -- in addition to, not
@@ -90,6 +96,7 @@ def model_a_flat(home_goals: np.ndarray, away_goals: np.ndarray) -> dict:
         flat[f"over_{line}"] = ou[f"over_{line}"]
     for label, p in goal_range_probabilities(total).items():
         flat[f"range_{label}"] = p
+    flat.update(extra_flat_probabilities(home_goals, away_goals))
     return flat
 
 
@@ -103,6 +110,7 @@ def flat_from_prediction(result: dict) -> dict:
         flat[f"over_{line}"] = result["over_under"][f"over_{line}"]
     for label, p in result["range_probabilities"].items():
         flat[f"range_{label}"] = p
+    flat.update(result["extra_flat"])
     return flat
 
 
@@ -125,6 +133,9 @@ def nest(flat: dict) -> dict:
     ranges = {label: round(float(flat[f"range_{label}"]), 5) for label in GOAL_RANGES if f"range_{label}" in flat}
     if ranges:
         out["goal_ranges"] = ranges
+    extra = nest_extra({m: flat[m] for m in EXTRA_MARKETS if m in flat})
+    if extra:
+        out["extra_markets"] = {cat: {k: round(v, 5) for k, v in probs.items()} for cat, probs in extra.items()}
     return out
 
 

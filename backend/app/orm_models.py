@@ -105,6 +105,12 @@ class Prediction(Base):
     # complete distribution (doesn't sum to 1); display-only, for the
     # correct-score market card.
     correct_score: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # Derived markets that need the joint score draw: {"team_totals": {...},
+    # "x12_btts": {...}, "ou_btts": {...}, "odd_even": {...}} -- see
+    # football_goal_range_model.extra_market_probabilities. Model A only
+    # (uncalibrated). Double chance isn't stored: it's summed from match_result
+    # at response time so it always matches the calibrated 1X2.
+    extra_markets: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     # Ensemble provenance. When present, the market columns above hold the
     # final *calibrated* probabilities, and raw_probabilities holds the
     # pre-calibration Model A / Model B / blended values they came from.

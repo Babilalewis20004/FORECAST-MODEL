@@ -652,6 +652,105 @@ def btts_probabilities(home_goals_samples: np.ndarray, away_goals_samples: np.nd
     return {"yes": yes, "no": 1.0 - yes}
 
 
+TEAM_TOTAL_LINES = (0.5, 1.5, 2.5)
+
+# Flat market keys for the derived markets, "<category>:<outcome>" -- one
+# entry per *independently calibrated* binary event (a Platt calibrator each,
+# see ensemble.train_ensemble). Complements (team-total under, odd/even's
+# "even") are implied by 1 - p and don't get their own key; the 1X2/O-U x BTTS
+# partitions are calibrated per outcome and then renormalised to sum to 1
+# (see nest_extra).
+def extra_flat_masks(home_goals: np.ndarray, away_goals: np.ndarray) -> dict[str, np.ndarray]:
+    """Boolean outcome mask per flat derived-market key, from a (home, away)
+    goal array pair -- samples for a prediction, or actual results for the
+    training labels, so both use exactly the same definitions."""
+    total = home_goals + away_goals
+    both = (home_goals > 0) & (away_goals > 0)
+    masks: dict[str, np.ndarray] = {}
+    for side, goals in (("home", home_goals), ("away", away_goals)):
+        for line in TEAM_TOTAL_LINES:
+            masks[f"team_totals:{side}_over_{line}"] = goals > line
+    results = {
+        "home_win": home_goals > away_goals,
+        "draw": home_goals == away_goals,
+        "away_win": home_goals < away_goals,
+    }
+    for name, mask in results.items():
+        masks[f"x12_btts:{name}_btts_yes"] = mask & both
+        masks[f"x12_btts:{name}_btts_no"] = mask & ~both
+    for line in OU_LINES:
+        for side, mask in (("over", total > line), ("under", total <= line)):
+            masks[f"ou_btts:{side}_{line}_btts_yes"] = mask & both
+            masks[f"ou_btts:{side}_{line}_btts_no"] = mask & ~both
+    masks["odd_even:odd"] = total % 2 == 1
+    return masks
+
+
+EXTRA_MARKET_KEYS = list(extra_flat_masks(np.zeros(1, dtype=int), np.zeros(1, dtype=int)))
+
+
+def extra_flat_probabilities(home_goals: np.ndarray, away_goals: np.ndarray) -> dict[str, float]:
+    return {k: float(np.mean(m)) for k, m in extra_flat_masks(home_goals, away_goals).items()}
+
+
+def nest_extra(flat: dict) -> dict[str, dict[str, float]]:
+    """Flat derived-market probabilities -> nested by category, adding the
+    implied complements and renormalising the complete partitions:
+
+      team_totals: "home_over_1.5", "home_under_1.5", ...
+      x12_btts:    "home_win_btts_yes", "draw_btts_no", ... (sums to 1)
+      ou_btts:     "over_2.5_btts_yes", "under_2.5_btts_no", ... (per line sums to 1)
+      odd_even:    "odd", "even"
+
+    Only categories present in `flat` are returned."""
+    out: dict[str, dict[str, float]] = {}
+    for key, p in flat.items():
+        category, name = key.split(":", 1)
+        out.setdefault(category, {})[name] = float(p)
+
+    tt = out.get("team_totals", {})
+    for name in [n for n in tt if "_over_" in n]:
+        tt[name.replace("_over_", "_under_")] = 1.0 - tt[name]
+
+    oe = out.get("odd_even", {})
+    if "odd" in oe:
+        oe["even"] = 1.0 - oe["odd"]
+
+    def renormalise(probs: dict[str, float], names: list[str]) -> None:
+        if all(n in probs for n in names):
+            total = sum(probs[n] for n in names)
+            if total > 0:
+                for n in names:
+                    probs[n] /= total
+
+    renormalise(out.get("x12_btts", {}), [f"{r}_btts_{b}" for r in ("home_win", "draw", "away_win") for b in ("yes", "no")])
+    for line in OU_LINES:
+        renormalise(
+            out.get("ou_btts", {}),
+            [f"{s}_{line}_btts_{b}" for s in ("over", "under") for b in ("yes", "no")],
+        )
+    return out
+
+
+def extra_market_probabilities(
+    home_goals_samples: np.ndarray, away_goals_samples: np.ndarray
+) -> dict[str, dict[str, float]]:
+    """Markets derived from the joint score draw that need more than the
+    marginals: team totals, 1X2/O-U combined with BTTS, and odd/even total
+    (see nest_extra for the key shapes). Raw simulation output; the served
+    values come from the ensemble's per-market calibrators when the league
+    has them. Double chance is not here -- it's a plain sum of the
+    calibrated 1X2 (see double_chance_probabilities)."""
+    return nest_extra(extra_flat_probabilities(home_goals_samples, away_goals_samples))
+
+
+def double_chance_probabilities(match_result: dict[str, float]) -> dict[str, float]:
+    """Double chance from a 1X2 dict: 1X (home or draw), X2 (draw or away),
+    12 (home or away)."""
+    h, d, a = match_result["home_win"], match_result["draw"], match_result["away_win"]
+    return {"home_draw": h + d, "draw_away": d + a, "home_away": h + a}
+
+
 def correct_score_probabilities(
     home_goals_samples: np.ndarray, away_goals_samples: np.ndarray, max_goals: int = 6, top_n: int = 10
 ) -> dict[str, float]:
@@ -736,6 +835,8 @@ def predict_fixture(
     # flat-key blend/shrinkage, since a per-scoreline joint distribution
     # doesn't fit that framework the way the other markets do.
     correct_score = correct_score_probabilities(home_samples, away_samples)
+    extra_flat = extra_flat_probabilities(home_samples, away_samples)
+    extra_markets = nest_extra(extra_flat)
 
     return {
         "lambda_home": round(lam_h, 2),
@@ -746,6 +847,8 @@ def predict_fixture(
         "over_under": over_under,
         "btts": btts,
         "correct_score": correct_score,
+        "extra_markets": extra_markets,
+        "extra_flat": extra_flat,
         # Fair (no-margin) decimal odds -- 1/probability -- for every market
         # above, same keys as their probability counterparts.
         "odds": {

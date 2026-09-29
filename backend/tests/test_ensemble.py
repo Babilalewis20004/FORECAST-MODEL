@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from app.ml.calibration import DEFAULT_SHRINKAGE_WEIGHT
-from app.ml.ensemble import ALL_MARKETS, BLENDED_MARKETS, RANGE_MARKETS, model_a_flat, nest, train_ensemble
+from app.ml.ensemble import ALL_MARKETS, BLENDED_MARKETS, EXTRA_MARKETS, RANGE_MARKETS, model_a_flat, nest, train_ensemble
 from app.ml.features import FEATURE_COLUMNS, build_training_frame
 from app.ml.football_goal_range_model import simulate_joint_score_distribution
 from app.ml.gbdt_models import GBDTMarketModels
@@ -33,9 +33,12 @@ def test_train_ensemble_reports_honest_splits_and_metrics(trained):
         brier = m["markets"][market]["brier"]
         assert all(brier[k] is not None for k in ("model_a", "model_b", "blended", "calibrated", "baseline"))
         assert 0.0 <= m["markets"][market]["w_a"] <= 1.0
-    for market in RANGE_MARKETS:
+    for market in RANGE_MARKETS + EXTRA_MARKETS:
         assert m["markets"][market]["w_a"] is None  # Model A only
         assert m["markets"][market]["brier"]["model_b"] is None
+    for market in EXTRA_MARKETS:
+        assert m["markets"][market]["calibrator"] == "BinaryCalibrator"
+        assert m["markets"][market]["brier"]["calibrated"] is not None
 
 
 def test_combine_produces_consistent_calibrated_markets(trained, synthetic_matches):
@@ -50,6 +53,12 @@ def test_combine_produces_consistent_calibrated_markets(trained, synthetic_match
     assert final["btts"]["yes"] + final["btts"]["no"] == pytest.approx(1.0)
     for line in (1.5, 2.5, 3.5):
         assert final["over_under"][f"over_{line}"] + final["over_under"][f"under_{line}"] == pytest.approx(1.0)
+    extra = final["extra_markets"]
+    assert sum(extra["x12_btts"].values()) == pytest.approx(1.0, abs=1e-3)
+    for line in (1.5, 2.5, 3.5):
+        assert sum(v for k, v in extra["ou_btts"].items() if f"_{line}_" in k) == pytest.approx(1.0, abs=1e-3)
+    assert extra["odd_even"]["odd"] + extra["odd_even"]["even"] == pytest.approx(1.0, abs=1e-4)
+    assert extra["team_totals"]["home_over_1.5"] + extra["team_totals"]["home_under_1.5"] == pytest.approx(1.0, abs=1e-4)
     assert set(out["raw"]) == {"model_a", "model_b", "blended"}
     assert "goal_ranges" not in out["raw"]["model_b"]
     assert out["weights"]["range_2-4"] is None

@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 
 from app.ml.calibration import shin_implied_probabilities
-from app.ml.football_goal_range_model import GOAL_RANGES, OU_LINES
+from app.ml.football_goal_range_model import GOAL_RANGES, OU_LINES, extra_flat_masks
 from app.ml.rolling_utils import trailing_match_counts
 
 WINDOWS = (5, 10)
@@ -306,4 +306,6 @@ def build_training_frame(matches: pd.DataFrame) -> pd.DataFrame:
         frame[f"y_over_{line}"] = (total > line).astype(int)
     for label, (lo, hi) in GOAL_RANGES.items():
         frame[f"y_range_{label}"] = ((total >= lo) & (total <= hi)).astype(int)
+    for market, mask in extra_flat_masks(hg, ag).items():
+        frame[f"y_{market}"] = mask.astype(int)
     return frame

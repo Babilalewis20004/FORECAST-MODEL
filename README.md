@@ -610,6 +610,44 @@ Jobs run one at a time in the background. Run the stats backfill on its own
 and repeat it daily until nothing is left to fetch, because of the 100
 requests/day free-plan limit.
 
+## Derived markets and the betslip: limits to improve
+
+Beyond 1X2, BTTS, Over/Under and the goal ranges, each card has a "More
+markets" row group: double chance, team totals (0.5/1.5/2.5), 1X2 and O/U
+combined with BTTS, and odd/even total goals. Picks from any market go on the
+Betslip tab (accumulator only, kept in the browser's `localStorage`).
+
+Double chance is summed from the calibrated 1X2. The others come from the same
+simulated scoreline as Model A and get their own Platt calibrator per event
+(`extra_flat_masks` in
+[`football_goal_range_model.py`](backend/app/ml/football_goal_range_model.py),
+calibrated in `train_ensemble`). They only appear after a league has been
+retrained, and three things about them are weaker than the core markets:
+
+1. **No bookmaker odds, so no value bets and no market shrinkage.** The odds
+   scraper only reads Match Winner, Goals Over/Under and Both Teams Score
+   (`ODDS_MARKETS` in
+   [`scrape_service.py`](backend/app/services/scrape_service.py)). On the
+   betslip these markets therefore show the model's fair odds (greyed, with a
+   warning), and they're excluded from value-bet detection. **Planned fix:**
+   once there's an Odds API subscription, add these markets to the odds
+   ingestion (double chance, team totals, result/BTTS and total/BTTS combos,
+   odd/even) and map them onto the same flat keys. The betslip already
+   prefers `bookmaker_odds` over fair odds, so it picks them up as soon as
+   they're stored. Shrinkage weights for these markets will use the default
+   until there's enough odds history to fit them.
+2. **Model A only, no second model.** Unlike 1X2, BTTS and O/U, there's no
+   Model B blended in, so these markets are less accurate even after
+   calibration. Options, cheapest first: rescale the BTTS combos and team
+   totals to agree with the calibrated 1X2, BTTS and O/U; then, if that isn't
+   enough, add GBDT classifiers for the most-used ones.
+3. **Skill on real data isn't checked yet.** The calibrators were only
+   exercised on synthetic data. After a real retrain, compare each market's
+   calibrated Brier score with the base rate in the league's metrics. If a
+   market doesn't beat it, hide it for that league rather than show it.
+
+Fixing 1 doesn't fix 2 or 3.
+
 ## Recommended next steps: more stable numbers
 
 Each league trains on only 1–2k matches, so the calibration split has

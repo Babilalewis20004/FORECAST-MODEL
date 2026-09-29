@@ -290,6 +290,9 @@ def generate_predictions(db: Session, league: str) -> dict:
             "over_under": final["over_under"],
             "btts": final["btts"],
             "correct_score": result["correct_score"],
+            # Calibrated when the league's ensemble has calibrators for them,
+            # else the raw simulation output.
+            "extra_markets": final.get("extra_markets") or result["extra_markets"],
             "raw_probabilities": raw,
             "ensemble_weights": weights,
             **value_fields(final, stored_odds.get(fx.fixture_id)),
