@@ -5,6 +5,9 @@ interface Props {
   correctScoreOdds: Record<string, number | null> | null | undefined;
   homeTeam: string;
   awayTeam: string;
+  // Actual final score for a finished fixture -- undefined/null for one not
+  // yet played.
+  result?: { home: number; away: number } | null;
 }
 
 function parseScoreline(key: string): [number, number] {
@@ -17,7 +20,7 @@ function parseScoreline(key: string): [number, number] {
 // the goal-range chart already does for its own numbers. Unlike the 1X2/BTTS/
 // O-U toggles, one scoreline is always selected (defaults to the model's most
 // likely), since "no scoreline picked" isn't a meaningful state here.
-export function CorrectScoreGrid({ correctScore, correctScoreOdds, homeTeam, awayTeam }: Props) {
+export function CorrectScoreGrid({ correctScore, correctScoreOdds, homeTeam, awayTeam, result }: Props) {
   const entries = correctScore ? Object.entries(correctScore).sort((a, b) => b[1] - a[1]) : [];
   const [selected, setSelected] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -27,18 +30,30 @@ export function CorrectScoreGrid({ correctScore, correctScoreOdds, homeTeam, awa
   const activeKey = selected ?? entries[0][0];
   const [h, a] = parseScoreline(activeKey);
   const activeOdds = correctScoreOdds?.[activeKey];
+  const correctKey = result ? `${result.home}-${result.away}` : null;
+  const headerCorrect = correctKey != null && activeKey === correctKey;
+  // entries is sorted by probability descending, so entries[0] is both the
+  // highest-probability and (odds being 1/prob) lowest-odds scoreline --
+  // "favoured" either way you'd define it for this market.
+  const favouredKey = entries[0][0];
+  const headerFavoured = activeKey === favouredKey;
 
   return (
     <div className="market">
-      <div className="market__title">Correct Score</div>
-      <button type="button" className="score-toggle" onClick={() => setOpen((v) => !v)}>
-        <span className="score-toggle__result">
+      <button
+        type="button"
+        className={`market-row${headerCorrect ? " market-row--correct" : ""}`}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {headerFavoured && <span className="favoured-badge">Favoured</span>}
+        <span className="market-row__label">Score</span>
+        <span className="market-row__pick">
           {homeTeam} {h} – {a} {awayTeam}
         </span>
-        <span className="score-toggle__right">
-          <span className="score-toggle__odds">{activeOdds != null ? activeOdds.toFixed(2) : "—"}</span>
-          <span className={`chev${open ? " chev--open" : ""}`}>▾</span>
+        <span className="market-row__right">
+          <span className="market-row__odds">{activeOdds != null ? activeOdds.toFixed(2) : "—"}</span>
         </span>
+        <span className={`chev${open ? " chev--open" : ""}`}>▾</span>
       </button>
       {open && (
         <div className="score-grid">
@@ -46,14 +61,17 @@ export function CorrectScoreGrid({ correctScore, correctScoreOdds, homeTeam, awa
             const [hg, ag] = parseScoreline(key);
             const odds = correctScoreOdds?.[key];
             const isActive = key === activeKey;
+            const isCorrect = key === correctKey;
+            const isFavoured = key === favouredKey;
             return (
               <button
                 key={key}
                 type="button"
-                className={`score-cell${isActive ? " score-cell--active" : ""}`}
+                className={`score-cell${isActive ? " score-cell--active" : ""}${isCorrect ? " score-cell--correct" : ""}`}
                 onClick={() => setSelected(key)}
                 title={`${(prob * 100).toFixed(1)}%`}
               >
+                {isFavoured && <span className="favoured-badge">Favoured</span>}
                 <span className="score-cell__sc">
                   {hg} – {ag}
                 </span>

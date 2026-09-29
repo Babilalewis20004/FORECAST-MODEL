@@ -102,19 +102,14 @@
   margin-top: 0;
 }
 
-.market__title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-}
-
 .market-toggles {
   display: grid;
   gap: 8px;
+  margin-top: 8px;
 }
 
 .market-toggle {
+  position: relative;
   background: var(--page);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -164,12 +159,45 @@
   color: var(--accent);
 }
 
-/* Correct score */
-.score-toggle {
+/* Actual result matched this pick -- wins over the user's own selection
+   color so a finished fixture always shows what actually landed. */
+.market-toggle--correct {
+  background: color-mix(in srgb, var(--success) 14%, var(--surface-1));
+  border-color: var(--success);
+}
+
+.market-toggle--correct .market-toggle__odds,
+.market-toggle--correct .market-toggle__pct {
+  color: var(--success);
+}
+
+/* The model's own pick for this market -- a small corner tag, independent of
+   (and layered over) whatever selection/correctness color the option also
+   has, since "the model favours this" is a separate fact from either. */
+.favoured-badge {
+  position: absolute;
+  top: -7px;
+  left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--success) 18%, var(--surface-1));
+  border: 1px solid var(--success);
+  color: var(--success);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* Collapsed one-line market row (1X2 / BTTS / O-U / Correct Score) -- shows
+   the model's favourite, or the user's own pick once made, and expands into
+   the full option set on tap. */
+.market-row {
+  position: relative;
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
   background: var(--page);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -177,27 +205,58 @@
   cursor: pointer;
   font-family: inherit;
   color: var(--text-primary);
+  text-align: left;
 }
 
-.score-toggle:hover {
+.market-row:hover {
   border-color: var(--text-muted);
 }
 
-.score-toggle__result {
-  font-size: 13px;
-  font-weight: 600;
+.market-row__label {
+  flex-shrink: 0;
+  width: 52px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
-.score-toggle__right {
+.market-row__pick {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.market-row__right {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
-.score-toggle__odds {
+.market-row__odds {
   font-size: 12.5px;
   font-weight: 700;
   color: var(--text-secondary);
+}
+
+.market-row__pct {
+  min-width: 30px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--success);
+  text-align: right;
+}
+
+/* Actual result matched the currently-shown pick -- same "ground truth"
+   green used by the expanded options below. */
+.market-row--correct {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 10%, var(--page));
 }
 
 .chev {
@@ -219,6 +278,7 @@
 }
 
 .score-cell {
+  position: relative;
   background: var(--page);
   border: 1px solid var(--border);
   border-radius: 7px;
@@ -253,6 +313,18 @@
 
 .score-cell--active .score-cell__odds {
   color: var(--accent);
+  font-weight: 600;
+}
+
+/* Actual scoreline for a finished fixture -- wins over the active/selected
+   color so it stays visible as ground truth regardless of what's tapped. */
+.score-cell--correct {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 14%, var(--surface-1));
+}
+
+.score-cell--correct .score-cell__odds {
+  color: var(--success);
   font-weight: 600;
 }
 

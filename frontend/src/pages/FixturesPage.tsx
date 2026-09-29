@@ -90,7 +90,12 @@ export function FixturesPage() {
         wantsUpcoming
           ? getUpcomingFixtures({
               league: league ?? undefined,
-              start: dateRange.start && dateRange.start > today ? dateRange.start : undefined,
+              // Never let this dip below today: getMatches() above already
+              // covers everything through yesterday, and the "upcoming"
+              // endpoint has no built-in floor -- without this a stale
+              // fixture still marked NS from a past date would leak into a
+              // "Today" query and land under the wrong date heading.
+              start: dateRange.start && dateRange.start > today ? dateRange.start : today,
               end: dateRange.end ?? undefined,
             })
           : Promise.resolve([]),
