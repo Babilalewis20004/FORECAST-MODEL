@@ -660,6 +660,10 @@ TEAM_TOTAL_LINES = (0.5, 1.5, 2.5)
 # "even") are implied by 1 - p and don't get their own key; the 1X2/O-U x BTTS
 # partitions are calibrated per outcome and then renormalised to sum to 1
 # (see nest_extra).
+def _ou_btts_impossible(side: str, line: float, btts: str) -> bool:
+    return side == "under" and btts == "yes" and line < 2
+
+
 def extra_flat_masks(home_goals: np.ndarray, away_goals: np.ndarray) -> dict[str, np.ndarray]:
     """Boolean outcome mask per flat derived-market key, from a (home, away)
     goal array pair -- samples for a prediction, or actual results for the
@@ -680,7 +684,10 @@ def extra_flat_masks(home_goals: np.ndarray, away_goals: np.ndarray) -> dict[str
         masks[f"x12_btts:{name}_btts_no"] = mask & ~both
     for line in OU_LINES:
         for side, mask in (("over", total > line), ("under", total <= line)):
-            masks[f"ou_btts:{side}_{line}_btts_yes"] = mask & both
+            # BTTS needs at least two goals, so "under 1.5 & BTTS yes" can
+            # never happen -- not a market, and nothing to calibrate.
+            if not _ou_btts_impossible(side, line, "yes"):
+                masks[f"ou_btts:{side}_{line}_btts_yes"] = mask & both
             masks[f"ou_btts:{side}_{line}_btts_no"] = mask & ~both
     masks["odd_even:odd"] = total % 2 == 1
     return masks
@@ -727,7 +734,12 @@ def nest_extra(flat: dict) -> dict[str, dict[str, float]]:
     for line in OU_LINES:
         renormalise(
             out.get("ou_btts", {}),
-            [f"{s}_{line}_btts_{b}" for s in ("over", "under") for b in ("yes", "no")],
+            [
+                f"{s}_{line}_btts_{b}"
+                for s in ("over", "under")
+                for b in ("yes", "no")
+                if not _ou_btts_impossible(s, line, b)
+            ],
         )
     return out
 

@@ -214,7 +214,9 @@ export function MarketsPanel({
       [
         [`over_${line}_btts_yes`, "Over & Yes"],
         [`over_${line}_btts_no`, "Over & No"],
-        [`under_${line}_btts_yes`, "Under & Yes"],
+        // Impossible below 2 goals (BTTS needs two) -- also filtered out of
+        // predictions stored before the backend dropped it.
+        ...(line >= 2 ? ([[`under_${line}_btts_yes`, "Under & Yes"]] as [string, string][]) : []),
         [`under_${line}_btts_no`, "Under & No"],
       ],
       totalGoals == null || bothScored == null

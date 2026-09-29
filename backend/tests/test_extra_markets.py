@@ -44,3 +44,12 @@ def test_odd_even_and_team_total_known_values():
 def test_double_chance():
     dc = double_chance_probabilities({"home_win": 0.5, "draw": 0.3, "away_win": 0.2})
     assert dc == {"home_draw": pytest.approx(0.8), "draw_away": pytest.approx(0.5), "home_away": pytest.approx(0.7)}
+
+
+def test_impossible_under_1_5_btts_yes_is_not_a_market():
+    h, a = _samples()
+    m = extra_market_probabilities(h, a)
+    assert "under_1.5_btts_yes" not in m["ou_btts"]
+    # the remaining three outcomes for that line still form a full partition
+    assert sum(v for k, v in m["ou_btts"].items() if "_1.5_" in k) == pytest.approx(1)
+    assert "under_2.5_btts_yes" in m["ou_btts"]
