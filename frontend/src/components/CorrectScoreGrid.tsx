@@ -32,6 +32,11 @@ export function CorrectScoreGrid({ correctScore, correctScoreOdds, homeTeam, awa
   const activeOdds = correctScoreOdds?.[activeKey];
   const correctKey = result ? `${result.home}-${result.away}` : null;
   const headerCorrect = correctKey != null && activeKey === correctKey;
+  // entries is sorted by probability descending, so entries[0] is both the
+  // highest-probability and (odds being 1/prob) lowest-odds scoreline --
+  // "favoured" either way you'd define it for this market.
+  const favouredKey = entries[0][0];
+  const headerFavoured = activeKey === favouredKey;
 
   return (
     <div className="market">
@@ -41,6 +46,7 @@ export function CorrectScoreGrid({ correctScore, correctScoreOdds, homeTeam, awa
         className={`score-toggle${headerCorrect ? " score-toggle--correct" : ""}`}
         onClick={() => setOpen((v) => !v)}
       >
+        {headerFavoured && <span className="favoured-badge">Favoured</span>}
         <span className="score-toggle__result">
           {homeTeam} {h} – {a} {awayTeam}
         </span>
@@ -56,6 +62,7 @@ export function CorrectScoreGrid({ correctScore, correctScoreOdds, homeTeam, awa
             const odds = correctScoreOdds?.[key];
             const isActive = key === activeKey;
             const isCorrect = key === correctKey;
+            const isFavoured = key === favouredKey;
             return (
               <button
                 key={key}
@@ -64,6 +71,7 @@ export function CorrectScoreGrid({ correctScore, correctScoreOdds, homeTeam, awa
                 onClick={() => setSelected(key)}
                 title={`${(prob * 100).toFixed(1)}%`}
               >
+                {isFavoured && <span className="favoured-badge">Favoured</span>}
                 <span className="score-cell__sc">
                   {hg} – {ag}
                 </span>

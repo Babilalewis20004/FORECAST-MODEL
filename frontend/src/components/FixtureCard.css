@@ -115,6 +115,7 @@
 }
 
 .market-toggle {
+  position: relative;
   background: var(--page);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -176,8 +177,27 @@
   color: var(--success);
 }
 
+/* The model's own pick for this market -- a small corner tag, independent of
+   (and layered over) whatever selection/correctness color the option also
+   has, since "the model favours this" is a separate fact from either. */
+.favoured-badge {
+  position: absolute;
+  top: -7px;
+  left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--success) 18%, var(--surface-1));
+  border: 1px solid var(--success);
+  color: var(--success);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
 /* Correct score */
 .score-toggle {
+  position: relative;
   width: 100%;
   display: flex;
   align-items: center;
@@ -231,6 +251,7 @@
 }
 
 .score-cell {
+  position: relative;
   background: var(--page);
   border: 1px solid var(--border);
   border-radius: 7px;

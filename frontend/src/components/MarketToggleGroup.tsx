@@ -22,6 +22,11 @@ interface Props {
 // bet is placed); it just highlights a pick the way the goal-range chart
 // already highlights this fixture's own numbers.
 export function MarketToggleGroup({ title, options, selected, onSelect, correctKey }: Props) {
+  // The model's own pick for this market -- highest probability among the
+  // options actually shown, independent of user selection or the actual
+  // result. Always defined since every group has at least one option.
+  const favouredKey = options.reduce((best, opt) => (opt.prob > best.prob ? opt : best), options[0]).key;
+
   return (
     <div className="market">
       <div className="market__title">{title}</div>
@@ -29,6 +34,7 @@ export function MarketToggleGroup({ title, options, selected, onSelect, correctK
         {options.map((opt) => {
           const isSelected = selected === opt.key;
           const isCorrect = correctKey === opt.key;
+          const isFavoured = opt.key === favouredKey;
           return (
             <button
               key={opt.key}
@@ -36,6 +42,7 @@ export function MarketToggleGroup({ title, options, selected, onSelect, correctK
               className={`market-toggle${isSelected ? " market-toggle--selected" : ""}${isCorrect ? " market-toggle--correct" : ""}`}
               onClick={() => onSelect(opt.key)}
             >
+              {isFavoured && <span className="favoured-badge">Favoured</span>}
               <span className="market-toggle__label">{opt.label}</span>
               <span className="market-toggle__odds">{opt.odds != null ? opt.odds.toFixed(2) : "—"}</span>
               <span className="market-toggle__pct">{Math.round(opt.prob * 100)}%</span>
