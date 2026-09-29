@@ -56,14 +56,14 @@ export function MarketsPanel({
   return (
     <div className="markets-panel">
       <MarketToggleGroup
-        title="1X2 Market"
+        chipLabel="1X2"
         options={x12Options}
         selected={selections.x12 ?? null}
         onSelect={(k) => toggle("x12", k)}
         correctKey={x12Correct}
       />
       <MarketToggleGroup
-        title="Both Teams to Score"
+        chipLabel="BTTS"
         options={bttsOptions}
         selected={selections.btts ?? null}
         onSelect={(k) => toggle("btts", k)}
@@ -84,7 +84,7 @@ export function MarketsPanel({
         return (
           <MarketToggleGroup
             key={line}
-            title={`Over / Under ${line} Goals`}
+            chipLabel={`O/U ${line}`}
             options={options}
             selected={selections[group] ?? null}
             onSelect={(k) => toggle(group, k)}

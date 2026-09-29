@@ -40,20 +40,20 @@ export function CorrectScoreGrid({ correctScore, correctScoreOdds, homeTeam, awa
 
   return (
     <div className="market">
-      <div className="market__title">Correct Score</div>
       <button
         type="button"
-        className={`score-toggle${headerCorrect ? " score-toggle--correct" : ""}`}
+        className={`market-row${headerCorrect ? " market-row--correct" : ""}`}
         onClick={() => setOpen((v) => !v)}
       >
         {headerFavoured && <span className="favoured-badge">Favoured</span>}
-        <span className="score-toggle__result">
+        <span className="market-row__label">Score</span>
+        <span className="market-row__pick">
           {homeTeam} {h} – {a} {awayTeam}
         </span>
-        <span className="score-toggle__right">
-          <span className="score-toggle__odds">{activeOdds != null ? activeOdds.toFixed(2) : "—"}</span>
-          <span className={`chev${open ? " chev--open" : ""}`}>▾</span>
+        <span className="market-row__right">
+          <span className="market-row__odds">{activeOdds != null ? activeOdds.toFixed(2) : "—"}</span>
         </span>
+        <span className={`chev${open ? " chev--open" : ""}`}>▾</span>
       </button>
       {open && (
         <div className="score-grid">
