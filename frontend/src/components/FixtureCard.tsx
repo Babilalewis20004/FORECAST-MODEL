@@ -1,7 +1,7 @@
 import type { Fixture } from "../types";
 import { CalibrationTag } from "./CalibrationTag";
 import { CorrectScoreGrid } from "./CorrectScoreGrid";
-import { GoalRangeChart } from "./GoalRangeChart";
+import { GoalRangeRow } from "./GoalRangeRow";
 import { MarketsPanel } from "./MarketsPanel";
 import { TeamForm } from "./TeamForm";
 import { ValueBadge } from "./ValueBadge";
@@ -36,7 +36,7 @@ export function FixtureCard({ fixture }: { fixture: Fixture }) {
             Expected goals: <strong>{prediction.lambda_home.toFixed(2)}</strong> :{" "}
             <strong>{prediction.lambda_away.toFixed(2)}</strong>
           </p>
-          <GoalRangeChart
+          <GoalRangeRow
             probabilities={prediction.range_probabilities}
             odds={prediction.range_odds}
             totalGoals={result ? result.home + result.away : null}

@@ -10,7 +10,7 @@ interface Props {
   totalGoals?: number | null;
 }
 
-function inRange(label: RangeLabel, total: number): boolean {
+export function inRange(label: RangeLabel, total: number): boolean {
   const [min, max] = label.split("-").map(Number);
   return total >= min && total <= max;
 }

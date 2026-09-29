@@ -87,11 +87,12 @@
   color: var(--text-muted);
 }
 
-/* Market toggle groups (1X2 / BTTS / Over-Under) */
+/* Market rows (Goal Range / 1X2 / BTTS / Over-Under / Score) -- one
+   continuous list, no divider between the goal-range row (outside
+   .markets-panel) and the rest, since they're now visually the same row
+   shape. */
 .markets-panel {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
+  margin-top: 14px;
 }
 
 .market {
@@ -105,6 +106,10 @@
 .market-toggles {
   display: grid;
   gap: 8px;
+  margin-top: 8px;
+}
+
+.market-expand {
   margin-top: 8px;
 }
 
