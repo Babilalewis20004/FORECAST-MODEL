@@ -164,6 +164,18 @@
   color: var(--accent);
 }
 
+/* Actual result matched this pick -- wins over the user's own selection
+   color so a finished fixture always shows what actually landed. */
+.market-toggle--correct {
+  background: color-mix(in srgb, var(--success) 14%, var(--surface-1));
+  border-color: var(--success);
+}
+
+.market-toggle--correct .market-toggle__odds,
+.market-toggle--correct .market-toggle__pct {
+  color: var(--success);
+}
+
 /* Correct score */
 .score-toggle {
   width: 100%;
@@ -254,6 +266,23 @@
 .score-cell--active .score-cell__odds {
   color: var(--accent);
   font-weight: 600;
+}
+
+/* Actual scoreline for a finished fixture -- wins over the active/selected
+   color so it stays visible as ground truth regardless of what's tapped. */
+.score-cell--correct {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 14%, var(--surface-1));
+}
+
+.score-cell--correct .score-cell__odds {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.score-toggle--correct {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 10%, var(--page));
 }
 
 /* Last 5 matches form */

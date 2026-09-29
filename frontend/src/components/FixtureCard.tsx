@@ -11,6 +11,7 @@ export function FixtureCard({ fixture }: { fixture: Fixture }) {
   const prediction = fixture.prediction;
   const hasMarkets = prediction?.match_result && prediction?.over_under && prediction?.btts;
   const isFinished = fixture.home_goals != null && fixture.away_goals != null;
+  const result = isFinished ? { home: fixture.home_goals!, away: fixture.away_goals! } : null;
 
   return (
     <article className="fixture-card">
@@ -35,7 +36,11 @@ export function FixtureCard({ fixture }: { fixture: Fixture }) {
             Expected goals: <strong>{prediction.lambda_home.toFixed(2)}</strong> :{" "}
             <strong>{prediction.lambda_away.toFixed(2)}</strong>
           </p>
-          <GoalRangeChart probabilities={prediction.range_probabilities} odds={prediction.range_odds} />
+          <GoalRangeChart
+            probabilities={prediction.range_probabilities}
+            odds={prediction.range_odds}
+            totalGoals={result ? result.home + result.away : null}
+          />
           {hasMarkets && (
             <MarketsPanel
               matchResult={prediction.match_result!}
@@ -46,6 +51,7 @@ export function FixtureCard({ fixture }: { fixture: Fixture }) {
               bttsOdds={prediction.btts_odds}
               homeTeam={fixture.home_team}
               awayTeam={fixture.away_team}
+              result={result}
             />
           )}
           <CorrectScoreGrid
@@ -53,6 +59,7 @@ export function FixtureCard({ fixture }: { fixture: Fixture }) {
             correctScoreOdds={prediction.correct_score_odds}
             homeTeam={fixture.home_team}
             awayTeam={fixture.away_team}
+            result={result}
           />
           <TeamForm homeTeam={fixture.home_team} awayTeam={fixture.away_team} />
           <CalibrationTag prediction={prediction} />

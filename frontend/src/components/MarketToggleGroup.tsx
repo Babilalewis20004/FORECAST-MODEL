@@ -10,24 +10,30 @@ interface Props {
   options: ToggleOption[];
   selected: string | null;
   onSelect: (key: string) => void;
+  // Key of the option the actual final result matched, for a finished
+  // fixture -- null/undefined for an unplayed one. Independent of `selected`
+  // (the user's own tap), so a correct call stays marked green whether or
+  // not the user picked it.
+  correctKey?: string | null;
 }
 
 // A mutually-exclusive set of tappable picks (1X2 / BTTS / one Over-Under
 // line) -- tapping the selected option again clears it. Pure UI state (no
 // bet is placed); it just highlights a pick the way the goal-range chart
 // already highlights this fixture's own numbers.
-export function MarketToggleGroup({ title, options, selected, onSelect }: Props) {
+export function MarketToggleGroup({ title, options, selected, onSelect, correctKey }: Props) {
   return (
     <div className="market">
       <div className="market__title">{title}</div>
       <div className="market-toggles" style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}>
         {options.map((opt) => {
           const isSelected = selected === opt.key;
+          const isCorrect = correctKey === opt.key;
           return (
             <button
               key={opt.key}
               type="button"
-              className={`market-toggle${isSelected ? " market-toggle--selected" : ""}`}
+              className={`market-toggle${isSelected ? " market-toggle--selected" : ""}${isCorrect ? " market-toggle--correct" : ""}`}
               onClick={() => onSelect(opt.key)}
             >
               <span className="market-toggle__label">{opt.label}</span>
