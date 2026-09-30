@@ -42,33 +42,9 @@ LEAGUES: dict[str, int] = {
     "League One": 41,
     "League Two": 42,
     "Scottish Premiership": 179,
-    "UEFA Nations League": 5,
-    "International Friendlies": 10,
-    "CONCACAF Nations League": 536,
-    "Gulf Cup of Nations": 25,
-    "UEFA U21 Championship": 38,
-    "UEFA U21 Championship - Qualification": 850,
-    "Africa Cup of Nations - Qualification": 36,
-    "World Cup": 1,
-    "Africa Cup of Nations": 6,
-    "Copa America": 9,
 }
 
 SEASONS = [2022, 2023, 2024, 2025, 2026]
-# International competitions don't run on a yearly club calendar: API-Football
-# only has seasons for the editions that exist (e.g. AFCON 2027 qualifying is
-# season 2027). Listing them avoids wasted requests on missing years.
-LEAGUE_SEASONS: dict[str, list[int]] = {
-    "UEFA Nations League": [2022, 2024, 2026],
-    "CONCACAF Nations League": [2022, 2023, 2024, 2025],
-    "Gulf Cup of Nations": [2023, 2024, 2026],
-    "UEFA U21 Championship": [2023, 2025],
-    "UEFA U21 Championship - Qualification": [2023, 2025, 2027],
-    "Africa Cup of Nations - Qualification": [2023, 2025, 2027],
-    "World Cup": [2026],
-    "Africa Cup of Nations": [2025],  # the 2025 edition, played Dec 2025 - Jan 2026
-    "Copa America": [2024],  # latest edition; the next is 2028
-}
 FINISHED_STATUSES = {"FT", "AET", "PEN"}
 # Statuses that will never change again (cancelled, abandoned, awarded).
 SETTLED_STATUSES = FINISHED_STATUSES | {"CANC", "ABD", "AWD", "WO"}
@@ -175,9 +151,8 @@ def _fetch_league_season(session: requests.Session, budget: Budget, league_name:
     rows = []
     for item in data["response"]:
         fx, teams, goals = item["fixture"], item["teams"], item["goals"]
-        # Every market settles on 90 minutes, but "goals" includes extra time
-        # -- knockout ties (Nations League finals, Gulf Cup, U21) use the
-        # regular-time score instead.
+        # Every market settles on 90 minutes, but "goals" includes extra time,
+        # so ties decided in extra time or penalties use the regular-time score.
         fulltime = (item.get("score") or {}).get("fulltime") or {}
         if fx["status"]["short"] in ("AET", "PEN") and fulltime.get("home") is not None:
             goals = fulltime
@@ -266,7 +241,7 @@ def scrape_fixtures(leagues: list[str] | None, job=None) -> dict:
             if job is not None:
                 job.detail = f"Scraping {league_name} fixtures..."
             n_finished = n_upcoming = n_rows = 0
-            for season in LEAGUE_SEASONS.get(league_name, SEASONS):
+            for season in SEASONS:
                 try:
                     rows = _fetch_league_season(session, budget, league_name, league_id, season)
                 except RuntimeError:

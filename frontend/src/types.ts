@@ -2,12 +2,12 @@ export const RANGE_LABELS = ["1-3", "1-4", "2-3", "2-4", "2-5", "2-6", "3-5", "3
 export type RangeLabel = (typeof RANGE_LABELS)[number];
 
 export const OU_LINES = [1.5, 2.5, 3.5] as const;
+export const TEAM_TOTAL_LINES = [0.5, 1.5, 2.5] as const;
 
 export interface League {
   league: string;
   tier: "rich" | "lower";
-  // The trained model serving this competition: the league itself for
-  // domestic leagues, "International" for every national-team competition.
+  // The trained model serving this league (the league itself).
   model_group: string;
   last_trained_at: string | null;
   n_matches: number | null;
@@ -80,6 +80,13 @@ export interface Prediction {
   over_under_odds: OverUnderOdds | null;
   btts_odds: BttsOdds | null;
   correct_score_odds: Record<string, number | null> | null;
+  // Derived markets by name: double_chance ("home_draw"/"draw_away"/
+  // "home_away"), team_totals ("home_over_1.5"), x12_btts
+  // ("home_win_btts_yes"), ou_btts ("over_2.5_btts_yes"), odd_even
+  // ("odd"/"even"). Everything but double_chance is absent on predictions
+  // made before those shipped, until the next retrain.
+  extra_markets?: Record<string, Record<string, number>> | null;
+  extra_markets_odds?: Record<string, Record<string, number | null>> | null;
   // Ensemble provenance -- null on Model-A-only predictions made before the
   // ensemble shipped. brier_scores is per league (keyed by market, e.g.
   // "match_result", "btts", "over_2.5"), not per fixture.

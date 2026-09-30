@@ -4,7 +4,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.ml.football_goal_range_model import probabilities_to_odds
+from app.ml.football_goal_range_model import double_chance_probabilities, probabilities_to_odds
 from app.ml.value_engine import market_probabilities
 
 # Goal-range labels use hyphens ("1-3") in the model/CSV output, but hyphens
@@ -47,6 +47,12 @@ class PredictionOut(BaseModel):
     over_under_odds: dict[str, float | None] | None = None
     btts_odds: dict[str, float | None] | None = None
     correct_score_odds: dict[str, float | None] | None = None
+    # Derived markets, keyed by market name: double_chance (from the
+    # calibrated 1X2, so present on any row with a 1X2), plus team_totals,
+    # x12_btts, ou_btts, odd_even (Model A only, need a retrain to appear).
+    # See football_goal_range_model.extra_market_probabilities.
+    extra_markets: dict[str, dict[str, float]] | None = None
+    extra_markets_odds: dict[str, dict[str, float | None]] | None = None
     # Ensemble provenance -- all null for predictions made before the
     # ensemble shipped (Model A only, uncalibrated) until the next retrain.
     #   raw_probabilities: {"model_a": {...}, "model_b": {...}, "blended": {...}}
@@ -87,6 +93,9 @@ class PredictionOut(BaseModel):
                 "btts": row.btts,
                 "goal_ranges": range_probabilities,
             }
+        extra_markets = dict(row.extra_markets or {})
+        if row.match_result:
+            extra_markets["double_chance"] = double_chance_probabilities(row.match_result)
         return PredictionOut(
             lambda_home=row.lambda_home,
             lambda_away=row.lambda_away,
@@ -101,6 +110,8 @@ class PredictionOut(BaseModel):
             over_under_odds=probabilities_to_odds(row.over_under) if row.over_under else None,
             btts_odds=probabilities_to_odds(row.btts) if row.btts else None,
             correct_score_odds=probabilities_to_odds(row.correct_score) if row.correct_score else None,
+            extra_markets=extra_markets or None,
+            extra_markets_odds={k: probabilities_to_odds(v) for k, v in extra_markets.items()} or None,
             raw_probabilities=row.raw_probabilities,
             calibrated_probabilities=calibrated,
             ensemble_weights=row.ensemble_weights,

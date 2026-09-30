@@ -49,8 +49,14 @@ export function FixtureCard({ fixture }: { fixture: Fixture }) {
               matchResultOdds={prediction.match_result_odds}
               overUnderOdds={prediction.over_under_odds}
               bttsOdds={prediction.btts_odds}
+              extraMarkets={prediction.extra_markets}
+              extraMarketsOdds={prediction.extra_markets_odds}
               homeTeam={fixture.home_team}
               awayTeam={fixture.away_team}
+              fixtureKey={`${fixture.date}|${fixture.home_team}|${fixture.away_team}`}
+              league={fixture.league}
+              date={fixture.date}
+              bookmakerOdds={prediction.bookmaker_odds}
               result={result}
             />
           )}

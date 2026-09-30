@@ -5,6 +5,10 @@ export interface ToggleOption {
   label: string;
   prob: number; // 0..1
   odds?: number | null;
+  // Flat key in prediction.bookmaker_odds, when bookmakers price this option
+  // (the core 1X2/BTTS/O-U markets); absent for derived markets, which then
+  // fall back to the model's fair odds on the betslip.
+  bookKey?: string;
 }
 
 interface Props {
@@ -18,7 +22,8 @@ interface Props {
   // fixture -- null/undefined for an unplayed one. Independent of `selected`
   // (the user's own tap), so a correct call stays marked green whether or
   // not the user picked it.
-  correctKey?: string | null;
+  // An array when several options can be right at once (double chance).
+  correctKey?: string | string[] | null;
 }
 
 // Collapsed by default (row shows the model's favourite, matching
@@ -35,7 +40,8 @@ export function MarketToggleGroup({ chipLabel, options, selected, onSelect, corr
   const favouredKey = options.reduce((best, opt) => (opt.prob > best.prob ? opt : best), options[0]).key;
   const activeKey = selected ?? favouredKey;
   const active = options.find((o) => o.key === activeKey)!;
-  const headerCorrect = correctKey != null && activeKey === correctKey;
+  const isCorrectKey = (k: string) => (Array.isArray(correctKey) ? correctKey.includes(k) : correctKey === k);
+  const headerCorrect = correctKey != null && isCorrectKey(activeKey);
   const headerFavoured = activeKey === favouredKey;
 
   return (
@@ -55,10 +61,10 @@ export function MarketToggleGroup({ chipLabel, options, selected, onSelect, corr
         <span className={`chev${open ? " chev--open" : ""}`}>▾</span>
       </button>
       {open && (
-        <div className="market-toggles" style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}>
+        <div className="market-toggles" style={{ gridTemplateColumns: `repeat(${Math.min(options.length, 3)}, 1fr)` }}>
           {options.map((opt) => {
             const isSelected = selected === opt.key;
-            const isCorrect = correctKey === opt.key;
+            const isCorrect = isCorrectKey(opt.key);
             const isFavoured = opt.key === favouredKey;
             return (
               <button
