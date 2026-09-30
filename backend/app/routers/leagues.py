@@ -14,8 +14,6 @@ def list_leagues(db: Session = Depends(get_db)) -> list[LeagueOut]:
     runs = {r.league: r for r in db.query(ModelRun).all()}
     out = []
     for league in ALL_LEAGUES:
-        # International competitions share one model: training status and
-        # n_matches are the pooled International model's.
         group = model_group(league)
         run = runs.get(group)
         out.append(

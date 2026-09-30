@@ -1,11 +1,9 @@
 # Predict Model
 
-Football prediction app for six domestic leagues (Premier League, La Liga,
-EFL Championship, League One, League Two, Scottish Premiership) and
-international football (UEFA Nations League, international friendlies,
-CONCACAF Nations League, Gulf Cup of Nations, UEFA U21 Championship and its
-qualifiers, Africa Cup of Nations qualifiers, plus the 2026 World Cup,
-AFCON 2025 and Copa América 2024 as training history). For every
+Football prediction app for 15 domestic leagues (Premier League, La Liga,
+Bundesliga, Serie A, Ligue 1, Primeira Liga, Eredivisie, Süper Lig, Jupiler
+Pro League, Super League 1, Liga Profesional Argentina, EFL Championship,
+League One, League Two and the Scottish Premiership). For every
 upcoming fixture it serves calibrated probabilities, and their fair
 decimal odds, for:
 
@@ -116,10 +114,9 @@ saved to `backend/app/ml/model_store/*.joblib` and reloaded at startup
 <summary><b>Ingestion</b>: API-Football → Postgres</summary>
 
 [`scrape_service.py`](backend/app/services/scrape_service.py) pulls match
-history and upcoming fixtures for every competition, upserting on
+history and upcoming fixtures for every league, upserting on
 `(league, date, home_team, away_team)` so re-runs never duplicate rows.
-International competitions only fetch the season years that exist for them
-(`LEAGUE_SEASONS`). Knockout matches decided after extra time or penalties
+Matches decided after extra time or penalties
 are stored at their 90-minute score, since every market settles on 90
 minutes. The optional stats backfill (shots, shots on target, corners,
 cards, xG) costs one API request per match, and the free plan allows 100 per
@@ -127,28 +124,6 @@ day. It's resumable, and every raw response is cached under
 `downloaded_files/`. A season is served from cache only once all its
 fixtures are settled, so every refresh re-fetches seasons still in progress
 and picks up new fixtures and results.
-</details>
-
-<details>
-<summary><b>International football</b>: one pooled model</summary>
-
-Each domestic league trains its own models. The ten international
-competitions share **one** model, `International`: the Gulf Cup alone has
-about 30 matches in five years, and a national team's form carries across
-friendlies, the Nations League and qualifiers. So Elo and rolling stats are
-built over all of a team's international matches, whatever the competition.
-Fixtures keep their competition name for filtering, and `/api/leagues`
-reports each competition's `model_group`. U21 Championship qualifiers are
-included so U21 sides have more history than the finals, which are played
-every two years. The 2026 World Cup, AFCON 2025 and Copa América 2024
-have no upcoming fixtures, but they're the most recent competitive matches
-for most national teams, so they're included as history. The model uses the goals-only tier, because international
-matches have no xG coverage.
-
-Known limitations: the model has no neutral-venue flag, so tournament
-matches at a host nation still treat the listed home side as at home. API-Football
-also lists a few pre-tournament warm-ups against club sides under
-friendlies.
 </details>
 
 <details>
@@ -383,8 +358,7 @@ needs no CORS setup or `.env`.
 The seed import gives you a populated fixtures list straight away, but those
 predictions are Model A only and uncalibrated. Click **Refresh data** in the
 UI (or `POST /api/refresh/retrain`) to train the full ensemble. That takes
-about 3 minutes per league (about 6 minutes for the ~4k-match International
-model), about 25 minutes for everything.
+about 3 minutes per league, about 45 minutes for everything.
 
 ## Backup & recovery
 
@@ -473,7 +447,6 @@ never saw during fitting. `w` is Model A's share of the blend.
 | League Two | 349 | +0.6% (w 0.85) | −0.1% (w 0.65) | +0.3% (w 0.80) | −0.9% (w 0.70) | +0.2% (w 0.30) |
 | Premier League | 298 | +2.3% (w 0.85) | +0.3% (w 0.50) | −0.2% (w 0.35) | +1.8% (w 0.85) | +1.9% (w 0.50) |
 | Scottish Premiership | 147 | +8.0% (w 0.65) | +0.0% (w 0.70) | +0.0% (w 0.60) | −0.8% (w 0.70) | +0.8% (w 0.75) |
-| International (all 10 competitions) | 638 | +9.0% (w 0.55) | +1.4% (w 0.30) | +0.7% (w 0.15) | +0.9% (w 0.20) | +0.8% (w 0.25) |
 
 How to read it:
 
@@ -555,7 +528,7 @@ The first run trains each domestic league on matches before 1 July of the
 season start (about 3 minutes per league) and caches the predictions under
 `downloaded_files/backtest/`. Later runs with different thresholds or staking
 are instant. It covers 1X2 and O/U 2.5 only: football-data has no BTTS odds,
-and there's no odds source for the international competitions. The report
+and some leagues have no odds source. The report
 gives ROI, win rate, drawdown, a match-clustered bootstrap p-value and CI for
 ROI > 0, and model-vs-market Brier / log loss. That last comparison matters
 most: a model that can't beat the de-margined closing line on Brier has no

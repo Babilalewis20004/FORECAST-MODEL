@@ -26,7 +26,6 @@ for r in db.query(ModelRun).order_by(ModelRun.league).all():
 | League | Calibrated | vs. baseline | Trained |
 |---|---|---|---|
 | Scottish Premiership | 0.564 | 0.637 | 2026-09-27 |
-| International | 0.574 | 0.634 | 2026-09-25 |
 | Serie A | 0.582 | 0.653 | 2026-09-27 |
 | Süper Lig | 0.586 | 0.633 | 2026-09-28 |
 | La Liga | 0.589 | 0.631 | 2026-09-25 |
@@ -99,24 +98,6 @@ Every trained league beats its baseline on `match_result`.
 | range_2-6 | 0.126 | 0.145 | — | 0.129 |
 | range_3-5 | 0.251 | 0.274 | — | 0.249 |
 | range_3-6 | 0.240 | 0.271 | — | 0.239 |
-
-### International (4,384 matches, trained 2026-09-25)
-
-| Market | Calibrated | Model A | Model B | Baseline |
-|---|---|---|---|---|
-| match_result | 0.574 | 0.587 | 0.577 | 0.634 |
-| btts | 0.247 | 0.252 | 0.249 | 0.250 |
-| over_1.5 | 0.186 | 0.188 | 0.190 | 0.187 |
-| over_2.5 | 0.248 | 0.256 | 0.255 | 0.250 |
-| over_3.5 | 0.215 | 0.230 | 0.221 | 0.216 |
-| range_1-3 | 0.240 | 0.250 | — | 0.240 |
-| range_1-4 | 0.175 | 0.180 | — | 0.175 |
-| range_2-3 | 0.247 | 0.252 | — | 0.246 |
-| range_2-4 | 0.241 | 0.241 | — | 0.239 |
-| range_2-5 | 0.218 | 0.217 | — | 0.216 |
-| range_2-6 | 0.202 | 0.202 | — | 0.202 |
-| range_3-5 | 0.252 | 0.250 | — | 0.249 |
-| range_3-6 | 0.252 | 0.253 | — | 0.250 |
 
 ### Jupiler Pro League (1,342 matches, trained 2026-09-28)
 
@@ -353,4 +334,4 @@ Every trained league beats its baseline on `match_result`.
 - Leagues with smaller training sets (Scottish Premiership at 978 matches,
   most of the newer additions around 1,300-2,300) tend to show noisier
   calibrated-vs-baseline gaps on the smaller binary/goal-range markets than
-  the larger leagues (International at 4,278, EFL Championship at 2,323).
+  the larger leagues (EFL Championship at 2,323).

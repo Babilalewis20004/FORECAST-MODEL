@@ -15,8 +15,6 @@ from app.ml.ensemble import LeagueEnsemble, flat_from_prediction, market_flat_fr
 from app.ml.features import market_features_from_odds
 from app.ml.football_goal_range_model import (
     GOALS_ONLY_LEAGUES,
-    INTERNATIONAL_COMPETITIONS,
-    INTERNATIONAL_GROUP,
     XG_RICH_LEAGUES,
     LeagueGoalModel,
     compute_referee_state,
@@ -34,11 +32,9 @@ from app.schemas import LABEL_TO_FIELD
 MODEL_STORE = Path(__file__).resolve().parents[1] / "ml" / "model_store"
 MODEL_STORE.mkdir(parents=True, exist_ok=True)
 
-# Competitions fixtures are listed/filtered by, vs. the model groups actually
-# trained: each domestic league is its own group, and every international
-# competition shares INTERNATIONAL_GROUP (see football_goal_range_model).
-ALL_LEAGUES = sorted(XG_RICH_LEAGUES | GOALS_ONLY_LEAGUES) + sorted(INTERNATIONAL_COMPETITIONS)
-ALL_MODEL_GROUPS = sorted(XG_RICH_LEAGUES | GOALS_ONLY_LEAGUES) + [INTERNATIONAL_GROUP]
+# Every league is its own model group.
+ALL_LEAGUES = sorted(XG_RICH_LEAGUES | GOALS_ONLY_LEAGUES)
+ALL_MODEL_GROUPS = ALL_LEAGUES
 
 _model_cache: dict[str, LeagueGoalModel] = {}
 _ensemble_cache: dict[str, LeagueEnsemble] = {}
@@ -58,11 +54,11 @@ def league_tier(league: str) -> str:
 
 def model_group(league: str) -> str:
     """The trained model (and model_runs row) that serves a competition."""
-    return INTERNATIONAL_GROUP if league in INTERNATIONAL_COMPETITIONS else league
+    return league
 
 
 def group_competitions(group: str) -> list[str]:
-    return sorted(INTERNATIONAL_COMPETITIONS) if group == INTERNATIONAL_GROUP else [group]
+    return [group]
 
 
 def _model_path(league: str) -> Path:
@@ -310,8 +306,6 @@ def generate_predictions(db: Session, league: str) -> dict:
 def retrain_leagues(leagues: list[str] | None, job=None) -> dict:
     """Entry point for the background job -- opens its own DB session since
     it runs outside the request lifecycle (see job_manager)."""
-    # Competitions map to their model group; asking for two international
-    # competitions retrains the shared International model once.
     targets = list(dict.fromkeys(model_group(lg) for lg in leagues)) if leagues else ALL_MODEL_GROUPS
     db = SessionLocal()
     results = []
