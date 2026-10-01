@@ -73,7 +73,9 @@ XG_RICH_LEAGUES = {
 # overclaiming shot-quality signal that isn't reliably there.
 GOALS_ONLY_LEAGUES = {
     "League One", "League Two", "Scottish Premiership", "Liga Profesional Argentina", "Super League 1",
-    # xG is absent before 2025 (Ligue 2: never), so these stay goals-only.
+    # xG is absent before 2025 (Ligue 2: never) or patchy, so these stay goals-only.
+    # J1 League was tested with xG features on (xG filled from TheStatsAPI to 88%
+    # coverage) and scored worse on 24 of 37 markets, so it stays here too.
     "Segunda División", "2. Bundesliga", "Serie B", "Ligue 2", "J1 League",
 }
 
