@@ -76,6 +76,8 @@ GOALS_ONLY_LEAGUES = {
     # xG is absent before 2025 (Ligue 2: never) or patchy, so these stay goals-only.
     # J1 League was tested with xG features on (xG filled from TheStatsAPI to 88%
     # coverage) and scored worse on 24 of 37 markets, so it stays here too.
+    # Serie B was tested with xG filled to 99% (real from 2024/25, proxy from shot-location
+    # stats before) and showed no gain (19 better / 18 worse of 37 markets).
     "Segunda División", "2. Bundesliga", "Serie B", "Ligue 2", "J1 League",
 }
 
