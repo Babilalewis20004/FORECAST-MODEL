@@ -31,6 +31,8 @@ REST_DAYS_CAP = 30  # beyond this it's off-season/international-break noise
 CONGESTION_WINDOW_DAYS = 14  # fixture pile-up: matches played in the trailing N days
 REFEREE_WINDOW = 20  # matches, all-competition, same referee
 MIN_REFEREE_PERIODS = 3
+SEASON_GAP_DAYS = 75  # a longer gap between a team's matches starts a new season (any league calendar)
+VENUE_WINDOW = 10  # home-only / away-only form window
 
 ELO_BASE = 1500.0
 ELO_K = 20.0
@@ -56,8 +58,11 @@ _OPTIONAL_SOURCES = [
 
 _TEAM_FEATURES = (
     [f"{c}_r{w}" for c in _STAT_COLS for w in WINDOWS]
-    + ["conv_r10", "elo", "rest_days", "n_matches", "congestion14"]
+    + ["conv_r10", "elo", "rest_days", "n_matches", "congestion14", "season_ppg", "season_gd_pg", "season_n"]
 )
+# Venue-split form: the home side's last VENUE_WINDOW *home* matches and the
+# away side's last VENUE_WINDOW *away* matches (prefixed h_/a_ like the rest).
+_VENUE_FEATURES = ["venue_gf_r10", "venue_ga_r10", "venue_ppg_r10"]
 # De-vigged (Shin) pre-match market probabilities. Unlike everything above
 # they aren't derived from match history: they arrive as columns on the
 # matches/targets frames (historical: match_odds' opening price; upcoming:
@@ -68,7 +73,9 @@ MARKET_FEATURES = ["opening_prob_home", "opening_prob_draw", "opening_prob_away"
 FEATURE_COLUMNS: list[str] = (
     [f"h_{f}" for f in _TEAM_FEATURES]
     + [f"a_{f}" for f in _TEAM_FEATURES]
-    + ["elo_diff", "h2h_n", "h2h_gd", "h2h_total", "h2h_btts", "ref_avg_goals", "ref_btts_rate"]
+    + [f"h_{f}" for f in _VENUE_FEATURES]
+    + [f"a_{f}" for f in _VENUE_FEATURES]
+    + ["ppg_diff", "elo_diff", "h2h_n", "h2h_gd", "h2h_total", "h2h_btts", "ref_avg_goals", "ref_btts_rate"]
     + MARKET_FEATURES
 )
 
@@ -161,7 +168,39 @@ def _team_state(df: pd.DataFrame) -> pd.DataFrame:
     shots_sum = g["shots_for"].transform(lambda s: s.rolling(10, min_periods=MIN_PERIODS).sum())
     out["conv_r10"] = goals_sum / shots_sum.replace(0, np.nan)
     out["n_matches"] = g.cumcount() + 1
+
+    # Season-to-date table form, from results only. A team's season restarts
+    # after a SEASON_GAP_DAYS gap, which works for any league calendar.
+    gf, ga = long["goals_for"], long["goals_against"]
+    long["_pts"] = np.where(gf > ga, 3.0, np.where(gf == ga, 1.0, 0.0))
+    long["_gd"] = gf - ga
+    new_season = g["date"].diff().dt.days.gt(SEASON_GAP_DAYS).fillna(False)
+    long["_season"] = new_season.groupby(long["team"], sort=False).cumsum()
+    sg = long.groupby(["team", "_season"], sort=False)
+    out["season_n"] = sg.cumcount() + 1
+    out["season_ppg"] = sg["_pts"].cumsum() / out["season_n"]
+    out["season_gd_pg"] = sg["_gd"].cumsum() / out["season_n"]
     out["last_match_date"] = out["date"]
+    return out.sort_values("date", kind="mergesort").reset_index(drop=True)
+
+
+def _venue_state(df: pd.DataFrame, side: str) -> pd.DataFrame:
+    """One row per (team, match played at `side` venue): that team's rolling
+    VENUE_WINDOW goals for/against and points per game at that venue only,
+    including this match (same convention as _team_state)."""
+    own, opp = ("home_goals", "away_goals") if side == "home" else ("away_goals", "home_goals")
+    v = pd.DataFrame({
+        "team": df[f"{side}_team"].to_numpy(),
+        "date": df["date"].to_numpy(),
+        "gf": df[own].to_numpy(),
+        "ga": df[opp].to_numpy(),
+    })
+    v["pts"] = np.where(v["gf"] > v["ga"], 3.0, np.where(v["gf"] == v["ga"], 1.0, 0.0))
+    v = v.sort_values(["team", "date"], kind="mergesort")
+    g = v.groupby("team", sort=False)
+    out = v[["team", "date"]].copy()
+    for col, name in (("gf", "venue_gf_r10"), ("ga", "venue_ga_r10"), ("pts", "venue_ppg_r10")):
+        out[name] = g[col].transform(lambda s: s.rolling(VENUE_WINDOW, min_periods=MIN_PERIODS).mean())
     return out.sort_values("date", kind="mergesort").reset_index(drop=True)
 
 
@@ -224,6 +263,7 @@ def build_feature_frame(matches: pd.DataFrame, targets: pd.DataFrame) -> pd.Data
     """
     history = _prepare_matches(matches)
     state = _team_state(history)
+    venue_states = {"h": _venue_state(history, "home"), "a": _venue_state(history, "away")}
     h2h = _h2h_state(history)
 
     t = targets.reset_index(drop=True).copy()
@@ -248,6 +288,16 @@ def build_feature_frame(matches: pd.DataFrame, targets: pd.DataFrame) -> pd.Data
         side_feats["elo"] = side_feats["elo"].fillna(ELO_BASE)
         side_feats = side_feats.drop(columns=["last_match_date"]).add_prefix(f"{side}_")
         t = t.join(side_feats, on="_tid")
+
+        venue = pd.merge_asof(
+            left[["_tid", "date", team_col]].rename(columns={team_col: "team"}),
+            venue_states[side],
+            on="date",
+            by="team",
+            allow_exact_matches=False,
+            direction="backward",
+        ).set_index("_tid")[_VENUE_FEATURES].add_prefix(f"{side}_")
+        t = t.join(venue, on="_tid")
 
     pair_a = np.where(left["home_team"] <= left["away_team"], left["home_team"], left["away_team"])
     pair_b = np.where(left["home_team"] <= left["away_team"], left["away_team"], left["home_team"])
@@ -279,6 +329,7 @@ def build_feature_frame(matches: pd.DataFrame, targets: pd.DataFrame) -> pd.Data
         t["ref_btts_rate"] = np.nan
 
     t["elo_diff"] = t["h_elo"] - t["a_elo"]
+    t["ppg_diff"] = t["h_season_ppg"] - t["a_season_ppg"]
     for col in MARKET_FEATURES:
         if col not in t.columns:
             t[col] = np.nan

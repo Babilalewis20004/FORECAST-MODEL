@@ -42,9 +42,17 @@ LEAGUES: dict[str, int] = {
     "League One": 41,
     "League Two": 42,
     "Scottish Premiership": 179,
+    "Segunda División": 141,
+    "2. Bundesliga": 79,
+    "Serie B": 136,
+    "Ligue 2": 62,
+    "J1 League": 98,
 }
 
 SEASONS = [2022, 2023, 2024, 2025, 2026]
+# J1 League moved to an August-May calendar: API-Football files the 2026/27
+# season under 2027 (2026 was the Feb-Jun transition half-season).
+EXTRA_SEASONS: dict[str, list[int]] = {"J1 League": [2027]}
 FINISHED_STATUSES = {"FT", "AET", "PEN"}
 # Statuses that will never change again (cancelled, abandoned, awarded).
 SETTLED_STATUSES = FINISHED_STATUSES | {"CANC", "ABD", "AWD", "WO"}
@@ -241,7 +249,7 @@ def scrape_fixtures(leagues: list[str] | None, job=None) -> dict:
             if job is not None:
                 job.detail = f"Scraping {league_name} fixtures..."
             n_finished = n_upcoming = n_rows = 0
-            for season in SEASONS:
+            for season in SEASONS + EXTRA_SEASONS.get(league_name, []):
                 try:
                     rows = _fetch_league_season(session, budget, league_name, league_id, season)
                 except RuntimeError:

@@ -41,6 +41,12 @@ FD_LEAGUES = {
     "Süper Lig": "T1",
     "Jupiler Pro League": "B1",
     "Super League 1": "G1",
+    "Segunda División": "SP2",
+    "2. Bundesliga": "D2",
+    "Serie B": "I2",
+    "Ligue 2": "F2",
+    # J1 League: football-data only has it in the "extra leagues" file (different
+    # layout), so it is skipped here like Liga Profesional Argentina.
     # Liga Profesional Argentina: not covered by football-data.co.uk (Europe-only)
     # -- sync_match_odds() silently skips leagues not in this dict.
 }

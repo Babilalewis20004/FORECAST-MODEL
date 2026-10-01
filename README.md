@@ -1,9 +1,10 @@
 # Predict Model
 
-Football prediction app for 15 domestic leagues (Premier League, La Liga,
+Football prediction app for 20 domestic leagues (Premier League, La Liga,
 Bundesliga, Serie A, Ligue 1, Primeira Liga, Eredivisie, Süper Lig, Jupiler
 Pro League, Super League 1, Liga Profesional Argentina, EFL Championship,
-League One, League Two and the Scottish Premiership). For every
+League One, League Two, the Scottish Premiership, Segunda División,
+2. Bundesliga, Serie B, Ligue 2 and J1 League). For every
 upcoming fixture it serves calibrated probabilities, and their fair
 decimal odds, for:
 
@@ -358,7 +359,7 @@ needs no CORS setup or `.env`.
 The seed import gives you a populated fixtures list straight away, but those
 predictions are Model A only and uncalibrated. Click **Refresh data** in the
 UI (or `POST /api/refresh/retrain`) to train the full ensemble. That takes
-about 3 minutes per league, about 45 minutes for everything.
+about 3–7 minutes per league, about 1.5 hours for everything.
 
 ## Backup & recovery
 
