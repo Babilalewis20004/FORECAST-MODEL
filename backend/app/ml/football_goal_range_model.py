@@ -73,6 +73,8 @@ XG_RICH_LEAGUES = {
 # overclaiming shot-quality signal that isn't reliably there.
 GOALS_ONLY_LEAGUES = {
     "League One", "League Two", "Scottish Premiership", "Liga Profesional Argentina", "Super League 1",
+    # xG is absent before 2025 (Ligue 2: never), so these stay goals-only.
+    "Segunda División", "2. Bundesliga", "Serie B", "Ligue 2", "J1 League",
 }
 
 ROLLING_WINDOW_RICH = 10       # PL/La Liga/Championship: longer window OK
